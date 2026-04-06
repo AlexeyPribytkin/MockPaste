@@ -1,0 +1,295 @@
+<Window x:Class="MockPaste.UI.Settings.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="{StaticResource StringSettingsTitle}"
+        Width="420" Height="560"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Foreground="{DynamicResource BrushTextPrimary}"
+        FontFamily="{StaticResource FontFamilyDefault}">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="46" GlassFrameThickness="0" ResizeBorderThickness="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <!-- Title bar close button -->
+        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="0,7,0,0">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrushSecondaryButtonHover}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Segmented theme pill -->
+        <Style x:Key="ThemeSegmentStyle" TargetType="RadioButton">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="{StaticResource FontSizeBase}"/>
+            <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="bg" Background="Transparent" CornerRadius="4"
+                                Padding="12,6" Cursor="Hand">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource BrushSecondaryButtonHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="{DynamicResource BrushAccent}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <!-- Shadow layer -->
+        <Border Background="{DynamicResource BrushShadow}"
+                CornerRadius="8"
+                Margin="3,3,0,0">
+            <Border.Effect>
+                <BlurEffect Radius="12"/>
+            </Border.Effect>
+        </Border>
+        <!-- Content layer -->
+        <Border Background="{DynamicResource BrushBackground}"
+                CornerRadius="8"
+                BorderBrush="{DynamicResource BrushBorder}"
+                BorderThickness="1">
+            <DockPanel>
+
+                <!-- Custom title bar -->
+                <Grid DockPanel.Dock="Top" Height="36">
+                    <TextBlock Text="{StaticResource StringSettingsTitle}"
+                           HorizontalAlignment="Left" VerticalAlignment="Center"
+                           Margin="16,0,0,0"
+                           Foreground="{DynamicResource BrushTextMuted}"
+                           FontSize="{StaticResource FontSizeSmall}"/>
+                    <Button HorizontalAlignment="Right"
+                        Style="{StaticResource TitleBarButtonStyle}"
+                        Content="✕"
+                        Click="TitleBarClose_Click"/>
+                </Grid>
+
+                <Grid Margin="24,4,24,16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title -->
+                    <TextBlock Grid.Row="0" Text="{StaticResource StringSettingsHeader}"
+                   FontSize="{StaticResource FontSizeLarge}" FontWeight="SemiBold"/>
+
+                    <!-- Scrollable content -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False" Padding="0,0,10,0">
+                        <StackPanel>
+
+                            <!-- ── HOTKEY ── -->
+                            <Grid Margin="0,16,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{StaticResource StringSectionHotkey}"
+                               Foreground="{DynamicResource BrushTextMuted}"
+                               FontSize="{StaticResource FontSizeSmall}" FontWeight="SemiBold"/>
+                                <Rectangle Grid.Column="1" Height="1" Fill="{DynamicResource BrushBorder}"
+                               Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <TextBlock Text="{StaticResource StringLabelHotkey}"
+                           Foreground="{DynamicResource BrushTextMuted}"
+                           FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Background="{DynamicResource BrushSurface}" CornerRadius="4" Padding="10,8"
+                            BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                    <TextBlock x:Name="HotkeyDisplay" Text="{StaticResource StringHotkeyDefault}"
+                                   FontSize="{StaticResource FontSizeBase}"/>
+                                </Border>
+                                <Button x:Name="ChangeHotkeyButton" Grid.Column="1"
+                            Content="{StaticResource StringButtonChange}" Margin="8,0,0,0"
+                            Padding="12,8" Background="{DynamicResource BrushAccent}"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="ChangeHotkey_Click"/>
+                                <Button Grid.Column="2" Content="{StaticResource StringButtonReset}" Margin="8,0,0,0"
+                            Padding="12,8" Background="{DynamicResource BrushBorder}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Click="ResetHotkey_Click"/>
+                            </Grid>
+
+                            <!-- ── BEHAVIOR ── -->
+                            <Grid Margin="0,16,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{StaticResource StringSectionBehavior}"
+                               Foreground="{DynamicResource BrushTextMuted}"
+                               FontSize="{StaticResource FontSizeSmall}" FontWeight="SemiBold"/>
+                                <Rectangle Grid.Column="1" Height="1" Fill="{DynamicResource BrushBorder}"
+                               Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <CheckBox x:Name="PreserveClipboardCheck"
+                          Content="{StaticResource StringCheckboxPreserveClipboard}"
+                          Foreground="{DynamicResource BrushTextPrimary}"
+                          FontSize="{StaticResource FontSizeBase}" Margin="0,0,0,12" IsChecked="True"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{StaticResource StringLabelPasteDelay}"
+                               FontSize="{StaticResource FontSizeBase}" VerticalAlignment="Center"/>
+                                <TextBox x:Name="PasteDelayBox" Grid.Column="1" Width="60" Text="50"
+                             Background="{DynamicResource BrushSurface}"
+                             Foreground="{DynamicResource BrushTextPrimary}"
+                             BorderBrush="{DynamicResource BrushBorder}"
+                             Padding="8,4" FontSize="{StaticResource FontSizeBase}"
+                             VerticalContentAlignment="Center" TextAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Text="{StaticResource StringUnitMilliseconds}"
+                               FontSize="{StaticResource FontSizeBase}" VerticalAlignment="Center"
+                               Margin="6,0,0,0" Foreground="{DynamicResource BrushTextMuted}"/>
+                            </Grid>
+
+                            <!-- ── GENERAL ── -->
+                            <Grid Margin="0,16,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{StaticResource StringSectionGeneral}"
+                               Foreground="{DynamicResource BrushTextMuted}"
+                               FontSize="{StaticResource FontSizeSmall}" FontWeight="SemiBold"/>
+                                <Rectangle Grid.Column="1" Height="1" Fill="{DynamicResource BrushBorder}"
+                               Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <CheckBox x:Name="LaunchStartupCheck"
+                          Content="{StaticResource StringCheckboxLaunchAtStartup}"
+                          Foreground="{DynamicResource BrushTextPrimary}"
+                          FontSize="{StaticResource FontSizeBase}" Margin="0,0,0,12"/>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{StaticResource StringLabelHistorySize}"
+                               FontSize="{StaticResource FontSizeBase}" VerticalAlignment="Center"/>
+                                <TextBox x:Name="HistorySizeBox" Grid.Column="1" Width="60" Text="10"
+                             Background="{DynamicResource BrushSurface}"
+                             Foreground="{DynamicResource BrushTextPrimary}"
+                             BorderBrush="{DynamicResource BrushBorder}"
+                             Padding="8,4" FontSize="{StaticResource FontSizeBase}"
+                             VerticalContentAlignment="Center" TextAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Text="{StaticResource StringUnitItems}"
+                               FontSize="{StaticResource FontSizeBase}" VerticalAlignment="Center"
+                               Margin="6,0,0,0" Foreground="{DynamicResource BrushTextMuted}"/>
+                            </Grid>
+
+                            <!-- ── APPEARANCE ── -->
+                            <Grid Margin="0,16,0,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{StaticResource StringSectionAppearance}"
+                               Foreground="{DynamicResource BrushTextMuted}"
+                               FontSize="{StaticResource FontSizeSmall}" FontWeight="SemiBold"/>
+                                <Rectangle Grid.Column="1" Height="1" Fill="{DynamicResource BrushBorder}"
+                               Margin="8,0,0,0" VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <TextBlock Text="{StaticResource StringLabelTheme}"
+                           Foreground="{DynamicResource BrushTextMuted}"
+                           FontSize="{StaticResource FontSizeBody}" Margin="0,0,0,8"/>
+
+                            <!-- Segmented theme selector -->
+                            <Border Background="{DynamicResource BrushSurface}" CornerRadius="6" Padding="3"
+                        BorderBrush="{DynamicResource BrushBorder}" BorderThickness="1">
+                                <UniformGrid Columns="3">
+                                    <RadioButton x:Name="ThemeDark"
+                                     Style="{StaticResource ThemeSegmentStyle}"
+                                     GroupName="ThemeGroup" Tag="Dark"
+                                     Content="{StaticResource StringThemeDark}"
+                                     Margin="2,0"/>
+                                    <RadioButton x:Name="ThemeLight"
+                                     Style="{StaticResource ThemeSegmentStyle}"
+                                     GroupName="ThemeGroup" Tag="Light"
+                                     Content="{StaticResource StringThemeLight}"
+                                     Margin="2,0"/>
+                                    <RadioButton x:Name="ThemeSystem"
+                                     Style="{StaticResource ThemeSegmentStyle}"
+                                     GroupName="ThemeGroup" Tag="System"
+                                     Content="{StaticResource StringThemeSystem}"
+                                     Margin="2,0"/>
+                                </UniformGrid>
+                            </Border>
+
+                            <Rectangle Height="8"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Status -->
+                    <TextBlock x:Name="StatusText" Grid.Row="2"
+                   Foreground="{DynamicResource BrushTextMuted}"
+                   FontSize="{StaticResource FontSizeSmall}" Margin="0,12,0,0"/>
+
+                    <!-- Save / Cancel -->
+                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <Button x:Name="SaveButton"
+                    Content="{StaticResource StringButtonSave}" Padding="16,9"
+                    Background="{DynamicResource BrushAccent}"
+                    Style="{StaticResource AccentButtonStyle}"
+                    IsEnabled="False"
+                    Click="Save_Click" Margin="0,0,8,0"/>
+                        <Button Content="{StaticResource StringButtonCancel}" Padding="16,9"
+                    Background="{DynamicResource BrushBorder}"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    Click="Cancel_Click"/>
+                    </StackPanel>
+                </Grid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

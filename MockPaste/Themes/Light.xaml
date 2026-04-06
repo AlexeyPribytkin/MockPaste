@@ -1,0 +1,33 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Application background -->
+    <SolidColorBrush x:Key="BrushBackground"          Color="#FFF0F0F5"/>
+
+    <!-- Surface layers -->
+    <SolidColorBrush x:Key="BrushSurface"             Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="BrushSurfaceSelected"     Color="#FFE0D8FF"/>
+
+    <!-- Borders and dividers -->
+    <SolidColorBrush x:Key="BrushBorder"              Color="#FFD0CDE8"/>
+
+    <!-- Accent (primary purple) -->
+    <SolidColorBrush x:Key="BrushAccent"              Color="#FF7C3AED"/>
+    <SolidColorBrush x:Key="BrushAccentHover"         Color="#FF9055FF"/>
+
+    <!-- Secondary button hover -->
+    <SolidColorBrush x:Key="BrushSecondaryButtonHover" Color="#FFE0DCF5"/>
+
+    <!-- Scrollbar -->
+    <SolidColorBrush x:Key="BrushScrollThumb"         Color="#FFBBB8D0"/>
+    <SolidColorBrush x:Key="BrushScrollThumbHover"    Color="#FF9896B8"/>
+
+    <!-- Text hierarchy -->
+    <SolidColorBrush x:Key="BrushTextPrimary"         Color="#FF1A1A2E"/>
+    <SolidColorBrush x:Key="BrushTextMuted"           Color="#FF5A5870"/>
+    <SolidColorBrush x:Key="BrushTextSubtle"          Color="#FF8A88A0"/>
+
+    <!-- Shadow overlay -->
+    <SolidColorBrush x:Key="BrushShadow"              Color="#25000000"/>
+
+</ResourceDictionary>
