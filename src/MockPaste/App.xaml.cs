@@ -24,6 +24,7 @@ public partial class App : System.Windows.Application
     private GeneratorRegistry? _generators;
     private HistoryService? _history;
     private IntPtr _lastForegroundWindow;
+    private SettingsWindow? _settingsWindow;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -139,9 +140,15 @@ public partial class App : System.Windows.Application
 
     private void ShowSettings()
     {
-        var window = new SettingsWindow(_settings!);
-        window.SettingsSaved += OnSettingsSaved;
-        window.ShowDialog();
+        if (_settingsWindow != null)
+        {
+            _settingsWindow.Activate();
+            return;
+        }
+        _settingsWindow = new SettingsWindow(_settings!);
+        _settingsWindow.SettingsSaved += OnSettingsSaved;
+        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+        _settingsWindow.ShowDialog();
     }
 
     private void OnSettingsSaved(AppSettings settings)

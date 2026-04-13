@@ -25,6 +25,7 @@
     <sys:String x:Key="StringUnitItems">items</sys:String>
     <sys:String x:Key="StringButtonSave">Save</sys:String>
     <sys:String x:Key="StringButtonCancel">Cancel</sys:String>
+    <sys:String x:Key="StringTooltipClose">Close</sys:String>
 
     <!-- Settings section headers -->
     <sys:String x:Key="StringSectionHotkey">HOTKEY</sys:String>
