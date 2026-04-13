@@ -44,8 +44,8 @@
             <!-- Off-state track (always behind) -->
             <Border x:Name="OffTrack"
                     CornerRadius="10"
-                    Background="{DynamicResource BrushBorder}"
-                    BorderBrush="White"
+                    Background="{DynamicResource BrushToggleTrackOff}"
+                    BorderBrush="{DynamicResource BrushToggleTrackBorder}"
                     BorderThickness="1"/>
 
             <!-- On-state track (accent, fades in when checked) -->
@@ -55,7 +55,7 @@
 
             <!-- Hover overlay -->
             <Border x:Name="HoverOverlay" CornerRadius="10"
-                    Background="White"
+                    Background="{DynamicResource BrushToggleHover}"
                     Opacity="0"/>
 
             <!-- Thumb container: owns the position (translate) animation -->
@@ -69,8 +69,17 @@
                 </Grid.RenderTransform>
                 <!-- Thumb circle: grows from its own centre on hover -->
                 <Ellipse x:Name="Thumb"
-                         Width="12" Height="12"
-                         Fill="White">
+                         Width="12" Height="12">
+                    <Ellipse.Style>
+                        <Style TargetType="Ellipse">
+                            <Setter Property="Fill" Value="{DynamicResource BrushToggleThumbOn}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType={x:Type self:ToggleSwitch}}}" Value="False">
+                                    <Setter Property="Fill" Value="{DynamicResource BrushToggleThumbOff}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Ellipse.Style>
                     <Ellipse.RenderTransform>
                         <ScaleTransform CenterX="7" CenterY="7"/>
                     </Ellipse.RenderTransform>

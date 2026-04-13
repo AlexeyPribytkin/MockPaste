@@ -27,6 +27,13 @@
     <SolidColorBrush x:Key="BrushTextMuted"           Color="#FF5A5870"/>
     <SolidColorBrush x:Key="BrushTextSubtle"          Color="#FF5F5D73"/>
 
+    <!-- Toggle switch -->
+    <SolidColorBrush x:Key="BrushToggleTrackOff"      Color="#FFD5D5D8"/>
+    <SolidColorBrush x:Key="BrushToggleTrackBorder"   Color="#A0000000"/>
+    <SolidColorBrush x:Key="BrushToggleHover"         Color="#FF1A1A2E"/>
+    <SolidColorBrush x:Key="BrushToggleThumbOff"      Color="#FF1A1A2E"/>
+    <SolidColorBrush x:Key="BrushToggleThumbOn"       Color="#FFFFFFFF"/>
+
     <!-- Shadow overlay -->
     <SolidColorBrush x:Key="BrushShadow"              Color="#25000000"/>
 
