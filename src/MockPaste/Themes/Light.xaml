@@ -25,7 +25,7 @@
     <!-- Text hierarchy -->
     <SolidColorBrush x:Key="BrushTextPrimary"         Color="#FF1A1A2E"/>
     <SolidColorBrush x:Key="BrushTextMuted"           Color="#FF5A5870"/>
-    <SolidColorBrush x:Key="BrushTextSubtle"          Color="#FF8A88A0"/>
+    <SolidColorBrush x:Key="BrushTextSubtle"          Color="#FF5F5D73"/>
 
     <!-- Shadow overlay -->
     <SolidColorBrush x:Key="BrushShadow"              Color="#25000000"/>

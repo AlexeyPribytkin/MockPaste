@@ -23,7 +23,7 @@
     <SolidColorBrush x:Key="BrushScrollThumbHover"    Color="#FF6A6A9A"/>
 
     <!-- Text hierarchy -->
-    <SolidColorBrush x:Key="BrushTextPrimary"         Color="White"/>
+    <SolidColorBrush x:Key="BrushTextPrimary"         Color="#FFFFFFFF"/>
     <SolidColorBrush x:Key="BrushTextMuted"           Color="#FFB0B0C0"/>
     <SolidColorBrush x:Key="BrushTextSubtle"          Color="#FF808090"/>
 

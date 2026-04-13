@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <linearGradient id="grad" x1="256" x2="256" y1="0" y2="512" gradientUnits="userSpaceOnUse">
+   <stop stop-color="#fff" stop-opacity=".2" offset="0"/>
+   <stop stop-opacity=".2" offset="1"/>
+  </linearGradient>
+ </defs>
+ <g>
+  <path x="0" y="0" width="512" height="512" d="m64.002 0h384a64 64 45 0 1 64 64v384a64 64 135 0 1-64 64h-384a64 64 45 0 1-64-64v-384a64 64 135 0 1 64-64z" fill="#7c3aed"/>
+  <path x="0" y="0" width="512" height="512" d="m64.002 0h384a64 64 45 0 1 64 64v384a64 64 135 0 1-64 64h-384a64 64 45 0 1-64-64v-384a64 64 135 0 1 64-64z" fill="url(#grad)"/>
+  <path x="208" y="72" width="128" height="256" d="m208 72h120a8 8 45 0 1 8.0335 8v248h-128z" opacity=".6"/>
+  <path d="m136.24 328.24 132.09 124.3a5.1947 5.1947 179.13 0 0 7.2333-0.10977l116.41-116.41a4.6965 4.6965 67.474 0 0-3.3253-8z" opacity=".6"/>
+  <path x="192" y="64" width="128" height="256" d="m196 64h120a4 4 45 0 1 4 4v252h-128v-252a4 4 135 0 1 4-4z" fill="#fff"/>
+  <path d="m133 325 119.33 119.33a5.1865 5.1865 0 0 0 7.3348 0l119.33-119.33a3 3 67.5 0 0-2-5.1h-241.85a3 3 112.5 0 0-2 5z" fill="#fff"/>
+ </g>
+</svg>

@@ -71,7 +71,7 @@
                                          HistoryTemplate="{StaticResource HistoryItemTemplate}"/>
 
     </Window.Resources>
-    <Grid Margin="14">
+    <Grid>
         <!-- Shadow layer (blurred semi-transparent shape, no rectangular bitmap artifacts) -->
         <Border Background="{DynamicResource BrushShadow}"
                 CornerRadius="8"
@@ -106,21 +106,19 @@
                            Grid.Column="0"
                            Text="{StaticResource StringAppName}"
                            Foreground="{DynamicResource BrushTextMuted}"
-                           FontSize="{StaticResource FontSizeSmall}"
+                           FontSize="{StaticResource FontSizeBase}"
                            FontFamily="{StaticResource FontFamilyDefault}"
-                           Margin="12,8,4,4"
-                           VerticalAlignment="Center"
+                           Margin="12,6,4,4"
                            MouseLeftButtonUp="HeaderText_MouseLeftButtonUp"/>
                     <Button x:Name="HistoryButton"
-                        Grid.Column="1"
-                        Margin="0,4,8,0"
-                        Padding="8,2"
-                        Foreground="{DynamicResource BrushTextSubtle}"
-                        FontFamily="{StaticResource FontFamilyDefault}"
-                        FontSize="{StaticResource FontSizeTiny}"
-                        Cursor="Hand"
-                        VerticalAlignment="Top"
-                        Click="HistoryButton_Click">
+                            Grid.Column="1"
+                            Margin="0,4,4,0"
+                            Padding="8,2"
+                            Foreground="{DynamicResource BrushTextSubtle}"
+                            FontFamily="{StaticResource FontFamilyDefault}"
+                            FontSize="{StaticResource FontSizeBody}"
+                            Cursor="Hand"
+                            Click="HistoryButton_Click">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="bd"
@@ -132,14 +130,14 @@
                                     <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger Property="IsMouseOver" Value="true">
                                         <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrushSurface}"/>
                                         <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Button.Template>
-                        <TextBlock Text="{StaticResource StringButtonHistory}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{StaticResource StringButtonHistory}" Margin="0,-1,0,0"/>
                     </Button>
                 </Grid>
 
@@ -163,7 +161,7 @@
                      Background="Transparent"
                      BorderThickness="0"
                      FocusVisualStyle="{x:Null}"
-                     Margin="4"
+                     Margin="4,2"
                      MaxHeight="280"
                      SelectionMode="Single"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"

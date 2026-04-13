@@ -120,7 +120,7 @@ public partial class PopupWindow : Window
         _isHistoryLevel = true;
         _isFormatLevel = false;
         _currentGenerator = null;
-        HeaderText.Text = "\u2190 History";
+        HeaderText.Text = "← History";
         HeaderText.Cursor = Cursors.Hand;
         HistoryButton.Visibility = Visibility.Collapsed;
 

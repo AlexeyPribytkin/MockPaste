@@ -86,13 +86,23 @@ public sealed class TrayIconManager : IDisposable
 
     private static Icon CreateDefaultIcon()
     {
+        try
+        {
+            var uri = new Uri("pack://application:,,,/Assets/app.ico", UriKind.Absolute);
+            var info = System.Windows.Application.GetResourceStream(uri);
+            if (info?.Stream != null)
+                return new Icon(info.Stream);
+        }
+        catch
+        {
+            // ignore and fall back
+        }
+
         var bitmap = new Bitmap(16, 16);
         using var g = Graphics.FromImage(bitmap);
         g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
         using var brush = new SolidBrush(Color.FromArgb(124, 58, 237));
         g.FillRectangle(brush, 0, 0, 16, 16);
-        using var font = new Font("Segoe UI", 8f, FontStyle.Bold);
-        g.DrawString("M", font, Brushes.White, 1, 1);
         return Icon.FromHandle(bitmap.GetHicon());
     }
 
