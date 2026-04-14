@@ -16,7 +16,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _snapshotPasteDelay        = string.Empty;
     private bool   _snapshotLaunchAtStartup;
     private string _snapshotHistorySize       = string.Empty;
-    private string _snapshotTheme             = string.Empty;
+    private AppTheme _snapshotTheme;
 
     // backing fields
     private bool   _isCapturing;
@@ -120,8 +120,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     }
 
     public bool IsDirty => HasChanges();
-    public bool IsPasteDelayValid  => int.TryParse(_pasteDelayText,  out var d) && d >= AppSettings.PasteDelayMin  && d <= AppSettings.PasteDelayMax;
-    public bool IsHistorySizeValid => int.TryParse(_historySizeText, out var s) && s >= AppSettings.HistorySizeMin && s <= AppSettings.HistorySizeMax;
+    public bool IsPasteDelayValid  => AppSettings.TryParsePasteDelay(_pasteDelayText,  out _);
+    public bool IsHistorySizeValid => AppSettings.TryParseHistorySize(_historySizeText, out _);
 
     // ── Capture API (called by code-behind) ──────────────────────────────────
 
@@ -152,7 +152,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     // ── Private ──────────────────────────────────────────────────────────────
 
-    private string CurrentTheme => _isThemeSystem ? "System" : _isThemeLight ? "Light" : "Dark";
+    private AppTheme CurrentTheme => _isThemeSystem ? AppTheme.System : _isThemeLight ? AppTheme.Light : AppTheme.Dark;
 
     private void LoadFromSettings()
     {
@@ -164,9 +164,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
         (_isThemeDark, _isThemeLight, _isThemeSystem) = _settings.Theme switch
         {
-            "Light"  => (false, true,  false),
-            "System" => (false, false, true),
-            _        => (true,  false, false)
+            AppTheme.Light  => (false, true,  false),
+            AppTheme.System => (false, false, true),
+            _               => (true,  false, false)
         };
     }
 
@@ -220,8 +220,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         _settings.Hotkey            = _pendingHotkey;
         _settings.PreserveClipboard = _preserveClipboard;
         _settings.LaunchAtStartup   = _launchAtStartup;
-        if (int.TryParse(_pasteDelayText,  out var delay)) _settings.PasteDelayMs = delay;
-        if (int.TryParse(_historySizeText, out var size))  _settings.HistorySize  = size;
+        if (AppSettings.TryParsePasteDelay(_pasteDelayText,  out var delay)) _settings.PasteDelayMs = delay;
+        if (AppSettings.TryParseHistorySize(_historySizeText, out var size))  _settings.HistorySize  = size;
         _settings.Theme             = CurrentTheme;
 
         var saved = SettingsSaved?.Invoke(_settings) ?? true;

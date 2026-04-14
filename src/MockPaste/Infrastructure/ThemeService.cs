@@ -1,14 +1,15 @@
 using System.Reflection;
 using System.Windows;
 using Microsoft.Win32;
+using MockPaste.Core.Models;
 
 namespace MockPaste.Infrastructure;
 
 public static class ThemeService
 {
-    private static string _currentTheme = "Dark";
+    private static AppTheme _currentTheme = AppTheme.Dark;
 
-    public static void Apply(string theme)
+    public static void Apply(AppTheme theme)
     {
         _currentTheme = theme;
         SwapTheme(Resolve(theme));
@@ -16,8 +17,8 @@ public static class ThemeService
 
     public static void Reapply() => SwapTheme(Resolve(_currentTheme));
 
-    public static string Resolve(string theme) =>
-        theme == "System" ? GetSystemTheme() : theme;
+    public static string Resolve(AppTheme theme) =>
+        theme == AppTheme.System ? GetSystemTheme() : theme.ToString();
 
     private static void SwapTheme(string resolved)
     {
