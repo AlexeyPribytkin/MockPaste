@@ -34,6 +34,9 @@
     <SolidColorBrush x:Key="BrushToggleThumbOff"      Color="#FF1A1A2E"/>
     <SolidColorBrush x:Key="BrushToggleThumbOn"       Color="#FFFFFFFF"/>
 
+    <!-- Validation error -->
+    <SolidColorBrush x:Key="BrushError"               Color="#FFD93030"/>
+
     <!-- Shadow overlay -->
     <SolidColorBrush x:Key="BrushShadow"              Color="#25000000"/>
 

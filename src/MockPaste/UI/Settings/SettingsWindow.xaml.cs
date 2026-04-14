@@ -2,131 +2,60 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using MockPaste.Core.Models;
-using MockPaste.Infrastructure;
 
 namespace MockPaste.UI.Settings;
 
 public partial class SettingsWindow : Window
 {
-    private readonly AppSettings _settings;
-    private HotkeyConfig _pendingHotkey;
-    private bool _isCapturing;
+    private readonly SettingsViewModel _vm;
 
-    // snapshot used to detect unsaved changes
-    private string _snapshotHotkey = string.Empty;
-    private bool _snapshotPreserveClipboard;
-    private string _snapshotPasteDelay = string.Empty;
-    private bool _snapshotLaunchAtStartup;
-    private string _snapshotHistorySize = string.Empty;
-    private string _snapshotTheme = string.Empty;
-
-    public event Action<AppSettings>? SettingsSaved;
+    public Func<AppSettings, bool>? SettingsSaved;
 
     public SettingsWindow(AppSettings settings)
     {
-        _settings = settings;
-        _pendingHotkey = settings.Hotkey.Clone();
+        _vm = new SettingsViewModel(settings);
         InitializeComponent();
-        LoadFromSettings();
-        TakeSnapshot();
-        SubscribeChangeHandlers();
-    }
+        DataContext = _vm;
 
-    private void LoadFromSettings()
-    {
-        HotkeyDisplay.Text = _pendingHotkey.ToDisplayString();
-        PreserveClipboardCheck.IsChecked = _settings.PreserveClipboard;
-        PasteDelayBox.Text = _settings.PasteDelayMs.ToString();
-        LaunchStartupCheck.IsChecked = _settings.LaunchAtStartup;
-        HistorySizeBox.Text = _settings.HistorySize.ToString();
-
-        (ThemeDark.IsChecked, ThemeLight.IsChecked, ThemeSystem.IsChecked) = _settings.Theme switch
+        _vm.SettingsSaved = s => SettingsSaved?.Invoke(s) ?? true;
+        _vm.PropertyChanged += (_, e) =>
         {
-            "Light"  => (false, true,  false),
-            "System" => (false, false, true),
-            _        => (true,  false, false)
+            if (e.PropertyName == nameof(SettingsViewModel.StatusMessage))
+                AnimateStatus();
+            else if (e.PropertyName == nameof(SettingsViewModel.IsCapturing))
+                SyncCaptureSubscription();
         };
+
+        DataObject.AddPastingHandler(PasteDelayBox,  OnDigitsOnlyPaste);
+        DataObject.AddPastingHandler(HistorySizeBox, OnDigitsOnlyPaste);
     }
 
-    private string CurrentTheme => ThemeSystem.IsChecked == true ? "System"
-                                 : ThemeLight.IsChecked  == true ? "Light"
-                                 : "Dark";
-
-    private void TakeSnapshot()
+    // Subscribes or unsubscribes the raw key capture handler based on VM state.
+    private void SyncCaptureSubscription()
     {
-        _snapshotHotkey             = _pendingHotkey.ToDisplayString();
-        _snapshotPreserveClipboard  = PreserveClipboardCheck.IsChecked == true;
-        _snapshotPasteDelay         = PasteDelayBox.Text;
-        _snapshotLaunchAtStartup    = LaunchStartupCheck.IsChecked == true;
-        _snapshotHistorySize        = HistorySizeBox.Text;
-        _snapshotTheme              = CurrentTheme;
+        if (_vm.IsCapturing)
+            PreviewKeyDown += CaptureKeyDown;
+        else
+            PreviewKeyDown -= CaptureKeyDown;
     }
 
-    private bool HasChanges() =>
-        _pendingHotkey.ToDisplayString()        != _snapshotHotkey
-        || (PreserveClipboardCheck.IsChecked == true) != _snapshotPreserveClipboard
-        || PasteDelayBox.Text                   != _snapshotPasteDelay
-        || (LaunchStartupCheck.IsChecked == true)     != _snapshotLaunchAtStartup
-        || HistorySizeBox.Text                  != _snapshotHistorySize
-        || CurrentTheme                         != _snapshotTheme;
-
-    private void UpdateSaveButton() => SaveButton.IsEnabled = HasChanges();
-
-    private void SubscribeChangeHandlers()
-    {
-        PasteDelayBox.TextChanged           += OnSettingChanged;
-        HistorySizeBox.TextChanged          += OnSettingChanged;
-        PreserveClipboardCheck.Checked      += OnSettingChanged;
-        PreserveClipboardCheck.Unchecked    += OnSettingChanged;
-        LaunchStartupCheck.Checked          += OnSettingChanged;
-        LaunchStartupCheck.Unchecked        += OnSettingChanged;
-        ThemeDark.Checked                   += OnSettingChanged;
-        ThemeLight.Checked                  += OnSettingChanged;
-        ThemeSystem.Checked                 += OnSettingChanged;
-    }
-
-    private void OnSettingChanged(object sender, RoutedEventArgs e) => UpdateSaveButton();
-
-    // Shows a status message that fades out after a short hold.
-    private void ShowStatus(string message)
+    // Fades the status text in, holds, then fades it out.
+    private void AnimateStatus()
     {
         StatusText.BeginAnimation(OpacityProperty, null);
+
+        if (string.IsNullOrEmpty(_vm.StatusMessage))
+        {
+            StatusText.Opacity = 0;
+            return;
+        }
+
         StatusText.Opacity = 1;
-        StatusText.Text = message;
         var fade = new DoubleAnimation(1, 0, new Duration(TimeSpan.FromSeconds(1.5)))
         {
             BeginTime = TimeSpan.FromSeconds(2)
         };
         StatusText.BeginAnimation(OpacityProperty, fade);
-    }
-
-    private void ChangeHotkey_Click(object sender, RoutedEventArgs e)
-    {
-        if (_isCapturing)
-        {
-            StopCapture();
-            return;
-        }
-        StartCapture();
-    }
-
-    private void StartCapture()
-    {
-        _isCapturing = true;
-        HotkeyDisplay.Text = "Press a key combination...";
-        ChangeHotkeyButton.Content = "Cancel";
-        StatusText.BeginAnimation(OpacityProperty, null);
-        StatusText.Text = "";
-        PreviewKeyDown += CaptureKeyDown;
-    }
-
-    private void StopCapture()
-    {
-        _isCapturing = false;
-        HotkeyDisplay.Text = _pendingHotkey.ToDisplayString();
-        ChangeHotkeyButton.Content = "Change";
-        PreviewKeyDown -= CaptureKeyDown;
-        UpdateSaveButton();
     }
 
     private void CaptureKeyDown(object sender, KeyEventArgs e)
@@ -136,77 +65,72 @@ public partial class SettingsWindow : Window
 
         if (key == Key.Escape)
         {
-            StopCapture();
+            _vm.CancelCapture();
             return;
         }
 
         if (key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt
             or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin)
         {
-            var modifiers = Keyboard.Modifiers;
-            HotkeyDisplay.Text = FormatModifiers(modifiers) + "...";
+            _vm.ShowCaptureHint(FormatModifiers(Keyboard.Modifiers) + "...");
             return;
         }
 
         var config = new HotkeyConfig
         {
-            Ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control),
-            Alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt),
+            Ctrl  = Keyboard.Modifiers.HasFlag(ModifierKeys.Control),
+            Alt   = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt),
             Shift = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift),
-            Win = Keyboard.Modifiers.HasFlag(ModifierKeys.Windows),
-            Key = key
+            Win   = Keyboard.Modifiers.HasFlag(ModifierKeys.Windows),
+            Key   = key
         };
 
         if (!config.IsValid())
         {
-            ShowStatus("At least one modifier key (Ctrl, Alt, Shift, Win) is required.");
+            _vm.SetStatus(System.Windows.Application.Current.Resources["StringStatusHotkeyModifierRequired"] as string ?? "");
             return;
         }
 
-        _pendingHotkey = config;
-        ShowStatus($"Hotkey set to: {config.ToDisplayString()}");
-        StopCapture();
+        _vm.AcceptHotkey(config);
     }
 
     private static string FormatModifiers(ModifierKeys modifiers)
     {
         var parts = new List<string>();
         if (modifiers.HasFlag(ModifierKeys.Control)) parts.Add("Ctrl");
-        if (modifiers.HasFlag(ModifierKeys.Alt)) parts.Add("Alt");
-        if (modifiers.HasFlag(ModifierKeys.Shift)) parts.Add("Shift");
+        if (modifiers.HasFlag(ModifierKeys.Alt))     parts.Add("Alt");
+        if (modifiers.HasFlag(ModifierKeys.Shift))   parts.Add("Shift");
         if (modifiers.HasFlag(ModifierKeys.Windows)) parts.Add("Win");
         return parts.Count > 0 ? string.Join(" + ", parts) + " + " : "";
     }
 
-    private void ResetHotkey_Click(object sender, RoutedEventArgs e)
+    private bool ConfirmDiscard()
     {
-        _pendingHotkey = HotkeyConfig.Default;
-        HotkeyDisplay.Text = _pendingHotkey.ToDisplayString();
-        ShowStatus("Hotkey reset to default.");
-        UpdateSaveButton();
+        if (!_vm.IsDirty) return true;
+        var msg = System.Windows.Application.Current.Resources["StringDiscardChangesMessage"] as string ?? "";
+        return MessageBox.Show(msg, "MockPaste", MessageBoxButton.YesNo, MessageBoxImage.Question)
+               == MessageBoxResult.Yes;
     }
 
-    private void Save_Click(object sender, RoutedEventArgs e)
-    {
-        _settings.Hotkey = _pendingHotkey;
-        _settings.PreserveClipboard = PreserveClipboardCheck.IsChecked == true;
-        _settings.LaunchAtStartup = LaunchStartupCheck.IsChecked == true;
-        if (int.TryParse(PasteDelayBox.Text, out var delay) && delay is >= 0 and <= 500)
-            _settings.PasteDelayMs = delay;
-        if (int.TryParse(HistorySizeBox.Text, out var historySize) && historySize is >= 1 and <= 500)
-            _settings.HistorySize = historySize;
-        _settings.Theme = CurrentTheme;
+    private void TitleBarClose_Click(object sender, RoutedEventArgs e) { if (ConfirmDiscard()) Close(); }
+    private void Cancel_Click(object sender, RoutedEventArgs e)        { if (ConfirmDiscard()) Close(); }
 
-        SettingsSaved?.Invoke(_settings);
-        TakeSnapshot();
-        UpdateSaveButton();
-        ShowStatus("Settings saved.");
+    private void DigitsOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
+    {
+        e.Handled = !e.Text.All(char.IsDigit);
     }
 
-    private void Cancel_Click(object sender, RoutedEventArgs e)
+    private static void OnDigitsOnlyPaste(object sender, DataObjectPastingEventArgs e)
     {
-        Close();
+        if (e.DataObject.GetDataPresent(DataFormats.Text))
+        {
+            var text = e.DataObject.GetData(DataFormats.Text) as string;
+            if (text?.All(char.IsDigit) != true)
+                e.CancelCommand();
+        }
+        else
+        {
+            e.CancelCommand();
+        }
     }
-
-    private void TitleBarClose_Click(object sender, RoutedEventArgs e) => Close();
 }

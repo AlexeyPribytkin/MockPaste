@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace MockPaste.Core.Models;
 
-public sealed class HotkeyConfig
+public sealed class HotkeyConfig : IEquatable<HotkeyConfig>
 {
     public bool Ctrl { get; set; } = true;
     public bool Alt { get; set; } = true;
@@ -46,4 +46,15 @@ public sealed class HotkeyConfig
     };
 
     public static HotkeyConfig Default => new() { Ctrl = true, Alt = true, Key = Key.Space };
+
+    public bool Equals(HotkeyConfig? other) =>
+        other is not null &&
+        Ctrl  == other.Ctrl  &&
+        Alt   == other.Alt   &&
+        Shift == other.Shift &&
+        Win   == other.Win   &&
+        Key   == other.Key;
+
+    public override bool Equals(object? obj) => Equals(obj as HotkeyConfig);
+    public override int  GetHashCode()        => HashCode.Combine(Ctrl, Alt, Shift, Win, Key);
 }

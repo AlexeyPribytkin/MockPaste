@@ -39,4 +39,15 @@
     <sys:String x:Key="StringThemeLight">Light</sys:String>
     <sys:String x:Key="StringThemeSystem">System</sys:String>
 
+    <!-- Status messages (set from code) -->
+    <sys:String x:Key="StringStatusCapturePrompt">Press a key combination...</sys:String>
+    <sys:String x:Key="StringStatusHotkeySet">Hotkey set to: {0}</sys:String>
+    <sys:String x:Key="StringStatusHotkeyReset">Hotkey reset to default.</sys:String>
+    <sys:String x:Key="StringStatusHotkeyModifierRequired">At least one modifier key (Ctrl, Alt, Shift, Win) is required.</sys:String>
+    <sys:String x:Key="StringStatusSaved">Settings saved.</sys:String>
+    <sys:String x:Key="StringStatusSaveFailed">Failed to save settings.</sys:String>
+
+    <!-- Discard-changes confirmation dialog -->
+    <sys:String x:Key="StringDiscardChangesMessage">Discard unsaved changes?</sys:String>
+
 </ResourceDictionary>

@@ -48,6 +48,7 @@ public partial class App : System.Windows.Application
             _settings = _settingsService.Load();
 
             ThemeService.Apply(_settings.Theme);
+            StartupService.Apply(_settings.LaunchAtStartup);
             SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
 
             _generators = GeneratorRegistry.CreateDefault();
@@ -146,15 +147,15 @@ public partial class App : System.Windows.Application
             return;
         }
         _settingsWindow = new SettingsWindow(_settings!);
-        _settingsWindow.SettingsSaved += OnSettingsSaved;
+        _settingsWindow.SettingsSaved = OnSettingsSaved;
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.ShowDialog();
     }
 
-    private void OnSettingsSaved(AppSettings settings)
+    private bool OnSettingsSaved(AppSettings settings)
     {
         _settings = settings;
-        _settingsService?.Save(settings);
+        var saved = _settingsService?.Save(settings) ?? false;
         _history?.UpdateMaxSize(settings.HistorySize);
 
         _hotkeyManager?.Unregister();
@@ -171,7 +172,9 @@ public partial class App : System.Windows.Application
         }
 
         ThemeService.Apply(settings.Theme);
+        StartupService.Apply(settings.LaunchAtStartup);
         AppLogger.Information("Settings updated");
+        return saved;
     }
 
     private void OnSystemThemeChanged(object sender, UserPreferenceChangedEventArgs e)

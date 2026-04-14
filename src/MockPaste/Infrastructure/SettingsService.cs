@@ -32,11 +32,13 @@ public sealed class SettingsService
 
             var json = File.ReadAllText(_settingsPath);
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
-            if (settings is null || !settings.Hotkey.IsValid())
+            if (settings is null)
             {
                 AppLogger.Warning("Invalid settings file, reverting to defaults");
                 return CreateDefault();
             }
+
+            settings.Sanitize();
             return settings;
         }
         catch (Exception ex)
@@ -46,17 +48,19 @@ public sealed class SettingsService
         }
     }
 
-    public void Save(AppSettings settings)
+    public bool Save(AppSettings settings)
     {
         try
         {
             var json = JsonSerializer.Serialize(settings, JsonOptions);
             File.WriteAllText(_settingsPath, json);
             AppLogger.Information("Settings saved");
+            return true;
         }
         catch (Exception ex)
         {
             AppLogger.Error("Failed to save settings", ex);
+            return false;
         }
     }
 
