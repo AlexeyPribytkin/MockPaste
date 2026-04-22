@@ -2,33 +2,30 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Core.Generators;
 
-public sealed class PhoneGenerator : IFakeDataGenerator
+public sealed class PhoneGenerator() : FakeDataGeneratorBase([
+    new("phone-us",            "US",            "(555) 123-4567",   opt => Generate(opt, "us")),
+    new("phone-international", "International", "+1-555-123-4567",  opt => Generate(opt, "international")),
+    new("phone-digits",        "Digits Only",   "5551234567",       opt => Generate(opt, "digits")),
+    new("phone-dotted",        "Dotted",        "555.123.4567",     opt => Generate(opt, "dotted")),
+])
 {
-    public string CategoryName => "Phone";
-    public string MnemonicKey => "P";
+    public override string CategoryName => "Phone";
+    public override int Order => 4;
+    public override string MnemonicKey => "P";
 
-    public IReadOnlyList<DataFormat> SupportedFormats { get; } =
-    [
-        new() { FormatId = "phone-us",            Name = "US",            Description = "(555) 123-4567" },
-        new() { FormatId = "phone-international",  Name = "International", Description = "+1-555-123-4567" },
-        new() { FormatId = "phone-digits",         Name = "Digits Only",   Description = "5551234567" },
-        new() { FormatId = "phone-dotted",         Name = "Dotted",        Description = "555.123.4567" },
-    ];
-
-    public string Generate(FakeDataOptions options)
+    private static string Generate(FakeDataOptions options, string variant)
     {
         var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;
         int area = rng.Next(200, 999);
         int prefix = rng.Next(200, 999);
         int line = rng.Next(1000, 9999);
 
-        return options.FormatId switch
+        return variant switch
         {
-            "phone-us"           => $"({area}) {prefix}-{line}",
-            "phone-international" => $"+1-{area}-{prefix}-{line}",
-            "phone-digits"       => $"{area}{prefix}{line}",
-            "phone-dotted"       => $"{area}.{prefix}.{line}",
-            _                    => $"({area}) {prefix}-{line}",
+            "international" => $"+1-{area}-{prefix}-{line}",
+            "digits" => $"{area}{prefix}{line}",
+            "dotted" => $"{area}.{prefix}.{line}",
+            _ => $"({area}) {prefix}-{line}",
         };
     }
 }

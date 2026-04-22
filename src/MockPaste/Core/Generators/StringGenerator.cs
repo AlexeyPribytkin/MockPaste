@@ -2,8 +2,17 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Core.Generators;
 
-public sealed class StringGenerator : IFakeDataGenerator
+public sealed class StringGenerator() : FakeDataGeneratorBase([
+    new("string-alphanumeric", "Alphanumeric", "Random letters and digits (16 chars)", opt => RandomString(opt, AlphanumericChars, defaultLength: 16)),
+    new("string-alpha",        "Alpha Only",   "Random letters (16 chars)",            opt => RandomString(opt, AlphaChars, defaultLength: 16)),
+    new("string-hex",          "Hex String",   "Random hex string (32 chars)",         opt => RandomString(opt, HexChars, defaultLength: 32)),
+    new("string-lorem",        "Lorem Ipsum",  "Random lorem ipsum words",             opt => LoremIpsum(opt, 8)),
+])
 {
+    public override string CategoryName => "String";
+    public override int Order => 5;
+    public override string MnemonicKey => "S";
+
     private const string AlphaChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private const string AlphanumericChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private const string HexChars = "0123456789abcdef";
@@ -13,37 +22,18 @@ public sealed class StringGenerator : IFakeDataGenerator
          "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore",
          "magna", "aliqua", "enim", "ad", "minim", "veniam", "quis", "nostrud"];
 
-    public string CategoryName => "String";
-    public string MnemonicKey => "S";
-
-    public IReadOnlyList<DataFormat> SupportedFormats { get; } =
-    [
-        new() { FormatId = "string-alphanumeric", Name = "Alphanumeric", Description = "Random letters and digits (16 chars)" },
-        new() { FormatId = "string-alpha",        Name = "Alpha Only",   Description = "Random letters (16 chars)" },
-        new() { FormatId = "string-hex",          Name = "Hex String",   Description = "Random hex string (32 chars)" },
-        new() { FormatId = "string-lorem",        Name = "Lorem Ipsum",  Description = "Random lorem ipsum words" },
-    ];
-
-    public string Generate(FakeDataOptions options)
+    private static string RandomString(FakeDataOptions options, string chars, int defaultLength)
     {
         var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;
-        int length = 16;
+        int length = defaultLength;
         if (options.Parameters.TryGetValue("length", out var lenStr) && int.TryParse(lenStr, out var l))
             length = l;
-
-        return options.FormatId switch
-        {
-            "string-alphanumeric" => RandomString(rng, AlphanumericChars, length),
-            "string-alpha"        => RandomString(rng, AlphaChars, length),
-            "string-hex"          => RandomString(rng, HexChars, 32),
-            "string-lorem"        => LoremIpsum(rng, 8),
-            _                     => RandomString(rng, AlphanumericChars, length),
-        };
+        return new(Enumerable.Range(0, length).Select(_ => chars[rng.Next(chars.Length)]).ToArray());
     }
 
-    private static string RandomString(Random rng, string chars, int length) =>
-        new(Enumerable.Range(0, length).Select(_ => chars[rng.Next(chars.Length)]).ToArray());
-
-    private static string LoremIpsum(Random rng, int wordCount) =>
-        string.Join(' ', Enumerable.Range(0, wordCount).Select(_ => LoremWords[rng.Next(LoremWords.Length)]));
+    private static string LoremIpsum(FakeDataOptions options, int wordCount)
+    {
+        var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;
+        return string.Join(' ', Enumerable.Range(0, wordCount).Select(_ => LoremWords[rng.Next(LoremWords.Length)]));
+    }
 }

@@ -12,19 +12,22 @@ public sealed class PasteOrchestrator
     private readonly InputSimulationService _inputSimulation;
     private readonly AppSettings _settings;
     private readonly HistoryService _history;
+    private readonly IAppLogger _logger;
 
     public PasteOrchestrator(
         GeneratorRegistry generators,
         ClipboardService clipboard,
         InputSimulationService inputSimulation,
         AppSettings settings,
-        HistoryService history)
+        HistoryService history,
+        IAppLogger logger)
     {
         _generators = generators;
         _clipboard = clipboard;
         _inputSimulation = inputSimulation;
         _settings = settings;
         _history = history;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(string categoryName, string formatId, IntPtr targetWindow)
@@ -34,13 +37,13 @@ public sealed class PasteOrchestrator
             var generator = _generators.Get(categoryName);
             if (generator is null)
             {
-                AppLogger.Warning($"Generator not found: {categoryName}");
+                _logger.Warning($"Generator not found: {categoryName}");
                 return;
             }
 
             var options = new FakeDataOptions { FormatId = formatId };
             var value = generator.Generate(options);
-            AppLogger.Information($"Generated {categoryName}/{formatId}: {value.Length} chars");
+            _logger.Information($"Generated {categoryName}/{formatId}: {value.Length} chars");
 
             var formatName = generator.SupportedFormats.FirstOrDefault(f => f.FormatId == formatId)?.Name ?? formatId;
             _history.Add(new HistoryEntry(value, categoryName, formatName, DateTime.Now));
@@ -50,7 +53,7 @@ public sealed class PasteOrchestrator
 
             if (!_clipboard.TrySetText(value))
             {
-                AppLogger.Error("Failed to set clipboard text");
+                _logger.Error("Failed to set clipboard text");
                 return;
             }
 
@@ -58,7 +61,7 @@ public sealed class PasteOrchestrator
             await Task.Delay(_settings.PasteDelayMs);
 
             if (!_inputSimulation.SimulatePaste())
-                AppLogger.Warning("Paste simulation may have failed");
+                _logger.Warning("Paste simulation may have failed");
 
             if (_settings.PreserveClipboard)
             {
@@ -68,7 +71,7 @@ public sealed class PasteOrchestrator
         }
         catch (Exception ex)
         {
-            AppLogger.Error($"Paste orchestration failed for {categoryName}/{formatId}", ex);
+            _logger.Error($"Paste orchestration failed for {categoryName}/{formatId}", ex);
         }
     }
 
@@ -76,7 +79,7 @@ public sealed class PasteOrchestrator
     {
         try
         {
-            AppLogger.Information($"Pasting from history: {value.Length} chars");
+            _logger.Information($"Pasting from history: {value.Length} chars");
             _history.Promote(value);
 
             if (_settings.PreserveClipboard)
@@ -84,7 +87,7 @@ public sealed class PasteOrchestrator
 
             if (!_clipboard.TrySetText(value))
             {
-                AppLogger.Error("Failed to set clipboard text");
+                _logger.Error("Failed to set clipboard text");
                 return;
             }
 
@@ -92,7 +95,7 @@ public sealed class PasteOrchestrator
             await Task.Delay(_settings.PasteDelayMs);
 
             if (!_inputSimulation.SimulatePaste())
-                AppLogger.Warning("Paste simulation may have failed");
+                _logger.Warning("Paste simulation may have failed");
 
             if (_settings.PreserveClipboard)
             {
@@ -102,7 +105,7 @@ public sealed class PasteOrchestrator
         }
         catch (Exception ex)
         {
-            AppLogger.Error("History paste failed", ex);
+            _logger.Error("History paste failed", ex);
         }
     }
 }

@@ -2,8 +2,17 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Core.Generators;
 
-public sealed class EmailGenerator : IFakeDataGenerator
+public sealed class EmailGenerator() : FakeDataGeneratorBase([
+    new("email-standard", "Standard",   "firstname.lastname@domain.com", opt => Generate(opt, "standard")),
+    new("email-numbered", "Numbered",   "user1234@domain.com",           opt => Generate(opt, "numbered")),
+    new("email-simple",   "Simple",     "user@domain.com",               opt => Generate(opt, "simple")),
+    new("email-plus",     "Plus alias", "user+tag@domain.com",           opt => Generate(opt, "plus")),
+])
 {
+    public override string CategoryName => "Email";
+    public override int Order => 3;
+    public override string MnemonicKey => "E";
+
     private static readonly string[] FirstNames =
         ["james", "mary", "john", "linda", "robert", "susan", "michael", "jessica", "david", "sarah",
          "alex", "taylor", "jordan", "casey", "morgan", "riley", "quinn", "avery", "blake", "cameron"];
@@ -16,18 +25,7 @@ public sealed class EmailGenerator : IFakeDataGenerator
         ["example.com", "test.org", "demo.net", "sample.io", "mock.dev",
          "fakecorp.com", "testmail.org", "devbox.net"];
 
-    public string CategoryName => "Email";
-    public string MnemonicKey => "E";
-
-    public IReadOnlyList<DataFormat> SupportedFormats { get; } =
-    [
-        new() { FormatId = "email-standard",  Name = "Standard",   Description = "firstname.lastname@domain.com" },
-        new() { FormatId = "email-numbered",  Name = "Numbered",   Description = "user1234@domain.com" },
-        new() { FormatId = "email-simple",    Name = "Simple",     Description = "user@domain.com" },
-        new() { FormatId = "email-plus",      Name = "Plus alias", Description = "user+tag@domain.com" },
-    ];
-
-    public string Generate(FakeDataOptions options)
+    private static string Generate(FakeDataOptions options, string variant)
     {
         var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;
         var first = FirstNames[rng.Next(FirstNames.Length)];
@@ -35,13 +33,12 @@ public sealed class EmailGenerator : IFakeDataGenerator
         var domain = Domains[rng.Next(Domains.Length)];
         var num = rng.Next(100, 9999);
 
-        return options.FormatId switch
+        return variant switch
         {
-            "email-standard" => $"{first}.{last}@{domain}",
-            "email-numbered" => $"{first}{num}@{domain}",
-            "email-simple"   => $"{first[0]}{last}@{domain}",
-            "email-plus"     => $"{first}.{last}+test{num}@{domain}",
-            _                => $"{first}.{last}@{domain}",
+            "numbered" => $"{first}{num}@{domain}",
+            "simple" => $"{first[0]}{last}@{domain}",
+            "plus" => $"{first}.{last}+test{num}@{domain}",
+            _ => $"{first}.{last}@{domain}",
         };
     }
 }

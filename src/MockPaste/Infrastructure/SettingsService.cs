@@ -7,6 +7,12 @@ namespace MockPaste.Infrastructure;
 
 public sealed class SettingsService
 {
+    /// <summary>Increment this when a breaking change is made to <see cref="AppSettings"/>.</summary>
+    private const int CurrentVersion = 1;
+
+    private const string AppFolderName = "MockPaste";
+    private const string SettingsFileName = "settings.json";
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         WriteIndented = true,
@@ -18,9 +24,9 @@ public sealed class SettingsService
     public SettingsService()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var dir = Path.Combine(appData, "MockPaste");
+        var dir = Path.Combine(appData, AppFolderName);
         Directory.CreateDirectory(dir);
-        _settingsPath = Path.Combine(dir, "settings.json");
+        _settingsPath = Path.Combine(dir, SettingsFileName);
     }
 
     public AppSettings Load()
@@ -38,6 +44,7 @@ public sealed class SettingsService
                 return CreateDefault();
             }
 
+            settings = Migrate(settings);
             settings.Sanitize();
             return settings;
         }
@@ -64,10 +71,26 @@ public sealed class SettingsService
         }
     }
 
-    private AppSettings CreateDefault()
+    private static AppSettings CreateDefault() => new() { Version = CurrentVersion };
+
+    /// <summary>
+    /// Applies incremental migrations so that settings from older versions are upgraded
+    /// to the current schema before use.
+    /// </summary>
+    private static AppSettings Migrate(AppSettings settings)
     {
-        var settings = new AppSettings();
-        Save(settings);
+        // Version 0 → 1: Version field was not present in very early builds; treat it as 0.
+        // No structural changes required for v1 yet — just stamp the current version so
+        // future migrations can detect the gap correctly.
+        if (settings.Version < 1)
+        {
+            AppLogger.Information($"Migrating settings from version {settings.Version} to 1");
+            settings.Version = 1;
+        }
+
+        // Future migrations go here:
+        // if (settings.Version < 2) { ... settings.Version = 2; }
+
         return settings;
     }
 }

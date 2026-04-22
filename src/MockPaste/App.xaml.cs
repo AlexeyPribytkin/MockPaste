@@ -1,5 +1,6 @@
 using System.IO;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using MockPaste.Application;
 using MockPaste.Core.Generators;
@@ -15,16 +16,18 @@ public partial class App : System.Windows.Application
 {
     private static Mutex? _instanceMutex;
 
+    private ServiceProvider? _services;
     private HotkeyManager? _hotkeyManager;
     private TrayIconManager? _trayIcon;
     private PopupWindow? _popup;
     private PasteOrchestrator? _orchestrator;
     private SettingsService? _settingsService;
-    private AppSettings? _settings;
-    private GeneratorRegistry? _generators;
-    private HistoryService? _history;
     private IntPtr _lastForegroundWindow;
     private SettingsWindow? _settingsWindow;
+
+    // Resolved from DI — kept as properties for convenience in event handlers.
+    private AppSettings Settings => _services!.GetRequiredService<AppSettings>();
+    private HistoryService History => _services!.GetRequiredService<HistoryService>();
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -44,23 +47,17 @@ public partial class App : System.Windows.Application
 
         try
         {
+            // Load settings first so they can be registered as a singleton.
             _settingsService = new SettingsService();
-            _settings = _settingsService.Load();
+            var settings = _settingsService.Load();
 
-            ThemeService.Apply(_settings.Theme);
-            StartupService.Apply(_settings.LaunchAtStartup);
+            _services = BuildServices(settings);
+
+            ThemeService.Apply(settings.Theme);
+            StartupService.Apply(settings.LaunchAtStartup);
             SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
 
-            _generators = GeneratorRegistry.CreateDefault();
-
-            _history = new HistoryService(_settings.HistorySize);
-
-            _orchestrator = new PasteOrchestrator(
-                _generators,
-                new ClipboardService(),
-                new InputSimulationService(),
-                _settings,
-                _history);
+            _orchestrator = _services.GetRequiredService<PasteOrchestrator>();
 
             InitializeTray();
             InitializeHotkey();
@@ -75,6 +72,26 @@ public partial class App : System.Windows.Application
                 MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
         }
+    }
+
+    private static ServiceProvider BuildServices(AppSettings settings)
+    {
+        var services = new ServiceCollection();
+
+        // Infrastructure
+        services.AddSingleton<IAppLogger>(AppLogger.Instance);
+        services.AddSingleton<ClipboardService>();
+        services.AddSingleton<InputSimulationService>();
+
+        // Core
+        services.AddSingleton(settings);
+        services.AddSingleton(sp => GeneratorRegistry.CreateDefault(sp.GetRequiredService<IAppLogger>()));
+        services.AddSingleton(sp => new HistoryService(sp.GetRequiredService<AppSettings>().HistorySize));
+
+        // Application
+        services.AddSingleton<PasteOrchestrator>();
+
+        return services.BuildServiceProvider();
     }
 
     private static void InitializeLogging()
@@ -93,7 +110,7 @@ public partial class App : System.Windows.Application
         _trayIcon.EnabledChanged += enabled =>
         {
             if (enabled)
-                _hotkeyManager?.Register(_settings!.Hotkey);
+                _hotkeyManager?.Register(Settings.Hotkey);
             else
                 _hotkeyManager?.Unregister();
         };
@@ -105,15 +122,15 @@ public partial class App : System.Windows.Application
         _hotkeyManager.Initialize();
         _hotkeyManager.HotkeyPressed += OnHotkeyPressed;
 
-        if (!_hotkeyManager.Register(_settings!.Hotkey))
-        {
+        if (!_hotkeyManager.Register(Settings.Hotkey))
             AppLogger.Warning("Default hotkey could not be registered");
-        }
     }
 
     private void InitializePopup()
     {
-        _popup = new PopupWindow(_generators!, _history!);
+        _popup = new PopupWindow(
+            _services!.GetRequiredService<GeneratorRegistry>(),
+            _services!.GetRequiredService<HistoryService>());
         _popup.FormatSelected += OnFormatSelected;
         _popup.HistoryItemSelected += OnHistoryItemSelected;
     }
@@ -146,33 +163,42 @@ public partial class App : System.Windows.Application
             _settingsWindow.Activate();
             return;
         }
-        _settingsWindow = new SettingsWindow(_settings!);
+        _settingsWindow = new SettingsWindow(Settings);
         _settingsWindow.SettingsSaved = OnSettingsSaved;
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.ShowDialog();
     }
 
-    private bool OnSettingsSaved(AppSettings settings)
+    private bool OnSettingsSaved(AppSettings updated)
     {
-        _settings = settings;
-        var saved = _settingsService?.Save(settings) ?? false;
-        _history?.UpdateMaxSize(settings.HistorySize);
+        // Copy values into the registered singleton so all DI consumers see the change.
+        var current = Settings;
+        current.Hotkey          = updated.Hotkey;
+        current.PreserveClipboard = updated.PreserveClipboard;
+        current.PasteDelayMs    = updated.PasteDelayMs;
+        current.LaunchAtStartup = updated.LaunchAtStartup;
+        current.Theme           = updated.Theme;
+        current.HistorySize     = updated.HistorySize;
+        current.Version         = updated.Version;
+
+        var saved = _settingsService?.Save(current) ?? false;
+        History.UpdateMaxSize(current.HistorySize);
 
         _hotkeyManager?.Unregister();
         if (_trayIcon is { IsEnabled: true })
         {
-            if (!_hotkeyManager!.Register(settings.Hotkey))
+            if (!_hotkeyManager!.Register(current.Hotkey))
             {
                 MessageBox.Show(
-                    $"Could not register hotkey: {settings.Hotkey.ToDisplayString()}\nIt may be in use by another application.",
+                    $"Could not register hotkey: {current.Hotkey.ToDisplayString()}\nIt may be in use by another application.",
                     "MockPaste",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
         }
 
-        ThemeService.Apply(settings.Theme);
-        StartupService.Apply(settings.LaunchAtStartup);
+        ThemeService.Apply(current.Theme);
+        StartupService.Apply(current.LaunchAtStartup);
         AppLogger.Information("Settings updated");
         return saved;
     }
@@ -189,9 +215,11 @@ public partial class App : System.Windows.Application
         SystemEvents.UserPreferenceChanged -= OnSystemThemeChanged;
         _hotkeyManager?.Dispose();
         _trayIcon?.Dispose();
+        _services?.Dispose();
         AppLogger.CloseAndFlush();
         _instanceMutex?.ReleaseMutex();
         _instanceMutex?.Dispose();
         base.OnExit(e);
     }
 }
+

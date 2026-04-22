@@ -1,3 +1,6 @@
+using System.Reflection;
+using MockPaste.Infrastructure;
+
 namespace MockPaste.Core.Generators;
 
 public sealed class GeneratorRegistry
@@ -13,16 +16,29 @@ public sealed class GeneratorRegistry
         _generators.GetValueOrDefault(categoryName);
 
     public IReadOnlyList<IFakeDataGenerator> GetAll() =>
-        _generators.Values.ToList().AsReadOnly();
+        _generators.Values.OrderBy(g => g.Order).ToList().AsReadOnly();
 
-    public static GeneratorRegistry CreateDefault()
+    public static GeneratorRegistry CreateDefault(IAppLogger? logger = null)
     {
         var registry = new GeneratorRegistry();
-        registry.Register(new GuidGenerator());
-        registry.Register(new EmailGenerator());
-        registry.Register(new PhoneGenerator());
-        registry.Register(new StringGenerator());
-        registry.Register(new NumberGenerator());
+        var generatorType = typeof(IFakeDataGenerator);
+
+        foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
+            .Where(t => t.IsClass && !t.IsAbstract && generatorType.IsAssignableFrom(t))
+            .OrderBy(t => t.Name))
+        {
+            try
+            {
+                if (Activator.CreateInstance(type) is IFakeDataGenerator g)
+                    registry.Register(g);
+            }
+            catch (Exception ex)
+            {
+                var log = logger ?? AppLogger.Instance;
+                log.Error($"Failed to instantiate generator '{type.FullName}'", ex);
+            }
+        }
+
         return registry;
     }
 }
