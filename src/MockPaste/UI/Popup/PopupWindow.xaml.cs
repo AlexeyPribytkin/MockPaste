@@ -13,7 +13,6 @@ public partial class PopupWindow : Window
 {
     private readonly GeneratorRegistry _generators;
     private readonly HistoryService _history;
-    private IFakeDataGenerator? _currentGenerator;
     private bool _isFormatLevel;
     private bool _isHistoryLevel;
     private bool _suppressDeactivate;
@@ -40,7 +39,6 @@ public partial class PopupWindow : Window
     public void ShowAtCursor()
     {
         _isFormatLevel = false;
-        _currentGenerator = null;
         ShowCategories();
 
         const double shadowPadding = 14;
@@ -75,7 +73,6 @@ public partial class PopupWindow : Window
     {
         _isFormatLevel = false;
         _isHistoryLevel = false;
-        _currentGenerator = null;
         HeaderText.Text = "MockPaste";
         HeaderText.Cursor = Cursors.Arrow;
         HistoryButton.Visibility = Visibility.Visible;
@@ -98,7 +95,6 @@ public partial class PopupWindow : Window
     {
         _isFormatLevel = true;
         _isHistoryLevel = false;
-        _currentGenerator = generator;
         HeaderText.Text = $"← {generator.CategoryName}";
         HeaderText.Cursor = Cursors.Hand;
         HistoryButton.Visibility = Visibility.Collapsed;
@@ -122,7 +118,6 @@ public partial class PopupWindow : Window
     {
         _isHistoryLevel = true;
         _isFormatLevel = false;
-        _currentGenerator = null;
         HeaderText.Text = "← History";
         HeaderText.Cursor = Cursors.Hand;
         HistoryButton.Visibility = Visibility.Collapsed;
