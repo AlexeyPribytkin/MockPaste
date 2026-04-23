@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,6 +17,8 @@ public partial class PopupWindow : Window
     private bool _isFormatLevel;
     private bool _isHistoryLevel;
     private bool _suppressDeactivate;
+
+    public IntPtr TargetWindow { get; set; }
 
     public event Action<string, string>? FormatSelected;
     public event Action<string>? HistoryItemSelected;
@@ -253,10 +256,30 @@ public partial class PopupWindow : Window
         ShowHistory();
     }
 
-    private void MenuList_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void MenuList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (e.OriginalSource is FrameworkElement { DataContext: MenuItemViewModel })
+        if (e.OriginalSource is FrameworkElement { DataContext: MenuItemViewModel or HistoryItemViewModel })
             SelectCurrentItem();
+    }
+
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState != MouseButtonState.Pressed) return;
+        // When HeaderText is a back button, let its MouseLeftButtonUp fire instead.
+        bool isBackButton = (_isFormatLevel || _isHistoryLevel) &&
+                            IsDescendantOf(e.OriginalSource as DependencyObject, HeaderText);
+        if (!isBackButton)
+            DragMove();
+    }
+
+    private static bool IsDescendantOf(DependencyObject? element, DependencyObject? ancestor)
+    {
+        while (element is not null)
+        {
+            if (element == ancestor) return true;
+            element = VisualTreeHelper.GetParent(element);
+        }
+        return false;
     }
 
     private void Window_Deactivated(object? sender, EventArgs e)
@@ -265,7 +288,7 @@ public partial class PopupWindow : Window
             HidePopup();
     }
 
-    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    protected override void OnClosing(CancelEventArgs e)
     {
         e.Cancel = true;
         HidePopup();

@@ -71,7 +71,7 @@
                                          HistoryTemplate="{StaticResource HistoryItemTemplate}"/>
 
     </Window.Resources>
-    <Grid>
+    <Grid Margin="12">
         <!-- Shadow layer (blurred semi-transparent shape, no rectangular bitmap artifacts) -->
         <Border Background="{DynamicResource BrushShadow}"
                 CornerRadius="8"
@@ -97,7 +97,8 @@
                 </Grid.RowDefinitions>
 
                 <!-- Header -->
-                <Grid Grid.Row="0">
+                <Grid Grid.Row="0"
+                      MouseLeftButtonDown="Header_MouseLeftButtonDown">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>

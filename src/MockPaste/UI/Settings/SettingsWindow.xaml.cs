@@ -21,12 +21,16 @@ public partial class SettingsWindow : Window
         _vm.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SettingsViewModel.StatusMessage))
+            {
                 AnimateStatus();
+            }
             else if (e.PropertyName == nameof(SettingsViewModel.IsCapturing))
+            {
                 SyncCaptureSubscription();
+            }
         };
 
-        DataObject.AddPastingHandler(PasteDelayBox,  OnDigitsOnlyPaste);
+        DataObject.AddPastingHandler(PasteDelayBox, OnDigitsOnlyPaste);
         DataObject.AddPastingHandler(HistorySizeBox, OnDigitsOnlyPaste);
     }
 
@@ -34,9 +38,13 @@ public partial class SettingsWindow : Window
     private void SyncCaptureSubscription()
     {
         if (_vm.IsCapturing)
+        {
             PreviewKeyDown += CaptureKeyDown;
+        }
         else
+        {
             PreviewKeyDown -= CaptureKeyDown;
+        }
     }
 
     // Fades the status text in, holds, then fades it out.
@@ -78,11 +86,11 @@ public partial class SettingsWindow : Window
 
         var config = new HotkeyConfig
         {
-            Ctrl  = Keyboard.Modifiers.HasFlag(ModifierKeys.Control),
-            Alt   = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt),
+            Ctrl = Keyboard.Modifiers.HasFlag(ModifierKeys.Control),
+            Alt = Keyboard.Modifiers.HasFlag(ModifierKeys.Alt),
             Shift = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift),
-            Win   = Keyboard.Modifiers.HasFlag(ModifierKeys.Windows),
-            Key   = key
+            Win = Keyboard.Modifiers.HasFlag(ModifierKeys.Windows),
+            Key = key
         };
 
         if (!config.IsValid())
@@ -98,8 +106,8 @@ public partial class SettingsWindow : Window
     {
         var parts = new List<string>();
         if (modifiers.HasFlag(ModifierKeys.Control)) parts.Add("Ctrl");
-        if (modifiers.HasFlag(ModifierKeys.Alt))     parts.Add("Alt");
-        if (modifiers.HasFlag(ModifierKeys.Shift))   parts.Add("Shift");
+        if (modifiers.HasFlag(ModifierKeys.Alt)) parts.Add("Alt");
+        if (modifiers.HasFlag(ModifierKeys.Shift)) parts.Add("Shift");
         if (modifiers.HasFlag(ModifierKeys.Windows)) parts.Add("Win");
         return parts.Count > 0 ? string.Join(" + ", parts) + " + " : "";
     }
@@ -112,8 +120,21 @@ public partial class SettingsWindow : Window
                == MessageBoxResult.Yes;
     }
 
-    private void TitleBarClose_Click(object sender, RoutedEventArgs e) { if (ConfirmDiscard()) Close(); }
-    private void Cancel_Click(object sender, RoutedEventArgs e)        { if (ConfirmDiscard()) Close(); }
+
+    private void TitleBarClose_Click(object sender, RoutedEventArgs e)
+    {
+        if (ConfirmDiscard())
+        {
+            Close();
+        }
+    }
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        if (ConfirmDiscard())
+        {
+            Close();
+        }
+    }
 
     private void DigitsOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {

@@ -71,8 +71,17 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
-        <!-- Content layer -->
+    <Grid Margin="12">
+        <!-- Shadow layer -->
+        <Border Background="{DynamicResource BrushShadow}"
+                CornerRadius="8"
+                Margin="3,3,0,0">
+            <Border.Effect>
+                <BlurEffect Radius="12"/>
+            </Border.Effect>
+        </Border>
+
+        <!-- Content layer (no Effect, fast re-renders on selection change) -->
         <Border Background="{DynamicResource BrushBackground}"
                 CornerRadius="8"
                 BorderBrush="{DynamicResource BrushBorder}"
