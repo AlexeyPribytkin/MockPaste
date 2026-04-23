@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MockPaste.Core.Models;
@@ -20,6 +21,8 @@ public sealed class SettingsService
     };
 
     private readonly string _settingsPath;
+    private readonly string _backupPath;
+    private readonly string _tempPath;
 
     public SettingsService()
     {
@@ -27,16 +30,20 @@ public sealed class SettingsService
         var dir = Path.Combine(appData, AppFolderName);
         Directory.CreateDirectory(dir);
         _settingsPath = Path.Combine(dir, SettingsFileName);
+        _backupPath = _settingsPath + ".bak";
+        _tempPath = _settingsPath + ".tmp";
     }
 
     public AppSettings Load()
     {
+        if (!File.Exists(_settingsPath))
+        {
+            return CreateDefault();
+        }
+
         try
         {
-            if (!File.Exists(_settingsPath))
-                return CreateDefault();
-
-            var json = File.ReadAllText(_settingsPath);
+            var json = File.ReadAllText(_settingsPath, Encoding.UTF8);
             var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
             if (settings is null)
             {
@@ -47,6 +54,16 @@ public sealed class SettingsService
             settings = Migrate(settings);
             settings.Sanitize();
             return settings;
+        }
+        catch (JsonException ex)
+        {
+            AppLogger.Warning("Settings file is corrupted, attempting backup restore", ex);
+            return TryRestoreFromBackup() ?? CreateDefault();
+        }
+        catch (IOException ex)
+        {
+            AppLogger.Warning("Failed to read settings file, reverting to defaults", ex);
+            return CreateDefault();
         }
         catch (Exception ex)
         {
@@ -59,10 +76,29 @@ public sealed class SettingsService
     {
         try
         {
+            // Guarantee the saved file always carries the current schema version.
+            settings.Version = CurrentVersion;
+
             var json = JsonSerializer.Serialize(settings, JsonOptions);
-            File.WriteAllText(_settingsPath, json);
+
+            // Back up the existing file before overwriting.
+            if (File.Exists(_settingsPath))
+            {
+                File.Copy(_settingsPath, _backupPath, overwrite: true);
+            }
+
+            // Atomic write: write to a temp file then replace, so a crash mid-write
+            // never leaves the settings file in a corrupted state.
+            File.WriteAllText(_tempPath, json, Encoding.UTF8);
+            File.Move(_tempPath, _settingsPath, overwrite: true);
+
             AppLogger.Information("Settings saved");
             return true;
+        }
+        catch (IOException ex)
+        {
+            AppLogger.Error("Failed to save settings (IO error)", ex);
+            return false;
         }
         catch (Exception ex)
         {
@@ -74,22 +110,69 @@ public sealed class SettingsService
     private static AppSettings CreateDefault() => new() { Version = CurrentVersion };
 
     /// <summary>
+    /// Attempts to load settings from the backup file after the primary file is found corrupted.
+    /// Returns <see langword="null"/> if no valid backup exists.
+    /// </summary>
+    private AppSettings? TryRestoreFromBackup()
+    {
+        if (!File.Exists(_backupPath))
+        {
+            return null;
+        }
+
+        try
+        {
+            var json = File.ReadAllText(_backupPath, Encoding.UTF8);
+            var settings = JsonSerializer.Deserialize<AppSettings>(json, JsonOptions);
+            if (settings is null)
+            {
+                return null;
+            }
+
+            AppLogger.Information("Settings restored from backup");
+            settings = Migrate(settings);
+            settings.Sanitize();
+            return settings;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Warning("Failed to restore settings from backup", ex);
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Applies incremental migrations so that settings from older versions are upgraded
     /// to the current schema before use.
     /// </summary>
     private static AppSettings Migrate(AppSettings settings)
     {
-        // Version 0 → 1: Version field was not present in very early builds; treat it as 0.
-        // No structural changes required for v1 yet — just stamp the current version so
-        // future migrations can detect the gap correctly.
-        if (settings.Version < 1)
+        // Loop ensures no migration step is skipped when jumping multiple versions.
+        while (settings.Version < CurrentVersion)
         {
-            AppLogger.Information($"Migrating settings from version {settings.Version} to 1");
-            settings.Version = 1;
-        }
+            switch (settings.Version)
+            {
+                case 0:
+                    // Version 0 → 1: Version field was not present in very early builds; treat it as 0.
+                    // No structural changes required for v1 yet — just stamp the current version so
+                    // future migrations can detect the gap correctly.
+                    AppLogger.Information($"Migrating settings from version {settings.Version} to 1");
+                    settings.Version = 1;
+                    break;
 
-        // Future migrations go here:
-        // if (settings.Version < 2) { ... settings.Version = 2; }
+                // Future migrations go here:
+                // case 1:
+                //     ...
+                //     settings.Version = 2;
+                //     break;
+
+                default:
+                    // Unknown version; stop to avoid an infinite loop.
+                    AppLogger.Warning($"Unknown settings version {settings.Version}, skipping further migration");
+                    settings.Version = CurrentVersion;
+                    break;
+            }
+        }
 
         return settings;
     }

@@ -1,6 +1,6 @@
 namespace MockPaste.UI.Popup;
 
-public sealed class HistoryItemViewModel
+public sealed class HistoryItemViewModel : IPopupItem
 {
     public required string Value { get; init; }
     public required string CategoryName { get; init; }

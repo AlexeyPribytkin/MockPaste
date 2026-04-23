@@ -12,21 +12,26 @@ public sealed class AppLogger : IAppLogger
 {
     // ── Singleton instance ────────────────────────────────────────────────────
     private static AppLogger _instance = new();
+    private static readonly object _initLock = new();
 
     /// <summary>Current logger instance used by the static helper methods.</summary>
     public static AppLogger Instance => _instance;
 
     // ── Static helpers (preserve all existing call-sites) ────────────────────
-    public static void Debug(string message, Exception? ex = null)       => _instance.WriteDebug(message, ex);
+    public static void Debug(string message, Exception? ex = null) => _instance.WriteDebug(message, ex);
     public static void Information(string message, Exception? ex = null) => _instance.WriteInformation(message, ex);
-    public static void Warning(string message, Exception? ex = null)     => _instance.WriteWarning(message, ex);
-    public static void Error(string message, Exception? ex = null)       => _instance.WriteError(message, ex);
-    public static void Fatal(string message, Exception? ex = null)       => _instance.WriteFatal(message, ex);
-    public static void CloseAndFlush()                                   => _instance.Flush();
+    public static void Warning(string message, Exception? ex = null) => _instance.WriteWarning(message, ex);
+    public static void Error(string message, Exception? ex = null) => _instance.WriteError(message, ex);
+    public static void Fatal(string message, Exception? ex = null) => _instance.WriteFatal(message, ex);
+    public static void CloseAndFlush() => _instance.Flush();
 
     public static void Initialize(string logDir)
     {
-        _instance = new AppLogger(logDir);
+        lock (_initLock)
+        {
+            _instance.Flush();
+            _instance = new AppLogger(logDir);
+        }
     }
 
     // ── Instance implementation ───────────────────────────────────────────────
@@ -48,9 +53,10 @@ public sealed class AppLogger : IAppLogger
     private void OpenLogFile()
     {
         _writer?.Dispose();
-        var fileName = $"mockpaste-{DateTime.Now:yyyy-MM-dd}.log";
+        var now = DateTime.Now;
+        var fileName = $"mockpaste-{now:yyyy-MM-dd}.log";
         _currentLogFile = Path.Combine(_logDir, fileName);
-        _writer = new StreamWriter(_currentLogFile, append: true, Encoding.UTF8) { AutoFlush = true };
+        _writer = new StreamWriter(_currentLogFile, append: true, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)) { AutoFlush = true };
         CleanupOldLogs();
     }
 
@@ -59,40 +65,57 @@ public sealed class AppLogger : IAppLogger
         try
         {
             foreach (var file in Directory.GetFiles(_logDir, "mockpaste-*.log")
-                                          .OrderByDescending(f => f)
-                                          .Skip(7))
-                File.Delete(file);
+                .Select(f => new FileInfo(f))
+                .OrderByDescending(f => f.CreationTimeUtc)
+                .Skip(7))
+            {
+                file.Delete();
+            }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            // Cleanup is best-effort; log to debug output to aid diagnosing permission or IO issues
+            System.Diagnostics.Debug.WriteLine($"[AppLogger] Failed to clean up old logs: {ex.Message}");
+        }
     }
 
-    void IAppLogger.Debug(string message, Exception? ex)       => WriteDebug(message, ex);
+    void IAppLogger.Debug(string message, Exception? ex) => WriteDebug(message, ex);
     void IAppLogger.Information(string message, Exception? ex) => WriteInformation(message, ex);
-    void IAppLogger.Warning(string message, Exception? ex)     => WriteWarning(message, ex);
-    void IAppLogger.Error(string message, Exception? ex)       => WriteError(message, ex);
-    void IAppLogger.Fatal(string message, Exception? ex)       => WriteFatal(message, ex);
+    void IAppLogger.Warning(string message, Exception? ex) => WriteWarning(message, ex);
+    void IAppLogger.Error(string message, Exception? ex) => WriteError(message, ex);
+    void IAppLogger.Fatal(string message, Exception? ex) => WriteFatal(message, ex);
 
-    private void WriteDebug(string message, Exception? ex)       => Write("DBG", message, ex);
+    private void WriteDebug(string message, Exception? ex) => Write("DBG", message, ex);
     private void WriteInformation(string message, Exception? ex) => Write("INF", message, ex);
-    private void WriteWarning(string message, Exception? ex)     => Write("WRN", message, ex);
-    private void WriteError(string message, Exception? ex)       => Write("ERR", message, ex);
-    private void WriteFatal(string message, Exception? ex)       => Write("FTL", message, ex);
+    private void WriteWarning(string message, Exception? ex) => Write("WRN", message, ex);
+    private void WriteError(string message, Exception? ex) => Write("ERR", message, ex);
+    private void WriteFatal(string message, Exception? ex) => Write("FTL", message, ex);
 
     private void Write(string level, string message, Exception? ex)
     {
-        if (_writer is null) return;
         lock (_lock)
         {
-            var expectedFile = Path.Combine(_logDir, $"mockpaste-{DateTime.Now:yyyy-MM-dd}.log");
-            if (_currentLogFile != expectedFile)
-                OpenLogFile();
+            if (_writer is null) return;
 
-            _writer.WriteLine($"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} [{level}] {message}");
+            var now = DateTime.Now;
+            var expectedFile = Path.Combine(_logDir, $"mockpaste-{now:yyyy-MM-dd}.log");
+            if (_currentLogFile != expectedFile)
+            {
+                OpenLogFile();
+            }
+
+            _writer.WriteLine($"{now:yyyy-MM-dd HH:mm:ss.fff} [{level}] {message}");
             if (ex is not null)
+            {
                 _writer.WriteLine(ex.ToString());
+            }
         }
     }
 
+    /// <summary>
+    /// Flushes and closes the current log file. After calling this, logging is
+    /// disabled until <see cref="Initialize"/> is called again.
+    /// </summary>
     public void Flush()
     {
         lock (_lock)

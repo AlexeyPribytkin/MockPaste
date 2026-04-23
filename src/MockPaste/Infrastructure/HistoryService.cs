@@ -16,7 +16,9 @@ public sealed class HistoryService
         {
             _maxSize = maxSize;
             while (_entries.Count > _maxSize)
+            {
                 _entries.RemoveLast();
+            }
         }
     }
 

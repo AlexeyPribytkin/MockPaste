@@ -29,9 +29,15 @@ public partial class PopupWindow : Window
 
         _vm.CloseRequested += () =>
         {
-            _suppressDeactivate = true;
-            HidePopup();
-            _suppressDeactivate = false;
+            try
+            {
+                _suppressDeactivate = true;
+                HidePopup();
+            }
+            finally
+            {
+                _suppressDeactivate = false;
+            }
         };
         _vm.FormatSelected += (cat, fmt) => FormatSelected?.Invoke(cat, fmt);
         _vm.HistoryItemSelected += val => HistoryItemSelected?.Invoke(val);
@@ -64,11 +70,17 @@ public partial class PopupWindow : Window
         Left = x;
         Top = y;
 
-        _suppressDeactivate = true;
-        Show();
-        Activate();
-        FocusSelectedItem();
-        _suppressDeactivate = false;
+        try
+        {
+            _suppressDeactivate = true;
+            Show();
+            Activate();
+            FocusSelectedItem();
+        }
+        finally
+        {
+            _suppressDeactivate = false;
+        }
     }
 
     public void HidePopup()
@@ -78,14 +90,15 @@ public partial class PopupWindow : Window
 
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(PopupViewModel.IsBackButton))
+        switch (e.PropertyName)
         {
-            HeaderText.Cursor = _vm.IsBackButton ? Cursors.Hand : Cursors.Arrow;
-        }
+            case nameof(PopupViewModel.IsBackButton):
+                HeaderText.Cursor = _vm.IsBackButton ? Cursors.Hand : Cursors.Arrow;
+                break;
 
-        if (e.PropertyName == nameof(PopupViewModel.Items))
-        {
-            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, FocusSelectedItem);
+            case nameof(PopupViewModel.Items):
+                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, FocusSelectedItem);
+                break;
         }
     }
 
@@ -96,7 +109,7 @@ public partial class PopupWindow : Window
             return;
         }
 
-        MenuList.UpdateLayout();
+        MenuList.ScrollIntoView(MenuList.SelectedItem);
         if (MenuList.ItemContainerGenerator.ContainerFromIndex(MenuList.SelectedIndex) is ListBoxItem container)
         {
             container.Focus();
@@ -161,7 +174,7 @@ public partial class PopupWindow : Window
                 break;
 
             default:
-                if (_vm.HandleMnemonic(e.Key.ToString()))
+                if (_vm.HandleMnemonic(new KeyConverter().ConvertToString(e.Key) ?? string.Empty))
                 {
                     e.Handled = true;
                 }
@@ -223,6 +236,14 @@ public partial class PopupWindow : Window
         }
     }
 
+    protected override void OnClosed(EventArgs e)
+    {
+        _vm.PropertyChanged -= OnVmPropertyChanged;
+        base.OnClosed(e);
+    }
+
+    // The window is intentionally never closed; OnClosing cancels all close attempts
+    // to keep the native HWND alive for the lifetime of the application.
     protected override void OnClosing(CancelEventArgs e)
     {
         e.Cancel = true;

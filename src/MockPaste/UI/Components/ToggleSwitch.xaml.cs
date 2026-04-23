@@ -85,10 +85,15 @@ public partial class ToggleSwitch : UserControl
 
     private static void OnIsCheckedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        if (d is not ToggleSwitch ts) return;
+        if (d is not ToggleSwitch ts)
+        {
+            return;
+        }
 
         if (ts.IsLoaded)
+        {
             ts.Animate();
+        }
 
         ts.RaiseEvent(new RoutedEventArgs(
             ts.IsChecked ? CheckedEvent : UncheckedEvent, ts));
@@ -116,7 +121,11 @@ public partial class ToggleSwitch : UserControl
 
     private void OnMouseEnter(object sender, MouseEventArgs e)
     {
-        if (!IsEnabled) return;
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         var d = new Duration(TimeSpan.FromMilliseconds(100));
         HoverOverlay.BeginAnimation(OpacityProperty, new DoubleAnimation(0.08, d));
         _thumbScale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(1.2, d)
@@ -142,12 +151,18 @@ public partial class ToggleSwitch : UserControl
     private void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         if (IsEnabled)
+        {
             IsChecked = !IsChecked;
+        }
     }
 
     private void OnKeyDown(object sender, KeyEventArgs e)
     {
-        if (!IsEnabled) return;
+        if (!IsEnabled)
+        {
+            return;
+        }
+
         if (e.Key is Key.Space or Key.Enter)
         {
             IsChecked = !IsChecked;

@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using MockPaste.Core.Generators;
 using MockPaste.Core.Models;
 using MockPaste.Infrastructure;
@@ -90,7 +90,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowCategories();
 
-        Assert.Equal(2, vm.Items!.Count);
+        Assert.Equal(2, vm.Items.Count);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowCategories();
 
-        var first = Assert.IsType<MenuItemViewModel>(vm.Items![0]);
+        var first = Assert.IsType<MenuItemViewModel>(vm.Items[0]);
         Assert.Equal("Email", first.CategoryName);
     }
 
@@ -175,7 +175,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowFormats(gen);
 
-        Assert.Equal(2, vm.Items!.Count);
+        Assert.Equal(2, vm.Items.Count);
     }
 
     [Fact]
@@ -221,13 +221,13 @@ public sealed class PopupViewModelTests
     }
 
     [Fact]
-    public void ShowHistory_WhenEmpty_Items_IsNull()
+    public void ShowHistory_WhenEmpty_Items_IsEmpty()
     {
         var vm = CreateVm(history: new HistoryService());
 
         vm.ShowHistory();
 
-        Assert.Null(vm.Items);
+        Assert.Empty(vm.Items);
     }
 
     [Fact]
@@ -240,8 +240,8 @@ public sealed class PopupViewModelTests
 
         vm.ShowHistory();
 
-        Assert.Equal(2, vm.Items!.Count);
-        Assert.All(vm.Items.Cast<object>(), item => Assert.IsType<HistoryItemViewModel>(item));
+        Assert.Equal(2, vm.Items.Count);
+        Assert.All(vm.Items, item => Assert.IsType<HistoryItemViewModel>(item));
     }
 
     [Fact]

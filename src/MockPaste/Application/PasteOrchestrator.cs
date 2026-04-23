@@ -30,7 +30,7 @@ public sealed class PasteOrchestrator
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(string categoryName, string formatId, IntPtr targetWindow)
+    public async Task ExecuteAsync(string categoryName, string formatId, IntPtr targetWindow, CancellationToken ct = default)
     {
         try
         {
@@ -46,28 +46,17 @@ public sealed class PasteOrchestrator
             _logger.Information($"Generated {categoryName}/{formatId}: {value.Length} chars");
 
             var formatName = generator.SupportedFormats.FirstOrDefault(f => f.FormatId == formatId)?.Name ?? formatId;
-            _history.Add(new HistoryEntry(value, categoryName, formatName, DateTime.Now));
 
-            if (_settings.PreserveClipboard)
-                _clipboard.TrySaveClipboard();
+            bool pasted = await ExecuteCoreAsync(value, targetWindow, ct);
 
-            if (!_clipboard.TrySetText(value))
+            if (pasted)
             {
-                _logger.Error("Failed to set clipboard text");
-                return;
+                _history.Add(new HistoryEntry(value, categoryName, formatName, DateTime.UtcNow));
             }
-
-            NativeMethods.SetForegroundWindow(targetWindow);
-            await Task.Delay(_settings.PasteDelayMs);
-
-            if (!_inputSimulation.SimulatePaste())
-                _logger.Warning("Paste simulation may have failed");
-
-            if (_settings.PreserveClipboard)
-            {
-                await Task.Delay(100);
-                _clipboard.TryRestoreClipboard();
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.Information($"Paste cancelled for {categoryName}/{formatId}");
         }
         catch (Exception ex)
         {
@@ -75,37 +64,74 @@ public sealed class PasteOrchestrator
         }
     }
 
-    public async Task ExecuteDirectAsync(string value, IntPtr targetWindow)
+    public async Task ExecuteDirectAsync(string value, IntPtr targetWindow, CancellationToken ct = default)
     {
         try
         {
             _logger.Information($"Pasting from history: {value.Length} chars");
-            _history.Promote(value);
 
-            if (_settings.PreserveClipboard)
-                _clipboard.TrySaveClipboard();
+            bool pasted = await ExecuteCoreAsync(value, targetWindow, ct);
 
-            if (!_clipboard.TrySetText(value))
+            if (pasted)
             {
-                _logger.Error("Failed to set clipboard text");
-                return;
+                _history.Promote(value);
             }
-
-            NativeMethods.SetForegroundWindow(targetWindow);
-            await Task.Delay(_settings.PasteDelayMs);
-
-            if (!_inputSimulation.SimulatePaste())
-                _logger.Warning("Paste simulation may have failed");
-
-            if (_settings.PreserveClipboard)
-            {
-                await Task.Delay(100);
-                _clipboard.TryRestoreClipboard();
-            }
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.Information("History paste cancelled");
         }
         catch (Exception ex)
         {
             _logger.Error("History paste failed", ex);
         }
+    }
+
+    /// <summary>
+    /// Runs the shared clipboard-set → focus → paste → restore pipeline.
+    /// Returns true if the paste simulation was dispatched successfully.
+    /// All clipboard calls are marshalled to the UI dispatcher (STA thread).
+    /// </summary>
+    private async Task<bool> ExecuteCoreAsync(string value, IntPtr targetWindow, CancellationToken ct)
+    {
+        var dispatcher = System.Windows.Application.Current.Dispatcher;
+
+        if (_settings.PreserveClipboard)
+        {
+            await dispatcher.InvokeAsync(() => _clipboard.TrySaveClipboard());
+        }
+
+        bool clipboardSet = await dispatcher.InvokeAsync(() => _clipboard.TrySetTextInstance(value));
+        if (!clipboardSet)
+        {
+            _logger.Error("Failed to set clipboard text");
+            return false;
+        }
+
+        if (!NativeMethods.SetForegroundWindow(targetWindow))
+        {
+            _logger.Warning("Failed to set foreground window — paste target may not receive focus");
+        }
+
+        await Task.Delay(_settings.PasteDelayMs, ct);
+
+        bool pasted = _inputSimulation.SimulatePaste();
+        if (!pasted)
+        {
+            _logger.Warning("Paste simulation may have failed");
+        }
+
+        if (_settings.PreserveClipboard)
+        {
+            await Task.Delay(_settings.ClipboardRestoreDelayMs, ct);
+
+            bool restored = await dispatcher.InvokeAsync(() => _clipboard.TryRestoreClipboard());
+            if (!restored)
+            {
+                _logger.Warning("Clipboard restore failed");
+            }
+        }
+
+        return pasted;
     }
 }

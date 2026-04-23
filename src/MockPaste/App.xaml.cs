@@ -10,13 +10,14 @@ using MockPaste.Infrastructure.Native;
 using MockPaste.UI.Popup;
 using MockPaste.UI.Settings;
 using MockPaste.UI.Tray;
+
 namespace MockPaste;
 
 public partial class App : System.Windows.Application
 {
     private static Mutex? _instanceMutex;
 
-    private ServiceProvider? _services;
+    private IServiceProvider? _services;
     private HotkeyManager? _hotkeyManager;
     private TrayIconManager? _trayIcon;
     private PopupWindow? _popup;
@@ -31,12 +32,21 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        _instanceMutex = new Mutex(true, "MockPaste_SingleInstance", out bool createdNew);
+        bool createdNew;
+        try
+        {
+            _instanceMutex = new Mutex(true, @"Global\MockPaste_SingleInstance", out createdNew);
+        }
+        catch (AbandonedMutexException)
+        {
+            createdNew = true;
+        }
+
         if (!createdNew)
         {
             MessageBox.Show("MockPaste is already running.", "MockPaste",
                 MessageBoxButton.OK, MessageBoxImage.Information);
-            _instanceMutex.Dispose();
+            _instanceMutex?.Dispose();
             Shutdown(0);
             return;
         }
@@ -55,13 +65,15 @@ public partial class App : System.Windows.Application
 
             ThemeService.Apply(settings.Theme);
             StartupService.Apply(settings.LaunchAtStartup);
-            SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
 
             _orchestrator = _services.GetRequiredService<PasteOrchestrator>();
 
             InitializeTray();
             InitializeHotkey();
             InitializePopup();
+
+            // Subscribe only after successful init so we don't leak if startup fails.
+            SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
 
             AppLogger.Information("MockPaste started successfully");
         }
@@ -107,13 +119,7 @@ public partial class App : System.Windows.Application
         _trayIcon = new TrayIconManager();
         _trayIcon.OnSettingsClicked += ShowSettings;
         _trayIcon.OnExitClicked += () => Shutdown();
-        _trayIcon.EnabledChanged += enabled =>
-        {
-            if (enabled)
-                _hotkeyManager?.Register(Settings.Hotkey);
-            else
-                _hotkeyManager?.Unregister();
-        };
+        _trayIcon.EnabledChanged += enabled => ApplyHotkey(Settings);
     }
 
     private void InitializeHotkey()
@@ -123,7 +129,9 @@ public partial class App : System.Windows.Application
         _hotkeyManager.HotkeyPressed += OnHotkeyPressed;
 
         if (!_hotkeyManager.Register(Settings.Hotkey))
+        {
             AppLogger.Warning("Default hotkey could not be registered");
+        }
     }
 
     private void InitializePopup()
@@ -137,59 +145,93 @@ public partial class App : System.Windows.Application
 
     private void OnHotkeyPressed()
     {
-        if (_trayIcon is { IsEnabled: false }) return;
+        if (_trayIcon is { IsEnabled: false })
+        {
+            return;
+        }
 
         _lastForegroundWindow = NativeMethods.GetForegroundWindow();
         AppLogger.Debug($"Showing popup, target window: {_lastForegroundWindow}");
-        _popup?.ShowAtCursor();
+        Dispatcher.Invoke(() => _popup?.ShowAtCursor());
     }
 
     private async void OnFormatSelected(string categoryName, string formatId)
     {
         AppLogger.Information($"Format selected: {categoryName}/{formatId}");
-        await (_orchestrator?.ExecuteAsync(categoryName, formatId, _lastForegroundWindow) ?? Task.CompletedTask);
+        try
+        {
+            await (_orchestrator?.ExecuteAsync(categoryName, formatId, _lastForegroundWindow) ?? Task.CompletedTask);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error("Paste operation failed", ex);
+        }
     }
 
     private async void OnHistoryItemSelected(string value)
     {
         AppLogger.Information("History item selected for paste");
-        await (_orchestrator?.ExecuteDirectAsync(value, _lastForegroundWindow) ?? Task.CompletedTask);
+        try
+        {
+            await (_orchestrator?.ExecuteDirectAsync(value, _lastForegroundWindow) ?? Task.CompletedTask);
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Error("History paste operation failed", ex);
+        }
     }
 
     private void ShowSettings()
     {
-        if (_settingsWindow != null)
+        Dispatcher.Invoke(() =>
         {
-            _settingsWindow.Activate();
-            return;
-        }
-        _settingsWindow = new SettingsWindow(Settings);
-        _settingsWindow.SettingsSaved = OnSettingsSaved;
-        _settingsWindow.UnregisterHotkey = () => _hotkeyManager?.Unregister();
-        _settingsWindow.ReregisterHotkey = () =>
-        {
-            if (_trayIcon is { IsEnabled: true })
-                _hotkeyManager?.Register(Settings.Hotkey);
-        };
-        _settingsWindow.Closed += (_, _) => _settingsWindow = null;
-        _settingsWindow.ShowDialog();
+            if (_settingsWindow != null)
+            {
+                _settingsWindow.Activate();
+                return;
+            }
+
+            _settingsWindow = new SettingsWindow(Settings)
+            {
+                SettingsSaved = OnSettingsSaved,
+                UnregisterHotkey = () => _hotkeyManager?.Unregister(),
+                ReregisterHotkey = () =>
+                {
+                    if (_trayIcon is { IsEnabled: true })
+                        _hotkeyManager?.Register(Settings.Hotkey);
+                }
+            };
+            _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+            _settingsWindow.ShowDialog();
+        });
     }
 
     private bool OnSettingsSaved(AppSettings updated)
     {
         // Copy values into the registered singleton so all DI consumers see the change.
         var current = Settings;
-        current.Hotkey          = updated.Hotkey;
+        current.Hotkey = updated.Hotkey;
         current.PreserveClipboard = updated.PreserveClipboard;
-        current.PasteDelayMs    = updated.PasteDelayMs;
+        current.PasteDelayMs = updated.PasteDelayMs;
         current.LaunchAtStartup = updated.LaunchAtStartup;
-        current.Theme           = updated.Theme;
-        current.HistorySize     = updated.HistorySize;
-        current.Version         = updated.Version;
+        current.Theme = updated.Theme;
+        current.HistorySize = updated.HistorySize;
+        current.Version = updated.Version;
 
         var saved = _settingsService?.Save(current) ?? false;
         History.UpdateMaxSize(current.HistorySize);
 
+        ApplyHotkey(current);
+
+        ThemeService.Apply(current.Theme);
+        StartupService.Apply(current.LaunchAtStartup);
+        AppLogger.Information("Settings updated");
+        return saved;
+    }
+
+    /// <summary>Unregisters the current hotkey and re-registers it if the tray icon is enabled.</summary>
+    private void ApplyHotkey(AppSettings current)
+    {
         _hotkeyManager?.Unregister();
         if (_trayIcon is { IsEnabled: true })
         {
@@ -202,17 +244,14 @@ public partial class App : System.Windows.Application
                     MessageBoxImage.Warning);
             }
         }
-
-        ThemeService.Apply(current.Theme);
-        StartupService.Apply(current.LaunchAtStartup);
-        AppLogger.Information("Settings updated");
-        return saved;
     }
 
     private void OnSystemThemeChanged(object sender, UserPreferenceChangedEventArgs e)
     {
         if (e.Category == UserPreferenceCategory.General)
+        {
             ThemeService.Reapply();
+        }
     }
 
     protected override void OnExit(ExitEventArgs e)
@@ -221,7 +260,7 @@ public partial class App : System.Windows.Application
         SystemEvents.UserPreferenceChanged -= OnSystemThemeChanged;
         _hotkeyManager?.Dispose();
         _trayIcon?.Dispose();
-        _services?.Dispose();
+        (_services as IDisposable)?.Dispose();
         AppLogger.CloseAndFlush();
         _instanceMutex?.ReleaseMutex();
         _instanceMutex?.Dispose();

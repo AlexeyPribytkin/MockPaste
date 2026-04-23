@@ -1,4 +1,3 @@
-using System.Collections;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MockPaste.Core.Generators;
@@ -11,16 +10,19 @@ namespace MockPaste.UI.Popup;
 /// </summary>
 public sealed class PopupViewModel : INotifyPropertyChanged
 {
+    private enum PopupLevel { Categories, Formats, History }
+
+    private static readonly Dictionary<string, PropertyChangedEventArgs> _argsCache = new();
+
     private readonly GeneratorRegistry _generators;
     private readonly HistoryService _history;
 
-    private bool _isFormatLevel;
-    private bool _isHistoryLevel;
+    private PopupLevel _level;
     private string _headerText = "MockPaste";
     private bool _isBackButton;
     private bool _isHistoryButtonVisible = true;
     private bool _isEmptyHistoryVisible;
-    private IList? _items;
+    private IReadOnlyList<IPopupItem> _items = [];
     private int _selectedIndex = -1;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -42,8 +44,8 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     // ── Navigation state ─────────────────────────────────────────────────
 
-    public bool IsFormatLevel => _isFormatLevel;
-    public bool IsHistoryLevel => _isHistoryLevel;
+    public bool IsFormatLevel => _level == PopupLevel.Formats;
+    public bool IsHistoryLevel => _level == PopupLevel.History;
 
     public string HeaderText
     {
@@ -70,7 +72,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         private set => SetField(ref _isEmptyHistoryVisible, value);
     }
 
-    public IList? Items
+    public IReadOnlyList<IPopupItem> Items
     {
         get => _items;
         private set => SetField(ref _items, value);
@@ -86,8 +88,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     public void ShowCategories()
     {
-        _isFormatLevel = false;
-        _isHistoryLevel = false;
+        SetLevel(PopupLevel.Categories);
         HeaderText = "MockPaste";
         IsBackButton = false;
         IsHistoryButtonVisible = true;
@@ -106,8 +107,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     public void ShowFormats(IFakeDataGenerator generator)
     {
-        _isFormatLevel = true;
-        _isHistoryLevel = false;
+        SetLevel(PopupLevel.Formats);
         HeaderText = $"← {generator.CategoryName}";
         IsBackButton = true;
         IsHistoryButtonVisible = false;
@@ -127,8 +127,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     public void ShowHistory()
     {
-        _isHistoryLevel = true;
-        _isFormatLevel = false;
+        SetLevel(PopupLevel.History);
         HeaderText = "← History";
         IsBackButton = true;
         IsHistoryButtonVisible = false;
@@ -136,7 +135,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         var entries = _history.GetAll();
         if (entries.Count == 0)
         {
-            Items = null;
+            Items = [];
             IsEmptyHistoryVisible = true;
         }
         else
@@ -150,7 +149,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
             }).ToList();
         }
 
-        SelectedIndex = (Items?.Count ?? 0) > 0 ? 0 : -1;
+        SelectedIndex = Items.Count > 0 ? 0 : -1;
     }
 
     // ── Selection ────────────────────────────────────────────────────────
@@ -162,7 +161,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     /// </summary>
     public bool SelectCurrentItem()
     {
-        if (SelectedIndex < 0 || Items is null)
+        if (SelectedIndex < 0 || SelectedIndex >= Items.Count)
         {
             return false;
         }
@@ -179,7 +178,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
             return false;
         }
 
-        if (!_isFormatLevel)
+        if (_level != PopupLevel.Formats)
         {
             var gen = _generators.Get(item.CategoryName);
             if (gen is not null)
@@ -208,25 +207,33 @@ public sealed class PopupViewModel : INotifyPropertyChanged
             return false;
         }
 
-        if (Items is not IEnumerable<MenuItemViewModel> items)
+        for (int i = 0; i < Items.Count; i++)
         {
-            return false;
+            if (Items[i] is MenuItemViewModel item &&
+                item.MnemonicKey.Equals(keyChar, StringComparison.OrdinalIgnoreCase))
+            {
+                SelectedIndex = i;
+                SelectCurrentItem();
+                return true;
+            }
         }
 
-        var match = items.FirstOrDefault(i =>
-            i.MnemonicKey.Equals(keyChar, StringComparison.OrdinalIgnoreCase));
-
-        if (match is null)
-        {
-            return false;
-        }
-
-        SelectedIndex = Items.IndexOf(match);
-        SelectCurrentItem();
-        return true;
+        return false;
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    private void SetLevel(PopupLevel level)
+    {
+        if (_level == level)
+        {
+            return;
+        }
+
+        _level = level;
+        Notify(nameof(IsFormatLevel));
+        Notify(nameof(IsHistoryLevel));
+    }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {
@@ -236,7 +243,23 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         }
 
         field = value;
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        Notify(name);
         return true;
+    }
+
+    private void Notify(string? name)
+    {
+        if (name is null)
+        {
+            return;
+        }
+
+        if (!_argsCache.TryGetValue(name, out var args))
+        {
+            args = new PropertyChangedEventArgs(name);
+            _argsCache[name] = args;
+        }
+
+        PropertyChanged?.Invoke(this, args);
     }
 }

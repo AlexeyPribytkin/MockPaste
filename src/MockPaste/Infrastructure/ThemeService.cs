@@ -7,7 +7,14 @@ namespace MockPaste.Infrastructure;
 
 public static class ThemeService
 {
+    // Cached once to avoid repeated reflection calls.
+    private static readonly string AssemblyName =
+        Assembly.GetExecutingAssembly().GetName().Name!;
+
     private static AppTheme _currentTheme = AppTheme.Dark;
+
+    // Tracks the currently applied dictionary so we avoid fragile string matching.
+    private static ResourceDictionary? _currentDictionary;
 
     public static void Apply(AppTheme theme)
     {
@@ -15,40 +22,71 @@ public static class ThemeService
         SwapTheme(Resolve(theme));
     }
 
+    /// <summary>
+    /// Reapplies the last theme set via <see cref="Apply"/>. Useful after dynamic
+    /// resource dictionaries are reloaded (e.g. after a window is recreated).
+    /// </summary>
     public static void Reapply() => SwapTheme(Resolve(_currentTheme));
 
-    public static string Resolve(AppTheme theme) =>
-        theme == AppTheme.System ? GetSystemTheme() : theme.ToString();
+    /// <summary>
+    /// Resolves the effective theme name for the given <paramref name="theme"/>.
+    /// <see cref="AppTheme.System"/> is resolved to the current OS preference.
+    /// </summary>
+    public static string Resolve(AppTheme theme) => theme switch
+    {
+        AppTheme.Dark => "Dark",
+        AppTheme.Light => "Light",
+        AppTheme.System => GetSystemTheme(),
+        _ => "Light"
+    };
 
     private static void SwapTheme(string resolved)
     {
-        var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-        var newUri = new Uri($"/{assemblyName};component/Themes/{resolved}.xaml", UriKind.Relative);
-        var merged = System.Windows.Application.Current.Resources.MergedDictionaries;
+        var app = System.Windows.Application.Current;
+        if (app is null)
+        {
+            return;
+        }
 
-        var existing = merged.FirstOrDefault(d =>
-            d.Source?.ToString().Contains("Dark.xaml") == true ||
-            d.Source?.ToString().Contains("Light.xaml") == true);
+        var newUri = new Uri($"/{AssemblyName};component/Themes/{resolved}.xaml", UriKind.Relative);
+
+        // Short-circuit if the same theme dictionary is already applied.
+        if (_currentDictionary?.Source == newUri)
+        {
+            return;
+        }
 
         var newDict = new ResourceDictionary { Source = newUri };
+        var merged = app.Resources.MergedDictionaries;
 
-        if (existing is not null)
+        if (_currentDictionary is not null && merged.Contains(_currentDictionary))
         {
-            int idx = merged.IndexOf(existing);
-            merged.Remove(existing);
+            int idx = merged.IndexOf(_currentDictionary);
+            merged.Remove(_currentDictionary);
+            // Theme dictionary is inserted at the same position to preserve merge order.
             merged.Insert(idx, newDict);
         }
         else
         {
+            // Theme dictionary is inserted first so it has the highest resource priority.
             merged.Insert(0, newDict);
         }
+
+        _currentDictionary = newDict;
     }
 
     private static string GetSystemTheme()
     {
-        var value = Registry.GetValue(
-            @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
-            "AppsUseLightTheme", 1);
-        return value is int v && v == 0 ? "Dark" : "Light";
+        try
+        {
+            var value = Registry.GetValue(
+                @"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize",
+                "AppsUseLightTheme", 1);
+            return value is int v && v == 0 ? "Dark" : "Light";
+        }
+        catch
+        {
+            return "Light";
+        }
     }
 }

@@ -6,6 +6,8 @@ public sealed class AppSettings
     public const int PasteDelayMax = 500;
     public const int PasteDelayDefault = 50;
 
+    public const int ClipboardRestoreDelayDefault = 100;
+
     public const int HistorySizeMin = 1;
     public const int HistorySizeMax = 500;
     public const int HistorySizeDefault = 10;
@@ -18,6 +20,7 @@ public sealed class AppSettings
     public HotkeyConfig Hotkey { get; set; } = HotkeyConfig.Default;
     public bool PreserveClipboard { get; set; } = PreserveClipboardDefault;
     public int PasteDelayMs { get; set; } = PasteDelayDefault;
+    public int ClipboardRestoreDelayMs { get; set; } = ClipboardRestoreDelayDefault;
     public bool LaunchAtStartup { get; set; } = LaunchAtStartupDefault;
     public AppTheme Theme { get; set; } = ThemeDefault;
     public int HistorySize { get; set; } = HistorySizeDefault;

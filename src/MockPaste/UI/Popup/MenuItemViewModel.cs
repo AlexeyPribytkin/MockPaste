@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace MockPaste.UI.Popup;
 
-public sealed class MenuItemViewModel : INotifyPropertyChanged
+public sealed class MenuItemViewModel : IPopupItem, INotifyPropertyChanged
 {
     public required string DisplayName { get; init; }
     public string MnemonicKey { get; init; } = string.Empty;
