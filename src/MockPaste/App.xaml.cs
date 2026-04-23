@@ -165,6 +165,12 @@ public partial class App : System.Windows.Application
         }
         _settingsWindow = new SettingsWindow(Settings);
         _settingsWindow.SettingsSaved = OnSettingsSaved;
+        _settingsWindow.UnregisterHotkey = () => _hotkeyManager?.Unregister();
+        _settingsWindow.ReregisterHotkey = () =>
+        {
+            if (_trayIcon is { IsEnabled: true })
+                _hotkeyManager?.Register(Settings.Hotkey);
+        };
         _settingsWindow.Closed += (_, _) => _settingsWindow = null;
         _settingsWindow.ShowDialog();
     }

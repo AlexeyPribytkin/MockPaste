@@ -11,36 +11,40 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private HotkeyConfig _pendingHotkey;
 
     // snapshot used to detect unsaved changes
-    private HotkeyConfig _snapshotHotkey      = HotkeyConfig.Default;
-    private bool   _snapshotPreserveClipboard;
-    private string _snapshotPasteDelay        = string.Empty;
-    private bool   _snapshotLaunchAtStartup;
-    private string _snapshotHistorySize       = string.Empty;
+    private HotkeyConfig _snapshotHotkey = HotkeyConfig.Default;
+    private bool _snapshotPreserveClipboard;
+    private string _snapshotPasteDelay = string.Empty;
+    private bool _snapshotLaunchAtStartup;
+    private string _snapshotHistorySize = string.Empty;
     private AppTheme _snapshotTheme;
 
     // backing fields
-    private bool   _isCapturing;
-    private string _hotkeyDisplayText         = string.Empty;
-    private bool   _preserveClipboard;
-    private string _pasteDelayText            = string.Empty;
-    private bool   _launchAtStartup;
-    private string _historySizeText           = string.Empty;
-    private bool   _isThemeDark;
-    private bool   _isThemeLight;
-    private bool   _isThemeSystem;
-    private string _statusMessage             = string.Empty;
+    private bool _isCapturing;
+    private string _hotkeyDisplayText = string.Empty;
+    private bool _preserveClipboard;
+    private string _pasteDelayText = string.Empty;
+    private bool _launchAtStartup;
+    private string _historySizeText = string.Empty;
+    private bool _isThemeDark;
+    private bool _isThemeLight;
+    private bool _isThemeSystem;
+    private string _statusMessage = string.Empty;
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    public Func<AppSettings, bool>?           SettingsSaved;
+    public Func<AppSettings, bool>? SettingsSaved;
+
+    // Overridable in tests to avoid WPF Application.Current dependency.
+    internal Func<string, string> ResourceResolver { get; set; } =
+        key => System.Windows.Application.Current?.Resources[key] as string ?? key;
 
     public SettingsViewModel(AppSettings settings)
     {
-        _settings      = settings;
+        _settings = settings;
         _pendingHotkey = settings.Hotkey.Clone();
 
-        SaveCommand        = new RelayCommand(Save, () => IsDirty && IsPasteDelayValid && IsHistorySizeValid);
+        SaveCommand = new RelayCommand(Save, () => IsDirty && IsPasteDelayValid && IsHistorySizeValid);
         ChangeHotkeyCommand = new RelayCommand(ToggleCapture);
-        ResetHotkeyCommand  = new RelayCommand(ResetHotkey);
+        ResetHotkeyCommand = new RelayCommand(ResetHotkey);
 
         LoadFromSettings();
         TakeSnapshot();
@@ -48,9 +52,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     // ── Commands ─────────────────────────────────────────────────────────────
 
-    public ICommand SaveCommand         { get; }
+    public ICommand SaveCommand { get; }
     public ICommand ChangeHotkeyCommand { get; }
-    public ICommand ResetHotkeyCommand  { get; }
+    public ICommand ResetHotkeyCommand { get; }
 
     // ── Properties ───────────────────────────────────────────────────────────
 
@@ -59,68 +63,142 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         get => _isCapturing;
         private set
         {
-            if (_isCapturing == value) return;
-            _isCapturing = value;
-            Notify();
+            if (_isCapturing != value)
+            {
+                _isCapturing = value;
+                Notify();
+            }
         }
     }
 
     public string HotkeyDisplayText
     {
         get => _hotkeyDisplayText;
-        private set { if (_hotkeyDisplayText != value) { _hotkeyDisplayText = value; Notify(); } }
+        private set
+        {
+            if (_hotkeyDisplayText != value)
+            {
+                _hotkeyDisplayText = value;
+                Notify();
+            }
+        }
     }
 
     public bool PreserveClipboard
     {
         get => _preserveClipboard;
-        set { if (_preserveClipboard != value) { _preserveClipboard = value; Notify(); NotifyDirty(); } }
+        set
+        {
+            if (_preserveClipboard != value)
+            {
+                _preserveClipboard = value;
+                Notify();
+                NotifyDirty();
+            }
+        }
     }
 
     public string PasteDelayText
     {
         get => _pasteDelayText;
-        set { if (_pasteDelayText != value) { _pasteDelayText = value; Notify(); Notify(nameof(IsPasteDelayValid)); NotifyDirty(); } }
+        set
+        {
+            if (_pasteDelayText != value)
+            {
+                _pasteDelayText = value;
+                Notify();
+                Notify(nameof(IsPasteDelayValid));
+                NotifyDirty();
+            }
+        }
     }
 
     public bool LaunchAtStartup
     {
         get => _launchAtStartup;
-        set { if (_launchAtStartup != value) { _launchAtStartup = value; Notify(); NotifyDirty(); } }
+        set
+        {
+            if (_launchAtStartup != value)
+            {
+                _launchAtStartup = value;
+                Notify();
+                NotifyDirty();
+            }
+        }
     }
 
     public string HistorySizeText
     {
         get => _historySizeText;
-        set { if (_historySizeText != value) { _historySizeText = value; Notify(); Notify(nameof(IsHistorySizeValid)); NotifyDirty(); } }
+        set
+        {
+            if (_historySizeText != value)
+            {
+                _historySizeText = value;
+                Notify();
+                Notify(nameof(IsHistorySizeValid));
+                NotifyDirty();
+            }
+        }
     }
 
     public bool IsThemeDark
     {
         get => _isThemeDark;
-        set { if (_isThemeDark != value) { _isThemeDark = value; Notify(); NotifyDirty(); } }
+        set
+        {
+            if (_isThemeDark != value)
+            {
+                _isThemeDark = value;
+                Notify();
+                NotifyDirty();
+            }
+        }
     }
 
     public bool IsThemeLight
     {
         get => _isThemeLight;
-        set { if (_isThemeLight != value) { _isThemeLight = value; Notify(); NotifyDirty(); } }
+        set
+        {
+            if (_isThemeLight != value)
+            {
+                _isThemeLight = value;
+                Notify();
+                NotifyDirty();
+            }
+        }
     }
 
     public bool IsThemeSystem
     {
         get => _isThemeSystem;
-        set { if (_isThemeSystem != value) { _isThemeSystem = value; Notify(); NotifyDirty(); } }
+        set
+        {
+            if (_isThemeSystem != value)
+            {
+                _isThemeSystem = value;
+                Notify();
+                NotifyDirty();
+            }
+        }
     }
 
     public string StatusMessage
     {
         get => _statusMessage;
-        private set { if (_statusMessage != value) { _statusMessage = value; Notify(); } }
+        private set
+        {
+            if (_statusMessage != value)
+            {
+                _statusMessage = value;
+                Notify();
+            }
+        }
     }
 
     public bool IsDirty => HasChanges();
-    public bool IsPasteDelayValid  => AppSettings.TryParsePasteDelay(_pasteDelayText,  out _);
+    public bool IsPasteDelayValid => AppSettings.TryParsePasteDelay(_pasteDelayText, out _);
     public bool IsHistorySizeValid => AppSettings.TryParseHistorySize(_historySizeText, out _);
 
     // ── Capture API (called by code-behind) ──────────────────────────────────
@@ -128,9 +206,11 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     /// <summary>Updates the hotkey display with a partial modifier hint while keys are held.</summary>
     internal void ShowCaptureHint(string hint)
     {
-        if (_hotkeyDisplayText == hint) return;
-        _hotkeyDisplayText = hint;
-        Notify(nameof(HotkeyDisplayText));
+        if (_hotkeyDisplayText != hint)
+        {
+            _hotkeyDisplayText = hint;
+            Notify(nameof(HotkeyDisplayText));
+        }
     }
 
     public void CancelCapture()
@@ -141,14 +221,25 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     public void AcceptHotkey(HotkeyConfig config)
     {
-        _pendingHotkey    = config;
+        _pendingHotkey = config;
         HotkeyDisplayText = config.ToDisplayString();
-        IsCapturing       = false;
+        IsCapturing = false;
         NotifyDirty();
         SetStatus(string.Format(Res("StringStatusHotkeySet"), config.ToDisplayString()));
     }
 
     internal void SetStatus(string message) => StatusMessage = message;
+
+    /// <summary>Formats active modifier keys into a human-readable prefix string like "Ctrl + Alt + ".</summary>
+    public static string FormatModifiers(ModifierKeys modifiers)
+    {
+        var parts = new List<string>();
+        if (modifiers.HasFlag(ModifierKeys.Control)) parts.Add("Ctrl");
+        if (modifiers.HasFlag(ModifierKeys.Alt)) parts.Add("Alt");
+        if (modifiers.HasFlag(ModifierKeys.Shift)) parts.Add("Shift");
+        if (modifiers.HasFlag(ModifierKeys.Windows)) parts.Add("Win");
+        return parts.Count > 0 ? string.Join(" + ", parts) + " + " : "";
+    }
 
     // ── Private ──────────────────────────────────────────────────────────────
 
@@ -158,35 +249,35 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         _hotkeyDisplayText = _pendingHotkey.ToDisplayString();
         _preserveClipboard = _settings.PreserveClipboard;
-        _pasteDelayText    = _settings.PasteDelayMs.ToString();
-        _launchAtStartup   = _settings.LaunchAtStartup;
-        _historySizeText   = _settings.HistorySize.ToString();
+        _pasteDelayText = _settings.PasteDelayMs.ToString();
+        _launchAtStartup = _settings.LaunchAtStartup;
+        _historySizeText = _settings.HistorySize.ToString();
 
         (_isThemeDark, _isThemeLight, _isThemeSystem) = _settings.Theme switch
         {
-            AppTheme.Light  => (false, true,  false),
+            AppTheme.Light => (false, true, false),
             AppTheme.System => (false, false, true),
-            _               => (true,  false, false)
+            _ => (true, false, false)
         };
     }
 
     private void TakeSnapshot()
     {
-        _snapshotHotkey            = _pendingHotkey.Clone();
+        _snapshotHotkey = _pendingHotkey.Clone();
         _snapshotPreserveClipboard = _preserveClipboard;
-        _snapshotPasteDelay        = _pasteDelayText;
-        _snapshotLaunchAtStartup   = _launchAtStartup;
-        _snapshotHistorySize       = _historySizeText;
-        _snapshotTheme             = CurrentTheme;
+        _snapshotPasteDelay = _pasteDelayText;
+        _snapshotLaunchAtStartup = _launchAtStartup;
+        _snapshotHistorySize = _historySizeText;
+        _snapshotTheme = CurrentTheme;
     }
 
     private bool HasChanges() =>
         !_pendingHotkey.Equals(_snapshotHotkey)
-        || _preserveClipboard   != _snapshotPreserveClipboard
-        || _pasteDelayText               != _snapshotPasteDelay
-        || _launchAtStartup              != _snapshotLaunchAtStartup
-        || _historySizeText              != _snapshotHistorySize
-        || CurrentTheme                  != _snapshotTheme;
+        || _preserveClipboard != _snapshotPreserveClipboard
+        || _pasteDelayText != _snapshotPasteDelay
+        || _launchAtStartup != _snapshotLaunchAtStartup
+        || _historySizeText != _snapshotHistorySize
+        || CurrentTheme != _snapshotTheme;
 
     private void NotifyDirty()
     {
@@ -196,20 +287,31 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     private void ToggleCapture()
     {
-        if (_isCapturing) CancelCapture();
-        else StartCapture();
+        if (_isCapturing)
+        {
+            CancelCapture();
+        }
+        else
+        {
+            StartCapture();
+        }
     }
 
     private void StartCapture()
     {
-        IsCapturing       = true;
+        IsCapturing = true;
         HotkeyDisplayText = Res("StringStatusCapturePrompt");
-        StatusMessage     = string.Empty;
+        StatusMessage = string.Empty;
     }
 
     private void ResetHotkey()
     {
-        _pendingHotkey    = HotkeyConfig.Default;
+        if (_isCapturing)
+        {
+            CancelCapture();
+        }
+
+        _pendingHotkey = HotkeyConfig.Default;
         HotkeyDisplayText = _pendingHotkey.ToDisplayString();
         NotifyDirty();
         SetStatus(Res("StringStatusHotkeyReset"));
@@ -217,12 +319,18 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 
     private void Save()
     {
-        _settings.Hotkey            = _pendingHotkey;
+        _settings.Hotkey = _pendingHotkey;
         _settings.PreserveClipboard = _preserveClipboard;
-        _settings.LaunchAtStartup   = _launchAtStartup;
-        if (AppSettings.TryParsePasteDelay(_pasteDelayText,  out var delay)) _settings.PasteDelayMs = delay;
-        if (AppSettings.TryParseHistorySize(_historySizeText, out var size))  _settings.HistorySize  = size;
-        _settings.Theme             = CurrentTheme;
+        _settings.LaunchAtStartup = _launchAtStartup;
+        if (AppSettings.TryParsePasteDelay(_pasteDelayText, out var delay))
+        {
+            _settings.PasteDelayMs = delay;
+        }
+        if (AppSettings.TryParseHistorySize(_historySizeText, out var size))
+        {
+            _settings.HistorySize = size;
+        }
+        _settings.Theme = CurrentTheme;
 
         var saved = SettingsSaved?.Invoke(_settings) ?? true;
         TakeSnapshot();
@@ -230,8 +338,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         SetStatus(saved ? Res("StringStatusSaved") : Res("StringStatusSaveFailed"));
     }
 
-    private static string Res(string key) =>
-        System.Windows.Application.Current.Resources[key] as string ?? key;
+    private string Res(string key) => ResourceResolver(key);
 
     private void Notify([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

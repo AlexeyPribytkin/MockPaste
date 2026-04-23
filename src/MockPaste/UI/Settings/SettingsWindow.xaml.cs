@@ -10,6 +10,8 @@ public partial class SettingsWindow : Window
     private readonly SettingsViewModel _vm;
 
     public Func<AppSettings, bool>? SettingsSaved;
+    public Action? UnregisterHotkey;
+    public Action? ReregisterHotkey;
 
     public SettingsWindow(AppSettings settings)
     {
@@ -26,25 +28,23 @@ public partial class SettingsWindow : Window
             }
             else if (e.PropertyName == nameof(SettingsViewModel.IsCapturing))
             {
-                SyncCaptureSubscription();
+                // Subscribes or unsubscribes the raw key capture handler based on VM state.
+                // Registers or unregisters the hotkey handler.
+                if (_vm.IsCapturing)
+                {
+                    UnregisterHotkey?.Invoke();
+                    PreviewKeyDown += CaptureKeyDown;
+                }
+                else
+                {
+                    PreviewKeyDown -= CaptureKeyDown;
+                    ReregisterHotkey?.Invoke();
+                }
             }
         };
 
         DataObject.AddPastingHandler(PasteDelayBox, OnDigitsOnlyPaste);
         DataObject.AddPastingHandler(HistorySizeBox, OnDigitsOnlyPaste);
-    }
-
-    // Subscribes or unsubscribes the raw key capture handler based on VM state.
-    private void SyncCaptureSubscription()
-    {
-        if (_vm.IsCapturing)
-        {
-            PreviewKeyDown += CaptureKeyDown;
-        }
-        else
-        {
-            PreviewKeyDown -= CaptureKeyDown;
-        }
     }
 
     // Fades the status text in, holds, then fades it out.
@@ -80,7 +80,7 @@ public partial class SettingsWindow : Window
         if (key is Key.LeftCtrl or Key.RightCtrl or Key.LeftAlt or Key.RightAlt
             or Key.LeftShift or Key.RightShift or Key.LWin or Key.RWin)
         {
-            _vm.ShowCaptureHint(FormatModifiers(Keyboard.Modifiers) + "...");
+            _vm.ShowCaptureHint(SettingsViewModel.FormatModifiers(Keyboard.Modifiers) + "...");
             return;
         }
 
@@ -102,24 +102,16 @@ public partial class SettingsWindow : Window
         _vm.AcceptHotkey(config);
     }
 
-    private static string FormatModifiers(ModifierKeys modifiers)
-    {
-        var parts = new List<string>();
-        if (modifiers.HasFlag(ModifierKeys.Control)) parts.Add("Ctrl");
-        if (modifiers.HasFlag(ModifierKeys.Alt)) parts.Add("Alt");
-        if (modifiers.HasFlag(ModifierKeys.Shift)) parts.Add("Shift");
-        if (modifiers.HasFlag(ModifierKeys.Windows)) parts.Add("Win");
-        return parts.Count > 0 ? string.Join(" + ", parts) + " + " : "";
-    }
-
     private bool ConfirmDiscard()
     {
-        if (!_vm.IsDirty) return true;
+        if (!_vm.IsDirty)
+        {
+            return true;
+        }
         var msg = System.Windows.Application.Current.Resources["StringDiscardChangesMessage"] as string ?? "";
         return MessageBox.Show(msg, "MockPaste", MessageBoxButton.YesNo, MessageBoxImage.Question)
                == MessageBoxResult.Yes;
     }
-
 
     private void TitleBarClose_Click(object sender, RoutedEventArgs e)
     {
@@ -128,6 +120,7 @@ public partial class SettingsWindow : Window
             Close();
         }
     }
+
     private void Cancel_Click(object sender, RoutedEventArgs e)
     {
         if (ConfirmDiscard())
@@ -147,7 +140,9 @@ public partial class SettingsWindow : Window
         {
             var text = e.DataObject.GetData(DataFormats.Text) as string;
             if (text?.All(char.IsDigit) != true)
+            {
                 e.CancelCommand();
+            }
         }
         else
         {

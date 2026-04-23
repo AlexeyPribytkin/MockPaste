@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,23 +11,31 @@ namespace MockPaste.UI.Popup;
 
 public partial class PopupWindow : Window
 {
-    private readonly GeneratorRegistry _generators;
-    private readonly HistoryService _history;
-    private bool _isFormatLevel;
-    private bool _isHistoryLevel;
+    private readonly PopupViewModel _vm;
     private bool _suppressDeactivate;
 
     public IntPtr TargetWindow { get; set; }
 
+    // Forwarded from VM so callers don't need to know about the VM type.
     public event Action<string, string>? FormatSelected;
     public event Action<string>? HistoryItemSelected;
 
     public PopupWindow(GeneratorRegistry generators, HistoryService history)
     {
-        _generators = generators;
-        _history = history;
+        _vm = new PopupViewModel(generators, history);
         InitializeComponent();
+        DataContext = _vm;
         PreviewKeyDown += PopupWindow_PreviewKeyDown;
+
+        _vm.CloseRequested += () =>
+        {
+            _suppressDeactivate = true;
+            HidePopup();
+            _suppressDeactivate = false;
+        };
+        _vm.FormatSelected += (cat, fmt) => FormatSelected?.Invoke(cat, fmt);
+        _vm.HistoryItemSelected += val => HistoryItemSelected?.Invoke(val);
+        _vm.PropertyChanged += OnVmPropertyChanged;
 
         // Force native window (HWND) creation so the first ShowAtCursor()
         // behaves the same as subsequent calls. Without this, the first
@@ -38,8 +46,7 @@ public partial class PopupWindow : Window
 
     public void ShowAtCursor()
     {
-        _isFormatLevel = false;
-        ShowCategories();
+        _vm.ShowCategories();
 
         const double shadowPadding = 14;
         var dpi = VisualTreeHelper.GetDpi(this);
@@ -49,10 +56,10 @@ public partial class PopupWindow : Window
 
         var screen = SystemParameters.WorkArea;
         UpdateLayout();
-        if (x + ActualWidth > screen.Right) x = screen.Right - ActualWidth;
-        if (y + ActualHeight > screen.Bottom) y = screen.Bottom - ActualHeight;
-        if (x < screen.Left) x = screen.Left;
-        if (y < screen.Top) y = screen.Top;
+        if (x + ActualWidth > screen.Right) { x = screen.Right - ActualWidth; }
+        if (y + ActualHeight > screen.Bottom) { y = screen.Bottom - ActualHeight; }
+        if (x < screen.Left) { x = screen.Left; }
+        if (y < screen.Top) { y = screen.Top; }
 
         Left = x;
         Top = y;
@@ -69,120 +76,42 @@ public partial class PopupWindow : Window
         Hide();
     }
 
-    private void ShowCategories()
+    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        _isFormatLevel = false;
-        _isHistoryLevel = false;
-        HeaderText.Text = "MockPaste";
-        HeaderText.Cursor = Cursors.Arrow;
-        HistoryButton.Visibility = Visibility.Visible;
-        EmptyHistoryText.Visibility = Visibility.Collapsed;
-
-        var items = _generators.GetAll().Select(g => new MenuItemViewModel
+        if (e.PropertyName == nameof(PopupViewModel.IsBackButton))
         {
-            DisplayName = g.CategoryName,
-            MnemonicKey = g.MnemonicKey,
-            CategoryName = g.CategoryName,
-            HasSubMenu = true
-        }).ToList();
-
-        MenuList.ItemsSource = items;
-        if (items.Count > 0) MenuList.SelectedIndex = 0;
-        FocusSelectedItem();
-    }
-
-    private void ShowFormats(IFakeDataGenerator generator)
-    {
-        _isFormatLevel = true;
-        _isHistoryLevel = false;
-        HeaderText.Text = $"← {generator.CategoryName}";
-        HeaderText.Cursor = Cursors.Hand;
-        HistoryButton.Visibility = Visibility.Collapsed;
-        EmptyHistoryText.Visibility = Visibility.Collapsed;
-
-        var items = generator.SupportedFormats.Select(f => new MenuItemViewModel
-        {
-            DisplayName = f.Name,
-            Description = f.Description,
-            CategoryName = generator.CategoryName,
-            FormatId = f.FormatId,
-            HasSubMenu = false
-        }).ToList();
-
-        MenuList.ItemsSource = items;
-        if (items.Count > 0) MenuList.SelectedIndex = 0;
-        FocusSelectedItem();
-    }
-
-    private void ShowHistory()
-    {
-        _isHistoryLevel = true;
-        _isFormatLevel = false;
-        HeaderText.Text = "← History";
-        HeaderText.Cursor = Cursors.Hand;
-        HistoryButton.Visibility = Visibility.Collapsed;
-
-        var entries = _history.GetAll();
-        if (entries.Count == 0)
-        {
-            MenuList.ItemsSource = null;
-            EmptyHistoryText.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            EmptyHistoryText.Visibility = Visibility.Collapsed;
-            MenuList.ItemsSource = entries.Select(e => new HistoryItemViewModel
-            {
-                Value = e.Value,
-                CategoryName = e.CategoryName,
-                FormatName = e.FormatName
-            }).ToList();
+            HeaderText.Cursor = _vm.IsBackButton ? Cursors.Hand : Cursors.Arrow;
         }
 
-        if (MenuList.Items.Count > 0) MenuList.SelectedIndex = 0;
-        FocusSelectedItem();
+        if (e.PropertyName == nameof(PopupViewModel.Items))
+        {
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded, FocusSelectedItem);
+        }
     }
 
     private void FocusSelectedItem()
     {
-        if (MenuList.SelectedIndex < 0) return;
+        if (MenuList.SelectedIndex < 0)
+        {
+            return;
+        }
+
         MenuList.UpdateLayout();
         if (MenuList.ItemContainerGenerator.ContainerFromIndex(MenuList.SelectedIndex) is ListBoxItem container)
+        {
             container.Focus();
+        }
         else
+        {
             MenuList.Focus();
+        }
     }
 
     private void HeaderText_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-        if (_isFormatLevel || _isHistoryLevel)
-            ShowCategories();
-    }
-
-    private void SelectCurrentItem()
-    {
-        if (MenuList.SelectedItem is HistoryItemViewModel histItem)
+        if (_vm.IsBackButton)
         {
-            _suppressDeactivate = true;
-            HidePopup();
-            HistoryItemSelected?.Invoke(histItem.Value);
-            _suppressDeactivate = false;
-            return;
-        }
-
-        if (MenuList.SelectedItem is not MenuItemViewModel item) return;
-
-        if (!_isFormatLevel)
-        {
-            var gen = _generators.Get(item.CategoryName);
-            if (gen is not null) ShowFormats(gen);
-        }
-        else
-        {
-            _suppressDeactivate = true;
-            HidePopup();
-            FormatSelected?.Invoke(item.CategoryName, item.FormatId);
-            _suppressDeactivate = false;
+            _vm.ShowCategories();
         }
     }
 
@@ -191,54 +120,53 @@ public partial class PopupWindow : Window
         switch (e.Key)
         {
             case Key.Escape:
-                if (_isFormatLevel || _isHistoryLevel)
-                    ShowCategories();
+                if (_vm.IsFormatLevel || _vm.IsHistoryLevel)
+                {
+                    _vm.ShowCategories();
+                }
                 else
+                {
                     HidePopup();
+                }
                 e.Handled = true;
                 break;
 
             case Key.Enter:
-                SelectCurrentItem();
+                _vm.SelectCurrentItem();
                 e.Handled = true;
                 break;
 
             case Key.Right:
-                if (_isHistoryLevel) ShowCategories();
-                else if (!_isFormatLevel) SelectCurrentItem();
+                if (_vm.IsHistoryLevel)
+                {
+                    _vm.ShowCategories();
+                }
+                else if (!_vm.IsFormatLevel)
+                {
+                    _vm.SelectCurrentItem();
+                }
                 e.Handled = true;
                 break;
 
             case Key.Left:
-                if (_isFormatLevel) ShowCategories();
-                else if (!_isHistoryLevel) ShowHistory();
+                if (_vm.IsFormatLevel)
+                {
+                    _vm.ShowCategories();
+                }
+                else if (!_vm.IsHistoryLevel)
+                {
+                    _vm.ShowHistory();
+                }
                 e.Handled = true;
                 break;
 
             default:
-                if (HandleMnemonic(e.Key))
+                if (_vm.HandleMnemonic(e.Key.ToString()))
+                {
                     e.Handled = true;
+                }
                 break;
         }
-    }
-
-    private bool HandleMnemonic(Key key)
-    {
-        var keyChar = key.ToString();
-        if (keyChar.Length != 1) return false;
-
-        if (MenuList.ItemsSource is IEnumerable<MenuItemViewModel> items)
-        {
-            var match = items.FirstOrDefault(i =>
-                i.MnemonicKey.Equals(keyChar, StringComparison.OrdinalIgnoreCase));
-            if (match is not null)
-            {
-                MenuList.SelectedItem = match;
-                SelectCurrentItem();
-                return true;
-            }
-        }
-        return false;
     }
 
     private void MenuList_KeyDown(object sender, KeyEventArgs e)
@@ -248,30 +176,40 @@ public partial class PopupWindow : Window
 
     private void HistoryButton_Click(object sender, RoutedEventArgs e)
     {
-        ShowHistory();
+        _vm.ShowHistory();
     }
 
     private void MenuList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         if (e.OriginalSource is FrameworkElement { DataContext: MenuItemViewModel or HistoryItemViewModel })
-            SelectCurrentItem();
+        {
+            _vm.SelectCurrentItem();
+        }
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.ButtonState != MouseButtonState.Pressed) return;
-        // When HeaderText is a back button, let its MouseLeftButtonUp fire instead.
-        bool isBackButton = (_isFormatLevel || _isHistoryLevel) &&
-                            IsDescendantOf(e.OriginalSource as DependencyObject, HeaderText);
+        if (e.ButtonState != MouseButtonState.Pressed)
+        {
+            return;
+        }
+
+        bool isBackButton =
+            _vm.IsBackButton && IsDescendantOf(e.OriginalSource as DependencyObject, HeaderText);
         if (!isBackButton)
+        {
             DragMove();
+        }
     }
 
     private static bool IsDescendantOf(DependencyObject? element, DependencyObject? ancestor)
     {
         while (element is not null)
         {
-            if (element == ancestor) return true;
+            if (element == ancestor)
+            {
+                return true;
+            }
             element = VisualTreeHelper.GetParent(element);
         }
         return false;
@@ -280,7 +218,9 @@ public partial class PopupWindow : Window
     private void Window_Deactivated(object? sender, EventArgs e)
     {
         if (!_suppressDeactivate)
+        {
             HidePopup();
+        }
     }
 
     protected override void OnClosing(CancelEventArgs e)
