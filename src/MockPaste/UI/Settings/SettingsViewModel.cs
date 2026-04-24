@@ -33,8 +33,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     public Func<AppSettings, bool>? SettingsSaved;
 
-    // Overridable in tests to avoid WPF Application.Current dependency.
-    internal Func<string, string> ResourceResolver { get; set; } =
+    public Func<string, string> ResourceResolver { get; set; } =
         key => System.Windows.Application.Current?.Resources[key] as string ?? key;
 
     public SettingsViewModel(AppSettings settings)
