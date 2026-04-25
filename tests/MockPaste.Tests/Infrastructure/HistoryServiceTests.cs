@@ -94,15 +94,14 @@ public sealed class HistoryServiceTests
     }
 
     [Fact]
-    public void Promote_UpdatesGeneratedAt()
+    public void Promote_PreservesGeneratedAt()
     {
         var svc = new HistoryService(10);
         var original = Entry("a");
         svc.Add(original);
-        var before = DateTime.Now;
         svc.Promote("a");
         var promoted = svc.GetAll()[0];
-        Assert.True(promoted.GeneratedAt >= before);
+        Assert.Equal(original.GeneratedAt, promoted.GeneratedAt);
     }
 
     // ── UpdateMaxSize ─────────────────────────────────────────────────────────

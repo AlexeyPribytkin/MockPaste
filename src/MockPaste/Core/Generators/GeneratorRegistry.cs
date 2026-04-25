@@ -18,6 +18,14 @@ public sealed class GeneratorRegistry
     public IReadOnlyList<IFakeDataGenerator> GetAll() =>
         _generators.Values.OrderBy(g => g.Order).ToList().AsReadOnly();
 
+    /// <summary>
+    /// Discovers and registers all <see cref="IFakeDataGenerator"/> implementations in this assembly
+    /// that have a public parameterless constructor.
+    /// <para>
+    /// Generators that require constructor arguments are silently skipped; add them explicitly via
+    /// <see cref="Register"/> after calling this method if needed.
+    /// </para>
+    /// </summary>
     public static GeneratorRegistry CreateDefault(IAppLogger? logger = null)
     {
         var registry = new GeneratorRegistry();
@@ -30,7 +38,13 @@ public sealed class GeneratorRegistry
             try
             {
                 if (Activator.CreateInstance(type) is IFakeDataGenerator g)
+                {
                     registry.Register(g);
+                }
+                else
+                {
+                    (logger ?? AppLogger.Instance).Warning($"Generator type '{type.FullName}' was instantiated but does not implement IFakeDataGenerator correctly");
+                }
             }
             catch (Exception ex)
             {

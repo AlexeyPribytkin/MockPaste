@@ -36,6 +36,23 @@ public sealed class AppSettings
         && value <= HistorySizeMax;
 
     /// <summary>
+    /// Copies all configurable properties from <paramref name="source"/> into this instance.
+    /// Used to apply saved settings without replacing the shared reference held by other components.
+    /// </summary>
+    public void CopyFrom(AppSettings source)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        Version = source.Version;
+        Hotkey = source.Hotkey;
+        PreserveClipboard = source.PreserveClipboard;
+        PasteDelayMs = source.PasteDelayMs;
+        ClipboardRestoreDelayMs = source.ClipboardRestoreDelayMs;
+        LaunchAtStartup = source.LaunchAtStartup;
+        Theme = source.Theme;
+        HistorySize = source.HistorySize;
+    }
+
+    /// <summary>
     /// Clamps numeric fields to their valid ranges and resets any invalid values to defaults.
     /// Safe to call after deserialisation.
     /// </summary>

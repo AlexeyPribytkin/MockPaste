@@ -12,8 +12,6 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 {
     private enum PopupLevel { Categories, Formats, History }
 
-    private static readonly Dictionary<string, PropertyChangedEventArgs> _argsCache = new();
-
     private readonly GeneratorRegistry _generators;
     private readonly HistoryService _history;
 
@@ -254,12 +252,6 @@ public sealed class PopupViewModel : INotifyPropertyChanged
             return;
         }
 
-        if (!_argsCache.TryGetValue(name, out var args))
-        {
-            args = new PropertyChangedEventArgs(name);
-            _argsCache[name] = args;
-        }
-
-        PropertyChanged?.Invoke(this, args);
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

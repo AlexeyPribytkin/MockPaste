@@ -8,18 +8,19 @@ namespace MockPaste.UI.Settings;
 public partial class SettingsWindow : Window
 {
     private readonly SettingsViewModel _vm;
+    private readonly Action? _unregisterHotkey;
+    private readonly Action? _reregisterHotkey;
 
-    public Func<AppSettings, bool>? SettingsSaved;
-    public Action? UnregisterHotkey;
-    public Action? ReregisterHotkey;
-
-    public SettingsWindow(AppSettings settings)
+    public SettingsWindow(AppSettings settings, Func<AppSettings, bool> settingsSaved, Action? unregisterHotkey, Action? reregisterHotkey)
     {
+        _unregisterHotkey = unregisterHotkey;
+        _reregisterHotkey = reregisterHotkey;
+
         _vm = new SettingsViewModel(settings);
         InitializeComponent();
         DataContext = _vm;
 
-        _vm.SettingsSaved = s => SettingsSaved?.Invoke(s) ?? true;
+        _vm.SettingsSaved = settingsSaved;
         _vm.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(SettingsViewModel.StatusMessage))
@@ -32,13 +33,13 @@ public partial class SettingsWindow : Window
                 // Registers or unregisters the hotkey handler.
                 if (_vm.IsCapturing)
                 {
-                    UnregisterHotkey?.Invoke();
+                    _unregisterHotkey?.Invoke();
                     PreviewKeyDown += CaptureKeyDown;
                 }
                 else
                 {
                     PreviewKeyDown -= CaptureKeyDown;
-                    ReregisterHotkey?.Invoke();
+                    _reregisterHotkey?.Invoke();
                 }
             }
         };

@@ -45,7 +45,7 @@ public sealed class HistoryService
             if (existing is null) return;
 
             _entries.Remove(existing);
-            _entries.AddFirst(existing with { GeneratedAt = DateTime.Now });
+            _entries.AddFirst(existing);
         }
     }
 

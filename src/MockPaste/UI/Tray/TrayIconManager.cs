@@ -7,11 +7,12 @@ public sealed class TrayIconManager : IDisposable
 {
     private readonly TaskbarIcon _taskbarIcon;
     private readonly TrayViewModel _viewModel;
+    private bool _isEnabled = true;
 
     public event Action? OnSettingsClicked;
     public event Action? OnExitClicked;
     public event Action? OnTrayLeftClicked;
-    public bool IsEnabled => _viewModel.IsEnabled;
+    public bool IsEnabled => _isEnabled;
     public event Action<bool>? EnabledChanged;
 
     public TrayIconManager()
@@ -23,6 +24,7 @@ public sealed class TrayIconManager : IDisposable
         _viewModel.ExitRequested += () => OnExitClicked?.Invoke();
         _viewModel.EnabledChanged += enabled =>
         {
+            _isEnabled = enabled;
             _taskbarIcon.ToolTipText = _viewModel.ToolTipText;
             AppLogger.Information($"MockPaste {(enabled ? "enabled" : "disabled")}");
             EnabledChanged?.Invoke(enabled);
