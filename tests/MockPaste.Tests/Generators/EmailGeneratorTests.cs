@@ -56,7 +56,7 @@ public sealed class EmailGeneratorTests
     {
         var result = _sut.Generate(new FakeDataOptions { FormatId = "email-numbered", Seed = 42 });
         var local = result.Split('@')[0];
-        Assert.True(local.Any(char.IsDigit));
+        Assert.Contains(local, char.IsDigit);
     }
 
     [Fact]

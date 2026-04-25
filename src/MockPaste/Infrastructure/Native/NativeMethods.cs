@@ -111,6 +111,31 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool DestroyMenu(IntPtr hMenu);
 
+    // Foreground window tracking
+    public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+    public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+
+    public delegate void WinEventProc(
+        IntPtr hWinEventHook, uint eventType,
+        IntPtr hwnd, int idObject, int idChild,
+        uint dwEventThread, uint dwmsEventTime);
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    public static partial IntPtr SetWinEventHook(
+        uint eventMin, uint eventMax,
+        IntPtr hmodWinEventProc, WinEventProc pfnWinEventProc,
+        uint idProcess, uint idThread, uint dwFlags);
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool UnhookWinEvent(IntPtr hWinEventHook);
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    public static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "GetClassNameW", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    public static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+
     public static INPUT KeyDown(ushort vk) => new()
     {
         type = INPUT_KEYBOARD,

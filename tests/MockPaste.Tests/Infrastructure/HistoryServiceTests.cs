@@ -67,7 +67,7 @@ public sealed class HistoryServiceTests
         var snapshot = svc.GetAll();
         svc.Add(Entry("b"));
         // snapshot taken before the second Add should still have only 1 item
-        Assert.Equal(1, snapshot.Count);
+        Assert.Single(snapshot);
     }
 
     // ── Promote ──────────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ public sealed class HistoryServiceTests
         svc.Add(Entry("a"));
         var ex = Record.Exception(() => svc.Promote("does-not-exist"));
         Assert.Null(ex);
-        Assert.Equal(1, svc.GetAll().Count);
+        Assert.Single(svc.GetAll());
     }
 
     [Fact]

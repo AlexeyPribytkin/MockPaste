@@ -10,6 +10,7 @@ public sealed class TrayIconManager : IDisposable
 
     public event Action? OnSettingsClicked;
     public event Action? OnExitClicked;
+    public event Action? OnTrayLeftClicked;
     public bool IsEnabled => _viewModel.IsEnabled;
     public event Action<bool>? EnabledChanged;
 
@@ -27,7 +28,9 @@ public sealed class TrayIconManager : IDisposable
             EnabledChanged?.Invoke(enabled);
         };
 
-        (_taskbarIcon.ContextMenu ?? throw new InvalidOperationException("TrayIcon ContextMenu is not set.")).DataContext = _viewModel;
+        (_taskbarIcon.ContextMenu ?? throw new InvalidOperationException("TrayIcon ContextMenu is not set."))
+            .DataContext = _viewModel;
+        _taskbarIcon.TrayLeftMouseDown += (_, _) => OnTrayLeftClicked?.Invoke();
         _taskbarIcon.ForceCreate(enablesEfficiencyMode: false);
     }
 

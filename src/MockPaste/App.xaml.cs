@@ -23,6 +23,7 @@ public partial class App : System.Windows.Application
     private SettingsService? _settingsService;
     private AppSettings? _settings;
     private HistoryService? _history;
+    private ForegroundWindowTracker? _foregroundTracker;
     private IntPtr _lastForegroundWindow;
     private SettingsWindow? _settingsWindow;
 
@@ -75,6 +76,7 @@ public partial class App : System.Windows.Application
             InitializeTray();
             InitializeHotkey();
             InitializePopup(generators);
+            _foregroundTracker = new ForegroundWindowTracker();
 
             // Subscribe only after successful init so we don't leak if startup fails.
             SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
@@ -103,6 +105,7 @@ public partial class App : System.Windows.Application
         _trayIcon = new TrayIconManager();
         _trayIcon.OnSettingsClicked += ShowSettings;
         _trayIcon.OnExitClicked += () => Shutdown();
+        _trayIcon.OnTrayLeftClicked += OnHotkeyPressed;
         _trayIcon.EnabledChanged += _ => ApplyHotkey(_settings!);
     }
 
@@ -132,7 +135,7 @@ public partial class App : System.Windows.Application
             return;
         }
 
-        _lastForegroundWindow = NativeMethods.GetForegroundWindow();
+        _lastForegroundWindow = _foregroundTracker?.LastForegroundWindow ?? NativeMethods.GetForegroundWindow();
         AppLogger.Debug($"Showing popup, target window: {_lastForegroundWindow}");
         Dispatcher.Invoke(() => _popup?.ShowAtCursor());
     }
@@ -240,6 +243,7 @@ public partial class App : System.Windows.Application
         SystemEvents.UserPreferenceChanged -= OnSystemThemeChanged;
         _hotkeyManager?.Dispose();
         _trayIcon?.Dispose();
+        _foregroundTracker?.Dispose();
         AppLogger.CloseAndFlush();
         _instanceMutex?.ReleaseMutex();
         _instanceMutex?.Dispose();
