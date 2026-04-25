@@ -57,23 +57,21 @@ public partial class PopupWindow : Window
         const double shadowPadding = 14;
         var dpi = VisualTreeHelper.GetDpi(this);
         Infrastructure.Native.NativeMethods.GetCursorPos(out var pt);
-        double x = pt.X / dpi.DpiScaleX - shadowPadding;
-        double y = pt.Y / dpi.DpiScaleY - shadowPadding;
-
-        var screen = SystemParameters.WorkArea;
-        UpdateLayout();
-        if (x + ActualWidth > screen.Right) { x = screen.Right - ActualWidth; }
-        if (y + ActualHeight > screen.Bottom) { y = screen.Bottom - ActualHeight; }
-        if (x < screen.Left) { x = screen.Left; }
-        if (y < screen.Top) { y = screen.Top; }
-
-        Left = x;
-        Top = y;
+        var desiredX = pt.X / dpi.DpiScaleX - shadowPadding;
+        var desiredY = pt.Y / dpi.DpiScaleY - shadowPadding;
 
         try
         {
             _suppressDeactivate = true;
+            Left = desiredX;
+            Top = desiredY;
             Show();
+            UpdateLayout();
+
+            var clampedPosition = GetClampedPosition(desiredX, desiredY);
+            Left = clampedPosition.X;
+            Top = clampedPosition.Y;
+
             Activate();
             FocusSelectedItem();
         }
@@ -81,6 +79,40 @@ public partial class PopupWindow : Window
         {
             _suppressDeactivate = false;
         }
+    }
+
+    private Point GetClampedPosition(double desiredX, double desiredY)
+    {
+        if (ActualWidth <= 0 || ActualHeight <= 0)
+        {
+            return new Point(desiredX, desiredY);
+        }
+
+        var clampedX = desiredX;
+        var clampedY = desiredY;
+        var screen = SystemParameters.WorkArea;
+
+        if (clampedX + ActualWidth > screen.Right)
+        {
+            clampedX = screen.Right - ActualWidth;
+        }
+
+        if (clampedY + ActualHeight > screen.Bottom)
+        {
+            clampedY = screen.Bottom - ActualHeight;
+        }
+
+        if (clampedX < screen.Left)
+        {
+            clampedX = screen.Left;
+        }
+
+        if (clampedY < screen.Top)
+        {
+            clampedY = screen.Top;
+        }
+
+        return new Point(clampedX, clampedY);
     }
 
     public void HidePopup()
