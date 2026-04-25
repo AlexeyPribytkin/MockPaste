@@ -1,9 +1,20 @@
 using MockPaste.Core.Generators;
+using Xunit;
 
 namespace MockPaste.Tests.Generators;
 
 public sealed class GeneratorRegistryTests
 {
+    private sealed class InvalidGenerator : IFakeDataGenerator
+    {
+        public string CategoryName => string.Empty;
+        public string MnemonicKey => "I";
+        public int Order => 1;
+        public IReadOnlyList<MockPaste.Core.Models.DataFormat> SupportedFormats => [];
+
+        public string Generate(MockPaste.Core.Models.FakeDataOptions options) => string.Empty;
+    }
+
     [Fact]
     public void CreateDefault_RegistersAllBuiltInGenerators()
     {
@@ -64,5 +75,22 @@ public sealed class GeneratorRegistryTests
         var registry = GeneratorRegistry.CreateDefault();
         var list = registry.GetAll();
         Assert.IsAssignableFrom<IReadOnlyList<MockPaste.Core.Generators.IFakeDataGenerator>>(list);
+    }
+
+    [Fact]
+    public void Register_NullGenerator_ThrowsArgumentNullException()
+    {
+        var registry = new GeneratorRegistry();
+
+        Assert.Throws<ArgumentNullException>(() => registry.Register(null!));
+    }
+
+    [Fact]
+    public void Register_EmptyCategory_ThrowsArgumentException()
+    {
+        var registry = new GeneratorRegistry();
+        var invalid = new InvalidGenerator();
+
+        Assert.Throws<ArgumentException>(() => registry.Register(invalid));
     }
 }

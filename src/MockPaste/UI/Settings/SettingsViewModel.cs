@@ -60,41 +60,19 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool IsCapturing
     {
         get => _isCapturing;
-        private set
-        {
-            if (_isCapturing != value)
-            {
-                _isCapturing = value;
-                Notify();
-            }
-        }
+        private set => SetField(ref _isCapturing, value);
     }
 
     public string HotkeyDisplayText
     {
         get => _hotkeyDisplayText;
-        private set
-        {
-            if (_hotkeyDisplayText != value)
-            {
-                _hotkeyDisplayText = value;
-                Notify();
-            }
-        }
+        private set => SetField(ref _hotkeyDisplayText, value);
     }
 
     public bool PreserveClipboard
     {
         get => _preserveClipboard;
-        set
-        {
-            if (_preserveClipboard != value)
-            {
-                _preserveClipboard = value;
-                Notify();
-                NotifyDirty();
-            }
-        }
+        set => SetDirtyField(ref _preserveClipboard, value);
     }
 
     public string PasteDelayText
@@ -102,12 +80,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         get => _pasteDelayText;
         set
         {
-            if (_pasteDelayText != value)
+            if (SetDirtyField(ref _pasteDelayText, value))
             {
-                _pasteDelayText = value;
-                Notify();
                 Notify(nameof(IsPasteDelayValid));
-                NotifyDirty();
             }
         }
     }
@@ -115,15 +90,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool LaunchAtStartup
     {
         get => _launchAtStartup;
-        set
-        {
-            if (_launchAtStartup != value)
-            {
-                _launchAtStartup = value;
-                Notify();
-                NotifyDirty();
-            }
-        }
+        set => SetDirtyField(ref _launchAtStartup, value);
     }
 
     public string HistorySizeText
@@ -131,12 +98,9 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         get => _historySizeText;
         set
         {
-            if (_historySizeText != value)
+            if (SetDirtyField(ref _historySizeText, value))
             {
-                _historySizeText = value;
-                Notify();
                 Notify(nameof(IsHistorySizeValid));
-                NotifyDirty();
             }
         }
     }
@@ -144,56 +108,25 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool IsThemeDark
     {
         get => _isThemeDark;
-        set
-        {
-            if (_isThemeDark != value)
-            {
-                _isThemeDark = value;
-                Notify();
-                NotifyDirty();
-            }
-        }
+        set => SetDirtyField(ref _isThemeDark, value);
     }
 
     public bool IsThemeLight
     {
         get => _isThemeLight;
-        set
-        {
-            if (_isThemeLight != value)
-            {
-                _isThemeLight = value;
-                Notify();
-                NotifyDirty();
-            }
-        }
+        set => SetDirtyField(ref _isThemeLight, value);
     }
 
     public bool IsThemeSystem
     {
         get => _isThemeSystem;
-        set
-        {
-            if (_isThemeSystem != value)
-            {
-                _isThemeSystem = value;
-                Notify();
-                NotifyDirty();
-            }
-        }
+        set => SetDirtyField(ref _isThemeSystem, value);
     }
 
     public string StatusMessage
     {
         get => _statusMessage;
-        private set
-        {
-            if (_statusMessage != value)
-            {
-                _statusMessage = value;
-                Notify();
-            }
-        }
+        private set => SetField(ref _statusMessage, value);
     }
 
     public bool IsDirty => HasChanges();
@@ -338,6 +271,31 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     }
 
     private string Res(string key) => ResourceResolver(key);
+
+    private bool SetDirtyField<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        Notify(name);
+        NotifyDirty();
+        return true;
+    }
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        Notify(name);
+        return true;
+    }
 
     private void Notify([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

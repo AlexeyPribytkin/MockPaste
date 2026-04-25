@@ -211,22 +211,13 @@ public sealed class PopupViewModelTests
     }
 
     [Fact]
-    public void ShowHistory_WhenEmpty_IsEmptyHistoryVisible_IsTrue()
+    public void ShowHistory_WhenEmpty_ShowsEmptyHistoryState()
     {
         var vm = CreateVm(history: new HistoryService());
 
         vm.ShowHistory();
 
         Assert.True(vm.IsEmptyHistoryVisible);
-    }
-
-    [Fact]
-    public void ShowHistory_WhenEmpty_Items_IsEmpty()
-    {
-        var vm = CreateVm(history: new HistoryService());
-
-        vm.ShowHistory();
-
         Assert.Empty(vm.Items);
     }
 
@@ -299,7 +290,7 @@ public sealed class PopupViewModelTests
     }
 
     [Fact]
-    public void SelectCurrentItem_AtFormatLevel_RaisesCloseRequested()
+    public void SelectCurrentItem_AtFormatLevel_ClosesAndReturnsTrue()
     {
         var vm = CreateVm();
         vm.ShowCategories();
@@ -307,20 +298,9 @@ public sealed class PopupViewModelTests
         bool closeCalled = false;
         vm.CloseRequested += () => closeCalled = true;
 
-        vm.SelectCurrentItem();
-
-        Assert.True(closeCalled);
-    }
-
-    [Fact]
-    public void SelectCurrentItem_AtFormatLevel_ReturnsTrue()
-    {
-        var vm = CreateVm();
-        vm.ShowCategories();
-        vm.SelectCurrentItem();
-
         bool result = vm.SelectCurrentItem();
 
+        Assert.True(closeCalled);
         Assert.True(result);
     }
 

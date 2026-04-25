@@ -9,6 +9,12 @@ public sealed class GeneratorRegistry
 
     public void Register(IFakeDataGenerator generator)
     {
+        ArgumentNullException.ThrowIfNull(generator);
+        if (string.IsNullOrWhiteSpace(generator.CategoryName))
+        {
+            throw new ArgumentException("Generator category name cannot be empty.", nameof(generator));
+        }
+
         _generators[generator.CategoryName] = generator;
     }
 
@@ -29,12 +35,24 @@ public sealed class GeneratorRegistry
     public static GeneratorRegistry CreateDefault(IAppLogger? logger = null)
     {
         var registry = new GeneratorRegistry();
+        var log = logger ?? AppLogger.Instance;
         var generatorType = typeof(IFakeDataGenerator);
+        var generatorNamespace = typeof(GeneratorRegistry).Namespace;
 
         foreach (var type in Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => t.IsClass && !t.IsAbstract && generatorType.IsAssignableFrom(t))
+            .Where(t =>
+                t.IsClass
+                && !t.IsAbstract
+                && t.Namespace == generatorNamespace
+                && generatorType.IsAssignableFrom(t))
             .OrderBy(t => t.Name))
         {
+            if (type.GetConstructor(Type.EmptyTypes) is null)
+            {
+                log.Warning($"Skipping generator '{type.FullName}' because it does not have a public parameterless constructor");
+                continue;
+            }
+
             try
             {
                 if (Activator.CreateInstance(type) is IFakeDataGenerator g)
@@ -43,16 +61,24 @@ public sealed class GeneratorRegistry
                 }
                 else
                 {
-                    (logger ?? AppLogger.Instance).Warning($"Generator type '{type.FullName}' was instantiated but does not implement IFakeDataGenerator correctly");
+                    log.Warning($"Generator type '{type.FullName}' was instantiated but does not implement IFakeDataGenerator correctly");
                 }
             }
-            catch (Exception ex)
+            catch (MemberAccessException ex)
             {
-                var log = logger ?? AppLogger.Instance;
-                log.Error($"Failed to instantiate generator '{type.FullName}'", ex);
+                LogInstantiationError(log, type, ex);
+            }
+            catch (TargetInvocationException ex)
+            {
+                LogInstantiationError(log, type, ex);
             }
         }
 
         return registry;
+    }
+
+    private static void LogInstantiationError(IAppLogger log, Type type, Exception exception)
+    {
+        log.Error($"Failed to instantiate generator '{type.FullName}'", exception);
     }
 }

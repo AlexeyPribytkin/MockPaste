@@ -65,11 +65,6 @@ public sealed class SettingsService
             AppLogger.Warning("Failed to read settings file, reverting to defaults", ex);
             return CreateDefault();
         }
-        catch (Exception ex)
-        {
-            AppLogger.Warning("Failed to load settings, reverting to defaults", ex);
-            return CreateDefault();
-        }
     }
 
     public bool Save(AppSettings settings)
@@ -103,11 +98,6 @@ public sealed class SettingsService
             AppLogger.Error("Failed to save settings (IO error)", ex);
             return false;
         }
-        catch (Exception ex)
-        {
-            AppLogger.Error("Failed to save settings", ex);
-            return false;
-        }
     }
 
     private static AppSettings CreateDefault() => new() { Version = CurrentVersion };
@@ -137,7 +127,12 @@ public sealed class SettingsService
             settings.Sanitize();
             return settings;
         }
-        catch (Exception ex)
+        catch (JsonException ex)
+        {
+            AppLogger.Warning("Failed to restore settings from backup", ex);
+            return null;
+        }
+        catch (IOException ex)
         {
             AppLogger.Warning("Failed to restore settings from backup", ex);
             return null;
@@ -150,32 +145,13 @@ public sealed class SettingsService
     /// </summary>
     private static AppSettings Migrate(AppSettings settings)
     {
-        // Loop ensures no migration step is skipped when jumping multiple versions.
-        while (settings.Version < CurrentVersion)
+        if (settings.Version >= CurrentVersion)
         {
-            switch (settings.Version)
-            {
-                case 0:
-                    // Version 0 → 1: Version field was not present in very early builds; treat it as 0.
-                    // No structural changes required for v1 yet — just stamp the current version so
-                    // future migrations can detect the gap correctly.
-                    AppLogger.Information($"Migrating settings from version {settings.Version} to 1");
-                    settings.Version = 1;
-                    break;
-
-                // Future migrations go here:
-                // case 1:
-                //     ...
-                //     settings.Version = 2;
-                //     break;
-
-                default:
-                    // Unknown version; stop to avoid an infinite loop.
-                    AppLogger.Warning($"Unknown settings version {settings.Version}, skipping further migration");
-                    settings.Version = CurrentVersion;
-                    break;
-            }
+            return settings;
         }
+
+        AppLogger.Information($"Migrating settings from version {settings.Version} to {CurrentVersion}");
+        settings.Version = CurrentVersion;
 
         return settings;
     }

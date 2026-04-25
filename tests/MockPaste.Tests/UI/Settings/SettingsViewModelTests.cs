@@ -45,32 +45,28 @@ public sealed class SettingsViewModelTests
 
     // ── IsDirty ───────────────────────────────────────────────────────────
 
-    [Fact]
-    public void WhenPreserveClipboardChanges_IsDirty_IsTrue()
+    [Theory]
+    [InlineData("PreserveClipboard")]
+    [InlineData("PasteDelay")]
+    [InlineData("HistorySize")]
+    public void WhenEditableSettingChanges_IsDirty_IsTrue(string settingName)
     {
         var vm = CreateVm();
 
-        vm.PreserveClipboard = !vm.PreserveClipboard;
-
-        Assert.True(vm.IsDirty);
-    }
-
-    [Fact]
-    public void WhenPasteDelayTextChanges_IsDirty_IsTrue()
-    {
-        var vm = CreateVm();
-
-        vm.PasteDelayText = "99";
-
-        Assert.True(vm.IsDirty);
-    }
-
-    [Fact]
-    public void WhenHistorySizeTextChanges_IsDirty_IsTrue()
-    {
-        var vm = CreateVm();
-
-        vm.HistorySizeText = "50";
+        switch (settingName)
+        {
+            case "PreserveClipboard":
+                vm.PreserveClipboard = !vm.PreserveClipboard;
+                break;
+            case "PasteDelay":
+                vm.PasteDelayText = "99";
+                break;
+            case "HistorySize":
+                vm.HistorySizeText = "50";
+                break;
+            default:
+                throw new ArgumentException("Unknown setting name.", nameof(settingName));
+        }
 
         Assert.True(vm.IsDirty);
     }
@@ -269,25 +265,14 @@ public sealed class SettingsViewModelTests
 
     // ── Status ────────────────────────────────────────────────────────────
 
-    [Fact]
-    public void WhenSaveSucceeds_StatusMessage_IsNotEmpty()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WhenSaveCommandExecuted_StatusMessage_IsNotEmpty(bool saveResult)
     {
         var settings = DefaultSettings();
         var vm = CreateVm(settings);
-        vm.SettingsSaved = _ => true;
-        vm.PreserveClipboard = !vm.PreserveClipboard;
-
-        vm.SaveCommand.Execute(null);
-
-        Assert.NotEmpty(vm.StatusMessage);
-    }
-
-    [Fact]
-    public void WhenSaveFails_StatusMessage_IsNotEmpty()
-    {
-        var settings = DefaultSettings();
-        var vm = CreateVm(settings);
-        vm.SettingsSaved = _ => false;
+        vm.SettingsSaved = _ => saveResult;
         vm.PreserveClipboard = !vm.PreserveClipboard;
 
         vm.SaveCommand.Execute(null);

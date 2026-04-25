@@ -58,13 +58,13 @@ internal sealed class AppBootstrapper : IDisposable
                 _history,
                 AppLogger.Instance);
 
-            ThemeService.Apply(_settings.Theme);
-            StartupService.Apply(_settings.LaunchAtStartup);
-
             InitializeTray();
             InitializeHotkey();
             InitializePopup(generators);
             _foregroundTracker = new ForegroundWindowTracker();
+
+            ThemeService.Apply(_settings.Theme);
+            StartupService.Apply(_settings.LaunchAtStartup);
 
             // Subscribe only after successful init so we don't leak if startup fails.
             SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
@@ -73,6 +73,15 @@ internal sealed class AppBootstrapper : IDisposable
         }
         catch (Exception ex)
         {
+            try
+            {
+                CleanupFailedStartup();
+            }
+            catch (Exception cleanupEx)
+            {
+                AppLogger.Warning("Cleanup after failed startup encountered an error", cleanupEx);
+            }
+
             AppLogger.Fatal("Failed to start MockPaste", ex);
             MessageBox.Show($"Failed to start MockPaste:\n{ex.Message}", "MockPaste Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
@@ -91,6 +100,28 @@ internal sealed class AppBootstrapper : IDisposable
         _hotkeyManager?.Dispose();
         _trayIcon?.Dispose();
         _foregroundTracker?.Dispose();
+    }
+
+    private void CleanupFailedStartup()
+    {
+        SystemEvents.UserPreferenceChanged -= OnSystemThemeChanged;
+
+        if (_popup is not null)
+        {
+            _popup.FormatSelected -= OnFormatSelected;
+            _popup.HistoryItemSelected -= OnHistoryItemSelected;
+            _popup.HidePopup();
+            _popup = null;
+        }
+
+        _hotkeyManager?.Dispose();
+        _hotkeyManager = null;
+
+        _trayIcon?.Dispose();
+        _trayIcon = null;
+
+        _foregroundTracker?.Dispose();
+        _foregroundTracker = null;
     }
 
     private static void InitializeLogging()
@@ -141,44 +172,18 @@ internal sealed class AppBootstrapper : IDisposable
         System.Windows.Application.Current.Dispatcher.Invoke(() => _popup?.ShowAtCursor());
     }
 
-    private async void OnFormatSelected(string categoryName, string formatId)
+    private void OnFormatSelected(string categoryName, string formatId)
     {
         // Snapshot the target window before any await so it is not overwritten by a subsequent hotkey press.
         var targetWindow = _lastForegroundWindow;
-        await ExecuteFormatAsync(categoryName, formatId, targetWindow);
+        _ = _orchestrator?.ExecuteAsync(categoryName, formatId, targetWindow) ?? Task.CompletedTask;
     }
 
-    private async Task ExecuteFormatAsync(string categoryName, string formatId, IntPtr targetWindow)
-    {
-        AppLogger.Information($"Format selected: {categoryName}/{formatId}");
-        try
-        {
-            await (_orchestrator?.ExecuteAsync(categoryName, formatId, targetWindow) ?? Task.CompletedTask);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.Error("Paste operation failed", ex);
-        }
-    }
-
-    private async void OnHistoryItemSelected(string value)
+    private void OnHistoryItemSelected(string value)
     {
         // Snapshot the target window before any await so it is not overwritten by a subsequent hotkey press.
         var targetWindow = _lastForegroundWindow;
-        await ExecuteHistoryPasteAsync(value, targetWindow);
-    }
-
-    private async Task ExecuteHistoryPasteAsync(string value, IntPtr targetWindow)
-    {
-        AppLogger.Information("History item selected for paste");
-        try
-        {
-            await (_orchestrator?.ExecuteDirectAsync(value, targetWindow) ?? Task.CompletedTask);
-        }
-        catch (Exception ex)
-        {
-            AppLogger.Error("History paste operation failed", ex);
-        }
+        _ = _orchestrator?.ExecuteDirectAsync(value, targetWindow) ?? Task.CompletedTask;
     }
 
     private void ShowSettings()
