@@ -11,6 +11,7 @@
     <sys:Double x:Key="FontSizeBody">12</sys:Double>
     <sys:Double x:Key="FontSizeBase">13</sys:Double>
     <sys:Double x:Key="FontSizeSubMenuArrow">16</sys:Double>
+    <sys:Double x:Key="FontSizeMenu">14</sys:Double>
     <sys:Double x:Key="FontSizeLarge">20</sys:Double>
 
 </ResourceDictionary>

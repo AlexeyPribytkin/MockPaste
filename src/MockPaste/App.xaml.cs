@@ -1,6 +1,5 @@
 using System.IO;
 using System.Windows;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using MockPaste.Application;
 using MockPaste.Core.Generators;
@@ -17,18 +16,15 @@ public partial class App : System.Windows.Application
 {
     private static Mutex? _instanceMutex;
 
-    private IServiceProvider? _services;
     private HotkeyManager? _hotkeyManager;
     private TrayIconManager? _trayIcon;
     private PopupWindow? _popup;
     private PasteOrchestrator? _orchestrator;
     private SettingsService? _settingsService;
+    private AppSettings? _settings;
+    private HistoryService? _history;
     private IntPtr _lastForegroundWindow;
     private SettingsWindow? _settingsWindow;
-
-    // Resolved from DI — kept as properties for convenience in event handlers.
-    private AppSettings Settings => _services!.GetRequiredService<AppSettings>();
-    private HistoryService History => _services!.GetRequiredService<HistoryService>();
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -57,20 +53,28 @@ public partial class App : System.Windows.Application
 
         try
         {
-            // Load settings first so they can be registered as a singleton.
             _settingsService = new SettingsService();
-            var settings = _settingsService.Load();
+            _settings = _settingsService.Load();
+            _history = new HistoryService(_settings.HistorySize);
 
-            _services = BuildServices(settings);
+            var generators = GeneratorRegistry.CreateDefault(AppLogger.Instance);
+            var clipboard = new ClipboardService();
+            var inputSimulation = new InputSimulationService();
 
-            ThemeService.Apply(settings.Theme);
-            StartupService.Apply(settings.LaunchAtStartup);
+            _orchestrator = new PasteOrchestrator(
+                generators,
+                clipboard,
+                inputSimulation,
+                _settings,
+                _history,
+                AppLogger.Instance);
 
-            _orchestrator = _services.GetRequiredService<PasteOrchestrator>();
+            ThemeService.Apply(_settings.Theme);
+            StartupService.Apply(_settings.LaunchAtStartup);
 
             InitializeTray();
             InitializeHotkey();
-            InitializePopup();
+            InitializePopup(generators);
 
             // Subscribe only after successful init so we don't leak if startup fails.
             SystemEvents.UserPreferenceChanged += OnSystemThemeChanged;
@@ -86,26 +90,6 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private static ServiceProvider BuildServices(AppSettings settings)
-    {
-        var services = new ServiceCollection();
-
-        // Infrastructure
-        services.AddSingleton<IAppLogger>(AppLogger.Instance);
-        services.AddSingleton<ClipboardService>();
-        services.AddSingleton<InputSimulationService>();
-
-        // Core
-        services.AddSingleton(settings);
-        services.AddSingleton(sp => GeneratorRegistry.CreateDefault(sp.GetRequiredService<IAppLogger>()));
-        services.AddSingleton(sp => new HistoryService(sp.GetRequiredService<AppSettings>().HistorySize));
-
-        // Application
-        services.AddSingleton<PasteOrchestrator>();
-
-        return services.BuildServiceProvider();
-    }
-
     private static void InitializeLogging()
     {
         var logDir = Path.Combine(
@@ -119,7 +103,7 @@ public partial class App : System.Windows.Application
         _trayIcon = new TrayIconManager();
         _trayIcon.OnSettingsClicked += ShowSettings;
         _trayIcon.OnExitClicked += () => Shutdown();
-        _trayIcon.EnabledChanged += enabled => ApplyHotkey(Settings);
+        _trayIcon.EnabledChanged += _ => ApplyHotkey(_settings!);
     }
 
     private void InitializeHotkey()
@@ -128,17 +112,15 @@ public partial class App : System.Windows.Application
         _hotkeyManager.Initialize();
         _hotkeyManager.HotkeyPressed += OnHotkeyPressed;
 
-        if (!_hotkeyManager.Register(Settings.Hotkey))
+        if (!_hotkeyManager.Register(_settings!.Hotkey))
         {
             AppLogger.Warning("Default hotkey could not be registered");
         }
     }
 
-    private void InitializePopup()
+    private void InitializePopup(GeneratorRegistry generators)
     {
-        _popup = new PopupWindow(
-            _services!.GetRequiredService<GeneratorRegistry>(),
-            _services!.GetRequiredService<HistoryService>());
+        _popup = new PopupWindow(generators, _history!);
         _popup.FormatSelected += OnFormatSelected;
         _popup.HistoryItemSelected += OnHistoryItemSelected;
     }
@@ -191,14 +173,14 @@ public partial class App : System.Windows.Application
                 return;
             }
 
-            _settingsWindow = new SettingsWindow(Settings)
+            _settingsWindow = new SettingsWindow(_settings!)
             {
                 SettingsSaved = OnSettingsSaved,
                 UnregisterHotkey = () => _hotkeyManager?.Unregister(),
                 ReregisterHotkey = () =>
                 {
                     if (_trayIcon is { IsEnabled: true })
-                        _hotkeyManager?.Register(Settings.Hotkey);
+                        _hotkeyManager?.Register(_settings!.Hotkey);
                 }
             };
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
@@ -208,23 +190,21 @@ public partial class App : System.Windows.Application
 
     private bool OnSettingsSaved(AppSettings updated)
     {
-        // Copy values into the registered singleton so all DI consumers see the change.
-        var current = Settings;
-        current.Hotkey = updated.Hotkey;
-        current.PreserveClipboard = updated.PreserveClipboard;
-        current.PasteDelayMs = updated.PasteDelayMs;
-        current.LaunchAtStartup = updated.LaunchAtStartup;
-        current.Theme = updated.Theme;
-        current.HistorySize = updated.HistorySize;
-        current.Version = updated.Version;
+        _settings!.Hotkey = updated.Hotkey;
+        _settings.PreserveClipboard = updated.PreserveClipboard;
+        _settings.PasteDelayMs = updated.PasteDelayMs;
+        _settings.LaunchAtStartup = updated.LaunchAtStartup;
+        _settings.Theme = updated.Theme;
+        _settings.HistorySize = updated.HistorySize;
+        _settings.Version = updated.Version;
 
-        var saved = _settingsService?.Save(current) ?? false;
-        History.UpdateMaxSize(current.HistorySize);
+        var saved = _settingsService?.Save(_settings) ?? false;
+        _history!.UpdateMaxSize(_settings.HistorySize);
 
-        ApplyHotkey(current);
+        ApplyHotkey(_settings);
 
-        ThemeService.Apply(current.Theme);
-        StartupService.Apply(current.LaunchAtStartup);
+        ThemeService.Apply(_settings.Theme);
+        StartupService.Apply(_settings.LaunchAtStartup);
         AppLogger.Information("Settings updated");
         return saved;
     }
@@ -260,11 +240,9 @@ public partial class App : System.Windows.Application
         SystemEvents.UserPreferenceChanged -= OnSystemThemeChanged;
         _hotkeyManager?.Dispose();
         _trayIcon?.Dispose();
-        (_services as IDisposable)?.Dispose();
         AppLogger.CloseAndFlush();
         _instanceMutex?.ReleaseMutex();
         _instanceMutex?.Dispose();
         base.OnExit(e);
     }
 }
-

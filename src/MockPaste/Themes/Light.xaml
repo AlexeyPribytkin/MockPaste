@@ -18,6 +18,9 @@
     <!-- Secondary button hover -->
     <SolidColorBrush x:Key="BrushSecondaryButtonHover" Color="#FFE0DCF5"/>
 
+    <!-- Menu item hover (neutral, no purple tint) -->
+    <SolidColorBrush x:Key="BrushMenuItemHover"       Color="#FFE8E6F0"/>
+
     <!-- Scrollbar -->
     <SolidColorBrush x:Key="BrushScrollThumb"         Color="#FFBBB8D0"/>
     <SolidColorBrush x:Key="BrushScrollThumbHover"    Color="#FF9896B8"/>

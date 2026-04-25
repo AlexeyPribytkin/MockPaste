@@ -12,7 +12,7 @@ public sealed class AppLogger : IAppLogger
 {
     // ── Singleton instance ────────────────────────────────────────────────────
     private static AppLogger _instance = new();
-    private static readonly object _initLock = new();
+    private static readonly Lock _initLock = new();
 
     /// <summary>Current logger instance used by the static helper methods.</summary>
     public static AppLogger Instance => _instance;
