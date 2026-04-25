@@ -167,7 +167,11 @@ internal sealed class AppBootstrapper : IDisposable
             return;
         }
 
-        _lastForegroundWindow = _foregroundTracker?.LastForegroundWindow ?? NativeMethods.GetForegroundWindow();
+        var trackedWindow = _foregroundTracker?.LastForegroundWindow ?? IntPtr.Zero;
+        _lastForegroundWindow = trackedWindow != IntPtr.Zero
+            ? trackedWindow
+            : NativeMethods.GetForegroundWindow();
+
         AppLogger.Debug($"Showing popup, target window: {_lastForegroundWindow}");
         System.Windows.Application.Current.Dispatcher.Invoke(() => _popup?.ShowAtCursor());
     }
