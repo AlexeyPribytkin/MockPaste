@@ -81,10 +81,7 @@ public sealed class ClipboardService
         return success;
     }
 
-    /// <summary>Instance wrapper — delegates to the static implementation so callers can use the injected service consistently.</summary>
-    public bool TrySetTextInstance(string text) => TrySetText(text);
-
-    public static bool TrySetText(string text)
+    public bool TrySetTextInstance(string text)
     {
         EnforceStaThread();
 
@@ -96,12 +93,13 @@ public sealed class ClipboardService
         bool success = Retry(i => Clipboard.SetText(text));
 
         if (!success)
+        {
             AppLogger.Error($"Failed to set clipboard text after {MaxRetries} attempts");
+        }
 
         return success;
     }
 
-    /// <summary>Retries <paramref name="action"/> up to <see cref="MaxRetries"/> times with exponential backoff on <see cref="COMException"/>.</summary>
     private static bool Retry(Action<int> action)
     {
         for (int i = 0; i < MaxRetries; i++)

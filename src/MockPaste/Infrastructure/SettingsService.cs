@@ -76,10 +76,13 @@ public sealed class SettingsService
     {
         try
         {
-            // Guarantee the saved file always carries the current schema version.
-            settings.Version = CurrentVersion;
+            // Stamp the current schema version into a temporary copy so the on-disk
+            // representation is always up-to-date without mutating the caller's object.
+            var toSerialize = new AppSettings();
+            toSerialize.CopyFrom(settings);
+            toSerialize.Version = CurrentVersion;
 
-            var json = JsonSerializer.Serialize(settings, JsonOptions);
+            var json = JsonSerializer.Serialize(toSerialize, JsonOptions);
 
             // Back up the existing file before overwriting.
             if (File.Exists(_settingsPath))

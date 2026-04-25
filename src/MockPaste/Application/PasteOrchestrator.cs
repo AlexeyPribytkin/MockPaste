@@ -13,8 +13,6 @@ public sealed class PasteOrchestrator
     private readonly AppSettings _settings;
     private readonly HistoryService _history;
     private readonly IAppLogger _logger;
-    // Ensures only one paste pipeline runs at a time; prevents concurrent clipboard save/restore corruption.
-    private readonly SemaphoreSlim _pasteLock = new(1, 1);
 
     public PasteOrchestrator(
         GeneratorRegistry generators,
@@ -96,9 +94,6 @@ public sealed class PasteOrchestrator
     /// </summary>
     private async Task<bool> ExecuteCoreAsync(string value, IntPtr targetWindow, CancellationToken ct)
     {
-        await _pasteLock.WaitAsync(ct);
-        try
-        {
         var dispatcher = System.Windows.Application.Current.Dispatcher;
 
         if (_settings.PreserveClipboard)
@@ -138,10 +133,5 @@ public sealed class PasteOrchestrator
         }
 
         return pasted;
-        }
-        finally
-        {
-            _pasteLock.Release();
-        }
     }
 }
