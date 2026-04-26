@@ -4,7 +4,7 @@
         xmlns:components="clr-namespace:MockPaste.UI.Components"
         Title="{StaticResource StringSettingsTitle}"
         Width="420"
-        Height="584"
+        Height="588"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -226,28 +226,24 @@
                                     FontSize="{StaticResource FontSizeBase}"
                                     VerticalAlignment="Center"/>
 
-                                <TextBox
-                                    x:Name="PasteDelayBox"
+                                <TextBlock
                                     Grid.Column="1"
-                                    Width="56"
-                                    Text="{Binding PasteDelayText, UpdateSourceTrigger=PropertyChanged}"
-                                    Background="{DynamicResource BrushSurface}"
-                                    Foreground="{DynamicResource BrushTextPrimary}"
-                                    Padding="8,4" FontSize="{StaticResource FontSizeBase}"
-                                    VerticalContentAlignment="Center" TextAlignment="Right"
-                                    PreviewTextInput="DigitsOnly_PreviewTextInput"
-                                    ToolTip="0 – 500 ms">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsPasteDelayValid}" Value="False">
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource BrushError}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
+                                    Text="{Binding PasteDelayDisplay}"
+                                    FontSize="{StaticResource FontSizeBase}"
+                                    Foreground="{DynamicResource BrushTextMuted}"
+                                    VerticalAlignment="Center"
+                                    MinWidth="52"
+                                    TextAlignment="Right"/>
                             </Grid>
+                            <Slider
+                                Minimum="0"
+                                Maximum="500"
+                                TickFrequency="50"
+                                IsSnapToTickEnabled="False"
+                                SmallChange="10"
+                                LargeChange="50"
+                                Value="{Binding PasteDelay, Mode=TwoWay}"
+                                Margin="0,4,0,0"/>
 
                             <!-- ── GENERAL ── -->
                             <Grid Margin="0,16,0,8">
@@ -288,30 +284,24 @@
                                     FontSize="{StaticResource FontSizeBase}"
                                     VerticalAlignment="Center"/>
 
-                                <TextBox
-                                    x:Name="HistorySizeBox"
+                                <TextBlock
                                     Grid.Column="1"
-                                    Width="56"
-                                    Text="{Binding HistorySizeText, UpdateSourceTrigger=PropertyChanged}"
-                                    Background="{DynamicResource BrushSurface}"
-                                    Foreground="{DynamicResource BrushTextPrimary}"
-                                    Padding="8,4"
+                                    Text="{Binding HistorySizeDisplay}"
                                     FontSize="{StaticResource FontSizeBase}"
-                                    VerticalContentAlignment="Center"
-                                    TextAlignment="Right"
-                                    PreviewTextInput="DigitsOnly_PreviewTextInput"
-                                    ToolTip="1 – 500 items">
-                                    <TextBox.Style>
-                                        <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsHistorySizeValid}" Value="False">
-                                                    <Setter Property="BorderBrush" Value="{DynamicResource BrushError}"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBox.Style>
-                                </TextBox>
+                                    Foreground="{DynamicResource BrushTextMuted}"
+                                    VerticalAlignment="Center"
+                                    MinWidth="52"
+                                    TextAlignment="Right"/>
                             </Grid>
+                            <Slider
+                                Minimum="1"
+                                Maximum="500"
+                                TickFrequency="50"
+                                IsSnapToTickEnabled="False"
+                                SmallChange="1"
+                                LargeChange="10"
+                                Value="{Binding HistorySize, Mode=TwoWay}"
+                                Margin="0,4,0,0"/>
 
                             <!-- ── APPEARANCE ── -->
                             <Grid Margin="0,16,0,8">

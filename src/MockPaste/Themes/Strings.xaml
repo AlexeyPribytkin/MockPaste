@@ -19,10 +19,11 @@
     <sys:String x:Key="StringButtonReset">Reset</sys:String>
     <sys:String x:Key="StringCheckboxPreserveClipboard">Preserve clipboard content</sys:String>
     <sys:String x:Key="StringCheckboxTrackClipboardHistory">Track clipboard history</sys:String>
-    <sys:String x:Key="StringLabelPasteDelay">Paste delay (ms):</sys:String>
+    <sys:String x:Key="StringLabelPasteDelay">Paste delay:</sys:String>
     <sys:String x:Key="StringUnitMilliseconds">ms</sys:String>
     <sys:String x:Key="StringCheckboxLaunchAtStartup">Launch at system startup</sys:String>
     <sys:String x:Key="StringLabelHistorySize">History size:</sys:String>
+    <sys:String x:Key="StringUnitItem">item</sys:String>
     <sys:String x:Key="StringUnitItems">items</sys:String>
     <sys:String x:Key="StringButtonSave">Save</sys:String>
     <sys:String x:Key="StringButtonCancel">Cancel</sys:String>

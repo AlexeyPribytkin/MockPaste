@@ -44,8 +44,7 @@ public partial class SettingsWindow : Window
             }
         };
 
-        DataObject.AddPastingHandler(PasteDelayBox, OnDigitsOnlyPaste);
-        DataObject.AddPastingHandler(HistorySizeBox, OnDigitsOnlyPaste);
+
     }
 
     // Fades the status text in, holds, then fades it out.
@@ -139,24 +138,5 @@ public partial class SettingsWindow : Window
         aboutWindow.ShowDialog();
     }
 
-    private void DigitsOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
-    {
-        e.Handled = !e.Text.All(char.IsDigit);
     }
 
-    private static void OnDigitsOnlyPaste(object sender, DataObjectPastingEventArgs e)
-    {
-        if (e.DataObject.GetDataPresent(DataFormats.Text))
-        {
-            var text = e.DataObject.GetData(DataFormats.Text) as string;
-            if (text?.All(char.IsDigit) != true)
-            {
-                e.CancelCommand();
-            }
-        }
-        else
-        {
-            e.CancelCommand();
-        }
-    }
-}

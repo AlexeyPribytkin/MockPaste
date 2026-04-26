@@ -216,16 +216,95 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!-- Slider -->
+    <Style TargetType="Slider">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Track x:Name="PART_Track" Grid.Row="1">
+                            <!-- Filled portion (left of thumb) -->
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Focusable="False" IsTabStop="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border x:Name="FilledTrack"
+                                                    Height="4"
+                                                    CornerRadius="2"
+                                                    Background="{DynamicResource BrushAccent}"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.DecreaseRepeatButton>
+
+                            <!-- Thumb -->
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse x:Name="ThumbCircle"
+                                                     Width="16" Height="16"
+                                                     Fill="{DynamicResource BrushAccent}"
+                                                     Stroke="{DynamicResource BrushBackground}"
+                                                     StrokeThickness="2"/>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="ThumbCircle" Property="Fill" Value="{DynamicResource BrushAccentHover}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsDragging" Value="True">
+                                                    <Setter TargetName="ThumbCircle" Property="Fill" Value="{DynamicResource BrushAccentHover}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+
+                            <!-- Empty portion (right of thumb) -->
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Focusable="False" IsTabStop="False">
+                                    <RepeatButton.Template>
+                                        <ControlTemplate TargetType="RepeatButton">
+                                            <Border x:Name="EmptyTrack"
+                                                    Height="4"
+                                                    CornerRadius="2"
+                                                    Background="{DynamicResource BrushSurface}"
+                                                    BorderBrush="{DynamicResource BrushBorder}"
+                                                    BorderThickness="1"/>
+                                        </ControlTemplate>
+                                    </RepeatButton.Template>
+                                </RepeatButton>
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.35"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
     <!-- TextBox -->
     <Style TargetType="TextBox">
-        <Setter Property="Background"               Value="{DynamicResource BrushSurface}"/>
-        <Setter Property="Foreground"               Value="{DynamicResource BrushTextPrimary}"/>
-        <Setter Property="BorderBrush"              Value="{DynamicResource BrushBorder}"/>
-        <Setter Property="BorderThickness"          Value="1"/>
-        <Setter Property="Padding"                  Value="8,4"/>
+        <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
+        <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8,4"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
-        <Setter Property="CaretBrush"               Value="{DynamicResource BrushTextPrimary}"/>
-        <Setter Property="SelectionBrush"           Value="{DynamicResource BrushAccent}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource BrushTextPrimary}"/>
+        <Setter Property="SelectionBrush" Value="{DynamicResource BrushAccent}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">

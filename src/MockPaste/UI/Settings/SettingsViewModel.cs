@@ -85,9 +85,19 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             if (SetDirtyField(ref _pasteDelayText, value))
             {
                 Notify(nameof(IsPasteDelayValid));
+                Notify(nameof(PasteDelay));
+                Notify(nameof(PasteDelayDisplay));
             }
         }
     }
+
+    public int PasteDelay
+    {
+        get => AppSettings.TryParsePasteDelay(_pasteDelayText, out var v) ? v : AppSettings.PasteDelayDefault;
+        set => PasteDelayText = value.ToString();
+    }
+
+    public string PasteDelayDisplay => $"{PasteDelay} {Res("StringUnitMilliseconds")}";
 
     public bool LaunchAtStartup
     {
@@ -109,7 +119,25 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             if (SetDirtyField(ref _historySizeText, value))
             {
                 Notify(nameof(IsHistorySizeValid));
+                Notify(nameof(HistorySize));
+                Notify(nameof(HistorySizeDisplay));
             }
+        }
+    }
+
+    public int HistorySize
+    {
+        get => AppSettings.TryParseHistorySize(_historySizeText, out var v) ? v : AppSettings.HistorySizeDefault;
+        set => HistorySizeText = value.ToString();
+    }
+
+    public string HistorySizeDisplay
+    {
+        get
+        {
+            var count = HistorySize;
+            var unit = count == 1 ? Res("StringUnitItem") : Res("StringUnitItems");
+            return $"{count} {unit}";
         }
     }
 

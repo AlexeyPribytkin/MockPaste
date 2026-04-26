@@ -328,4 +328,159 @@ public sealed class SettingsViewModelTests
 
         Assert.Equal(expected, result);
     }
+
+    // ── PasteDelay int property ───────────────────────────────────────────
+
+    [Fact]
+    public void PasteDelay_InitialValue_MatchesSettings()
+    {
+        var settings = new AppSettings { PasteDelayMs = 120 };
+        var vm = CreateVm(settings);
+
+        Assert.Equal(120, vm.PasteDelay);
+    }
+
+    [Fact]
+    public void WhenPasteDelaySet_PasteDelayText_IsUpdated()
+    {
+        var vm = CreateVm();
+
+        vm.PasteDelay = 75;
+
+        Assert.Equal("75", vm.PasteDelayText);
+    }
+
+    [Fact]
+    public void WhenPasteDelaySet_IsDirty_IsTrue()
+    {
+        var vm = CreateVm();
+
+        vm.PasteDelay = 200;
+
+        Assert.True(vm.IsDirty);
+    }
+
+    [Fact]
+    public void WhenPasteDelaySet_PropertyChanged_IsRaisedForPasteDelay()
+    {
+        var vm = CreateVm();
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        vm.PasteDelay = 100;
+
+        Assert.Contains(nameof(SettingsViewModel.PasteDelay), raised);
+    }
+
+    // ── HistorySize int property ──────────────────────────────────────────
+
+    [Fact]
+    public void HistorySize_InitialValue_MatchesSettings()
+    {
+        var settings = new AppSettings { HistorySize = 42 };
+        var vm = CreateVm(settings);
+
+        Assert.Equal(42, vm.HistorySize);
+    }
+
+    [Fact]
+    public void WhenHistorySizeSet_HistorySizeText_IsUpdated()
+    {
+        var vm = CreateVm();
+
+        vm.HistorySize = 25;
+
+        Assert.Equal("25", vm.HistorySizeText);
+    }
+
+    [Fact]
+    public void WhenHistorySizeSet_IsDirty_IsTrue()
+    {
+        var vm = CreateVm();
+
+        vm.HistorySize = 30;
+
+        Assert.True(vm.IsDirty);
+    }
+
+    [Fact]
+    public void WhenHistorySizeSet_PropertyChanged_IsRaisedForHistorySize()
+    {
+        var vm = CreateVm();
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        vm.HistorySize = 15;
+
+        Assert.Contains(nameof(SettingsViewModel.HistorySize), raised);
+    }
+
+    // ── PasteDelayDisplay ─────────────────────────────────────────────────
+
+    [Fact]
+    public void PasteDelayDisplay_ContainsValueAndUnit()
+    {
+        var vm = CreateVm();
+        vm.PasteDelay = 80;
+
+        Assert.Contains("80", vm.PasteDelayDisplay);
+        Assert.Contains("StringUnitMilliseconds", vm.PasteDelayDisplay);
+    }
+
+    [Fact]
+    public void WhenPasteDelayChanges_PropertyChanged_IsRaisedForPasteDelayDisplay()
+    {
+        var vm = CreateVm();
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        vm.PasteDelay = AppSettings.PasteDelayDefault + 10;
+
+        Assert.Contains(nameof(SettingsViewModel.PasteDelayDisplay), raised);
+    }
+
+    // ── HistorySizeDisplay ────────────────────────────────────────────────
+
+    [Fact]
+    public void HistorySizeDisplay_WhenSizeIsOne_UsesSingularUnit()
+    {
+        var vm = CreateVm();
+        vm.HistorySize = 1;
+
+        Assert.Contains("StringUnitItem", vm.HistorySizeDisplay);
+        Assert.DoesNotContain("StringUnitItems", vm.HistorySizeDisplay);
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(10)]
+    [InlineData(500)]
+    public void HistorySizeDisplay_WhenSizeIsNotOne_UsesPluralUnit(int size)
+    {
+        var vm = CreateVm();
+        vm.HistorySize = size;
+
+        Assert.Contains("StringUnitItems", vm.HistorySizeDisplay);
+    }
+
+    [Fact]
+    public void HistorySizeDisplay_ContainsValue()
+    {
+        var vm = CreateVm();
+        vm.HistorySize = 7;
+
+        Assert.Contains("7", vm.HistorySizeDisplay);
+    }
+
+    [Fact]
+    public void WhenHistorySizeChanges_PropertyChanged_IsRaisedForHistorySizeDisplay()
+    {
+        var vm = CreateVm();
+        var raised = new List<string?>();
+        vm.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        vm.HistorySize = 5;
+
+        Assert.Contains(nameof(SettingsViewModel.HistorySizeDisplay), raised);
+    }
 }
