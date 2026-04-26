@@ -60,4 +60,9 @@
     <!-- Discard-changes confirmation dialog -->
     <sys:String x:Key="StringDiscardChangesMessage">Discard unsaved changes?</sys:String>
 
+    <!-- Message dialog buttons -->
+    <sys:String x:Key="StringDialogOK">OK</sys:String>
+    <sys:String x:Key="StringDialogYes">Yes</sys:String>
+    <sys:String x:Key="StringDialogNo">No</sys:String>
+
 </ResourceDictionary>

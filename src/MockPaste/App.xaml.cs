@@ -1,6 +1,7 @@
 using System.Windows;
 using MockPaste.Application;
 using MockPaste.Infrastructure;
+using MockPaste.UI.Dialogs;
 
 namespace MockPaste;
 
@@ -23,8 +24,7 @@ public partial class App : System.Windows.Application
 
         if (!createdNew)
         {
-            MessageBox.Show("MockPaste is already running.", "MockPaste",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageDialog.Show("MockPaste is already running.", "MockPaste", DialogKind.Information);
             _instanceMutex?.Dispose();
             Shutdown(0);
             return;

@@ -155,8 +155,7 @@
                                     Grid.Column="1"
                                     Command="{Binding ChangeHotkeyCommand}"
                                     Margin="8,0,0,0"
-                                    Padding="12,8"
-                                    Background="{DynamicResource BrushAccent}">
+                                    Padding="12,8">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
                                             <Setter Property="Content" Value="{StaticResource StringButtonChange}"/>
@@ -175,7 +174,6 @@
                                     Command="{Binding ResetHotkeyCommand}"
                                     Margin="8,0,0,0"
                                     Padding="12,8"
-                                    Background="{DynamicResource BrushBorder}"
                                     Style="{StaticResource SecondaryButtonStyle}"/>
                             </Grid>
 
@@ -391,28 +389,8 @@
                             Padding="0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Foreground="{DynamicResource BrushTextMuted}"
-                            Cursor="Hand"
-                            Click="About_Click">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Background" Value="Transparent"/>
-                                    <Setter Property="Opacity" Value="0.3"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="Button">
-                                                <ContentPresenter/>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Opacity" Value="1"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                            Style="{StaticResource GhostButtonStyle}"
+                            Click="About_Click"/>
 
                         <StackPanel
                             Grid.Column="1"
@@ -422,16 +400,14 @@
                             <Button
                                 x:Name="SaveButton"
                                 Content="{StaticResource StringButtonSave}"
-                                Padding="16,9"
-                                Background="{DynamicResource BrushAccent}"
+                                Padding="16,8"
                                 Style="{StaticResource AccentButtonStyle}"
                                 Command="{Binding SaveCommand}"
                                 Margin="0,0,8,0"/>
 
                             <Button
                                 Content="{StaticResource StringButtonCancel}"
-                                Padding="16,9"
-                                Background="{DynamicResource BrushBorder}"
+                                Padding="16,8"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="Cancel_Click"/>
                         </StackPanel>

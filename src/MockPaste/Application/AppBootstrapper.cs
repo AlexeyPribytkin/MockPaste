@@ -6,6 +6,7 @@ using MockPaste.Core.Models;
 using MockPaste.Infrastructure;
 using MockPaste.Infrastructure.Native;
 using MockPaste.UI.Popup;
+using MockPaste.UI.Dialogs;
 using MockPaste.UI.Settings;
 using MockPaste.UI.Tray;
 
@@ -91,8 +92,7 @@ internal sealed class AppBootstrapper : IDisposable
             }
 
             AppLogger.Fatal("Failed to start MockPaste", ex);
-            MessageBox.Show($"Failed to start MockPaste:\n{ex.Message}", "MockPaste Error",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageDialog.Show($"Failed to start MockPaste:\n{ex.Message}", "MockPaste Error", DialogKind.Error);
             _shutdownApp();
         }
     }
@@ -269,11 +269,10 @@ internal sealed class AppBootstrapper : IDisposable
         {
             if (!_hotkeyManager!.Register(current.Hotkey))
             {
-                MessageBox.Show(
+                MessageDialog.Show(
                     $"Could not register hotkey: {current.Hotkey.ToDisplayString()}\nIt may be in use by another application.",
                     "MockPaste",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
+                    DialogKind.Warning);
             }
         }
     }

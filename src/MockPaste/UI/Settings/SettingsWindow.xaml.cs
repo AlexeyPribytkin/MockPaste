@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using MockPaste.Core.Models;
+using MockPaste.UI.Dialogs;
 
 namespace MockPaste.UI.Settings;
 
@@ -109,8 +110,7 @@ public partial class SettingsWindow : Window
             return true;
         }
         var msg = System.Windows.Application.Current.Resources["StringDiscardChangesMessage"] as string ?? "";
-        return MessageBox.Show(msg, "MockPaste", MessageBoxButton.YesNo, MessageBoxImage.Question)
-               == MessageBoxResult.Yes;
+        return MessageDialog.Confirm(msg, "MockPaste", this);
     }
 
     private void TitleBarClose_Click(object sender, RoutedEventArgs e)
