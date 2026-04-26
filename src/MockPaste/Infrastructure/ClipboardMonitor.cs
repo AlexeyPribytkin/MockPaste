@@ -21,7 +21,7 @@ internal sealed class ClipboardMonitor : IDisposable
         {
             Width = 0,
             Height = 0,
-            WindowStyle = 0
+            ParentWindow = new IntPtr(-3) // HWND_MESSAGE – invisible message-only window, not in the Z-order
         };
 
         _source = new HwndSource(parameters);

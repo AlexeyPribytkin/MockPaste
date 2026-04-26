@@ -89,28 +89,6 @@ internal static partial class NativeMethods
         public ushort wParamH;
     }
 
-    // Native context menu
-    public const uint MF_STRING = 0x00000000;
-    public const uint MF_SEPARATOR = 0x00000800;
-    public const uint MF_CHECKED = 0x00000008;
-    public const uint TPM_RETURNCMD = 0x0100;
-    public const uint TPM_NONOTIFY = 0x0080;
-    public const uint TPM_BOTTOMALIGN = 0x0020;
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    public static partial IntPtr CreatePopupMenu();
-
-    [LibraryImport("user32.dll", EntryPoint = "AppendMenuW", StringMarshalling = StringMarshalling.Utf16)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool AppendMenu(IntPtr hMenu, uint uFlags, nuint uIDNewItem, string? lpNewItem);
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    public static partial uint TrackPopupMenuEx(IntPtr hMenu, uint uFlags, int x, int y, IntPtr hwnd, IntPtr lptpm);
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool DestroyMenu(IntPtr hMenu);
-
     // Foreground window tracking
     public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
     public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
@@ -133,8 +111,15 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll", SetLastError = true)]
     public static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
-    [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "GetClassNameW", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
-    public static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool AttachThreadInput(uint idAttach, uint idAttachTo, [MarshalAs(UnmanagedType.Bool)] bool fAttach);
+
+    [LibraryImport("kernel32.dll")]
+    public static partial uint GetCurrentThreadId();
+
+    [LibraryImport("user32.dll", EntryPoint = "GetClassNameW", SetLastError = true)]
+    public static unsafe partial int GetClassName(IntPtr hWnd, char* lpClassName, int nMaxCount);
 
     public static INPUT KeyDown(ushort vk) => new()
     {

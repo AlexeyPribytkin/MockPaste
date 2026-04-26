@@ -108,7 +108,7 @@ public sealed class PasteOrchestrator
             return false;
         }
 
-        if (!NativeMethods.SetForegroundWindow(targetWindow))
+        if (!ForceForegroundWindow(targetWindow))
         {
             _logger.Warning("Failed to set foreground window — paste target may not receive focus");
         }
@@ -133,5 +133,34 @@ public sealed class PasteOrchestrator
         }
 
         return pasted;
+    }
+    /// <summary>
+    /// Sets <paramref name="hWnd"/> as the foreground window, bypassing the Windows
+    /// foreground-lock by temporarily attaching our thread's input queue to the
+    /// target thread's input queue. This is necessary when our foreground right
+    /// has already been consumed (e.g. by <c>Activate()</c> on the popup) before
+    /// the paste pipeline runs.
+    /// </summary>
+    private static bool ForceForegroundWindow(IntPtr hWnd)
+    {
+        if (hWnd == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        uint targetThread = NativeMethods.GetWindowThreadProcessId(hWnd, out _);
+        uint currentThread = NativeMethods.GetCurrentThreadId();
+
+        bool attached = targetThread != currentThread
+            && NativeMethods.AttachThreadInput(currentThread, targetThread, true);
+
+        bool result = NativeMethods.SetForegroundWindow(hWnd);
+
+        if (attached)
+        {
+            NativeMethods.AttachThreadInput(currentThread, targetThread, false);
+        }
+
+        return result;
     }
 }

@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace MockPaste.Infrastructure.Native;
 
 /// <summary>
@@ -55,9 +53,16 @@ internal sealed class ForegroundWindowTracker : IDisposable
             return;
         }
 
-        var className = new StringBuilder(256);
-        NativeMethods.GetClassName(hwnd, className, className.Capacity);
-        if (_shellClasses.Contains(className.ToString()))
+        Span<char> classNameBuf = stackalloc char[256];
+        int len;
+        unsafe
+        {
+            fixed (char* p = classNameBuf)
+            {
+                len = NativeMethods.GetClassName(hwnd, p, classNameBuf.Length);
+            }
+        }
+        if (_shellClasses.Contains(new string(classNameBuf[..len])))
         {
             return;
         }

@@ -229,7 +229,7 @@
                                 <TextBox
                                     x:Name="PasteDelayBox"
                                     Grid.Column="1"
-                                    Width="60"
+                                    Width="56"
                                     Text="{Binding PasteDelayText, UpdateSourceTrigger=PropertyChanged}"
                                     Background="{DynamicResource BrushSurface}"
                                     Foreground="{DynamicResource BrushTextPrimary}"
@@ -291,7 +291,7 @@
                                 <TextBox
                                     x:Name="HistorySizeBox"
                                     Grid.Column="1"
-                                    Width="60"
+                                    Width="56"
                                     Text="{Binding HistorySizeText, UpdateSourceTrigger=PropertyChanged}"
                                     Background="{DynamicResource BrushSurface}"
                                     Foreground="{DynamicResource BrushTextPrimary}"
