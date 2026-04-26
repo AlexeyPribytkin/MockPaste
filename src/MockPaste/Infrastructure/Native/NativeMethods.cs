@@ -2,28 +2,52 @@ using System.Runtime.InteropServices;
 
 namespace MockPaste.Infrastructure.Native;
 
+/// <summary>
+/// P/Invoke declarations for Win32 APIs used by MockPaste: hotkey registration,
+/// keyboard input simulation, clipboard monitoring, and foreground-window tracking.
+/// </summary>
 internal static partial class NativeMethods
 {
+    /// <summary>Windows message posted when a registered hotkey is pressed.</summary>
     public const int WM_HOTKEY = 0x0312;
+    /// <summary>Alt modifier flag for <c>RegisterHotKey</c>.</summary>
     public const uint MOD_ALT = 0x0001;
+
+    /// <summary>Ctrl modifier flag for <c>RegisterHotKey</c>.</summary>
     public const uint MOD_CONTROL = 0x0002;
+
+    /// <summary>Shift modifier flag for <c>RegisterHotKey</c>.</summary>
     public const uint MOD_SHIFT = 0x0004;
+
+    /// <summary>Windows key modifier flag for <c>RegisterHotKey</c>.</summary>
     public const uint MOD_WIN = 0x0008;
+
+    /// <summary>Suppresses repeated hotkey messages while the key is held down.</summary>
     public const uint MOD_NOREPEAT = 0x4000;
 
+    /// <summary>Input type value for keyboard events in the <see cref="INPUT"/> structure.</summary>
     public const int INPUT_KEYBOARD = 1;
+
+    /// <summary>Flag indicating a key-up (release) event in <see cref="KEYBDINPUT.dwFlags"/>.</summary>
     public const uint KEYEVENTF_KEYUP = 0x0002;
+
+    /// <summary>Virtual-key code for the Ctrl key.</summary>
     public const ushort VK_CONTROL = 0x11;
+
+    /// <summary>Virtual-key code for the V key (used in Ctrl+V paste simulation).</summary>
     public const ushort VK_V = 0x56;
 
+    /// <summary>Registers a system-wide hotkey on the window identified by <paramref name="hWnd"/>.</summary>
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool RegisterHotKey(IntPtr hWnd, int id, uint fsModifiers, uint vk);
 
+    /// <summary>Unregisters the hotkey previously registered with <see cref="RegisterHotKey"/>.</summary>
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool UnregisterHotKey(IntPtr hWnd, int id);
 
+    /// <summary>Sends an array of synthesized keyboard or mouse input events to the input queue.</summary>
     [LibraryImport("user32.dll", SetLastError = true)]
     public static partial uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
@@ -121,19 +145,21 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll", EntryPoint = "GetClassNameW", SetLastError = true)]
     public static unsafe partial int GetClassName(IntPtr hWnd, char* lpClassName, int nMaxCount);
 
+    /// <summary>Creates a key-down <see cref="INPUT"/> structure for the given virtual-key code.</summary>
     public static INPUT KeyDown(ushort vk) => new()
     {
         type = INPUT_KEYBOARD,
         u = new INPUTUNION { ki = new KEYBDINPUT { wVk = vk } }
     };
 
+    /// <summary>Creates a key-up <see cref="INPUT"/> structure for the given virtual-key code.</summary>
     public static INPUT KeyUp(ushort vk) => new()
     {
         type = INPUT_KEYBOARD,
         u = new INPUTUNION { ki = new KEYBDINPUT { wVk = vk, dwFlags = KEYEVENTF_KEYUP } }
     };
 
-    // Clipboard monitoring
+    /// <summary>Windows message sent to a window registered via <see cref="AddClipboardFormatListener"/> when clipboard contents change.</summary>
     public const int WM_CLIPBOARDUPDATE = 0x031D;
 
     [LibraryImport("user32.dll", SetLastError = true)]

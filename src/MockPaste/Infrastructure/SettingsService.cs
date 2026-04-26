@@ -6,6 +6,11 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Infrastructure;
 
+/// <summary>
+/// Persists and loads <see cref="AppSettings"/> as a JSON file in the user's AppData folder.
+/// Implements atomic writes (write-to-temp-then-rename), automatic backup, and
+/// forward-compatible migration so older settings files can be safely upgraded.
+/// </summary>
 public sealed class SettingsService
 {
     /// <summary>Increment this when a breaking change is made to <see cref="AppSettings"/>.</summary>
@@ -24,6 +29,10 @@ public sealed class SettingsService
     private readonly string _backupPath;
     private readonly string _tempPath;
 
+    /// <summary>
+    /// Resolves the settings, backup, and temp file paths under the user's AppData folder.
+    /// The settings directory is created if it does not already exist.
+    /// </summary>
     public SettingsService()
     {
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -34,6 +43,11 @@ public sealed class SettingsService
         _tempPath = _settingsPath + ".tmp";
     }
 
+    /// <summary>
+    /// Loads settings from disk, migrating older schemas and sanitising values.
+    /// Falls back to the backup file if the primary is corrupted, or to defaults
+    /// if both are unreadable.
+    /// </summary>
     public AppSettings Load()
     {
         if (!File.Exists(_settingsPath))
@@ -67,6 +81,11 @@ public sealed class SettingsService
         }
     }
 
+    /// <summary>
+    /// Serialises <paramref name="settings"/> to disk using an atomic temp-file write.
+    /// The existing file is first copied to a <c>.bak</c> backup.
+    /// </summary>
+    /// <returns><c>true</c> on success; <c>false</c> if an <see cref="IOException"/> occurred.</returns>
     public bool Save(AppSettings settings)
     {
         try
@@ -100,6 +119,7 @@ public sealed class SettingsService
         }
     }
 
+    /// <summary>Creates a fresh <see cref="AppSettings"/> instance stamped with the current schema version.</summary>
     private static AppSettings CreateDefault() => new() { Version = CurrentVersion };
 
     /// <summary>

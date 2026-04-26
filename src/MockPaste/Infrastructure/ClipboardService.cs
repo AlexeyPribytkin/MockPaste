@@ -3,6 +3,12 @@ using System.Windows;
 
 namespace MockPaste.Infrastructure;
 
+/// <summary>
+/// Wraps WPF clipboard operations with retry logic (to handle transient COM locks)
+/// and provides save/restore functionality so the original clipboard content can be
+/// preserved around a paste operation.
+/// Must be used on an STA thread.
+/// </summary>
 public sealed class ClipboardService
 {
     private const int MaxRetries = 5;
@@ -10,6 +16,11 @@ public sealed class ClipboardService
 
     private IDataObject? _savedClipboard;
 
+    /// <summary>
+    /// Snapshots the current clipboard content into an in-memory buffer so it can
+    /// be restored later. Returns <c>true</c> on success (including when the clipboard
+    /// is empty). Must be called on an STA thread.
+    /// </summary>
     public bool TrySaveClipboard()
     {
         EnforceStaThread();
@@ -57,6 +68,11 @@ public sealed class ClipboardService
         }
     }
 
+    /// <summary>
+    /// Restores the previously saved clipboard content. Returns <c>false</c> when there
+    /// is no saved content or when all retry attempts fail. Clears the saved snapshot
+    /// on success. Must be called on an STA thread.
+    /// </summary>
     public bool TryRestoreClipboard()
     {
         EnforceStaThread();
@@ -81,6 +97,10 @@ public sealed class ClipboardService
         return success;
     }
 
+    /// <summary>
+    /// Returns the current clipboard text, or <c>null</c> when the clipboard contains
+    /// no text or is temporarily locked. Must be called on an STA thread.
+    /// </summary>
     public string? TryGetText()
     {
         EnforceStaThread();
@@ -96,6 +116,10 @@ public sealed class ClipboardService
         }
     }
 
+    /// <summary>
+    /// Places <paramref name="text"/> on the clipboard, retrying on transient COM failures.
+    /// Returns <c>false</c> when all retries are exhausted. Must be called on an STA thread.
+    /// </summary>
     public bool TrySetTextInstance(string text)
     {
         EnforceStaThread();
@@ -115,6 +139,10 @@ public sealed class ClipboardService
         return success;
     }
 
+    /// <summary>
+    /// Retries <paramref name="action"/> up to <see cref="MaxRetries"/> times, backing off
+    /// exponentially on each <see cref="COMException"/>.
+    /// </summary>
     private static bool Retry(Action<int> action)
     {
         for (int i = 0; i < MaxRetries; i++)

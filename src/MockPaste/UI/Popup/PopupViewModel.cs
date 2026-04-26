@@ -43,9 +43,13 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     // ── Navigation state ─────────────────────────────────────────────────
 
+    /// <summary><c>true</c> when the popup is showing the format sub-menu for a specific category.</summary>
     public bool IsFormatLevel => _level == PopupLevel.Formats;
+
+    /// <summary><c>true</c> when the popup is showing the history list.</summary>
     public bool IsHistoryLevel => _level == PopupLevel.History;
 
+    /// <summary>Title text shown at the top of the popup (e.g. "MockPaste", "← GUID", "← History").</summary>
     public string HeaderText
     {
         get => _headerText;
@@ -59,24 +63,28 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         private set => SetField(ref _isBackButton, value);
     }
 
+    /// <summary>Controls visibility of the history navigation button; hidden when already on the history or format level.</summary>
     public bool IsHistoryButtonVisible
     {
         get => _isHistoryButtonVisible;
         private set => SetField(ref _isHistoryButtonVisible, value);
     }
 
+    /// <summary>When <c>true</c>, an empty-state placeholder is shown instead of the list (history level only).</summary>
     public bool IsEmptyHistoryVisible
     {
         get => _isEmptyHistoryVisible;
         private set => SetField(ref _isEmptyHistoryVisible, value);
     }
 
+    /// <summary>The list of items currently shown in the popup (categories, formats, or history entries).</summary>
     public IReadOnlyList<IPopupItem> Items
     {
         get => _items;
         private set => SetField(ref _items, value);
     }
 
+    /// <summary>Zero-based index of the currently highlighted item; -1 when nothing is selected.</summary>
     public int SelectedIndex
     {
         get => _selectedIndex;
@@ -85,6 +93,9 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     // ── Navigation ───────────────────────────────────────────────────────
 
+    // ── Navigation ───────────────────────────────────────────────────
+
+    /// <summary>Navigates to the top-level category list and resets the header and button visibility.</summary>
     public void ShowCategories()
     {
         SetLevel(PopupLevel.Categories);
@@ -104,6 +115,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         SelectedIndex = Items.Count > 0 ? 0 : -1;
     }
 
+    /// <summary>Navigates to the format sub-menu for <paramref name="generator"/> and updates the header to show the back-navigation title.</summary>
     public void ShowFormats(IFakeDataGenerator generator)
     {
         SetLevel(PopupLevel.Formats);
@@ -124,6 +136,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         SelectedIndex = Items.Count > 0 ? 0 : -1;
     }
 
+    /// <summary>Navigates to the history list view, refreshing entries from the <see cref="HistoryService"/>.</summary>
     public void ShowHistory()
     {
         SetLevel(PopupLevel.History);
@@ -161,6 +174,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         }
     }
 
+    /// <summary>Rebuilds the <see cref="Items"/> list from the current <see cref="HistoryService"/> snapshot.</summary>
     private void RefreshHistoryItems()
     {
         var entries = _history.GetAll();
@@ -230,6 +244,10 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     /// Handles keyboard mnemonic navigation on the category level.
     /// Returns true if a match was found and acted upon.
     /// </summary>
+    /// <summary>
+    /// Handles keyboard mnemonic navigation on the category level.
+    /// Returns <c>true</c> if a match was found and acted upon.
+    /// </summary>
     public bool HandleMnemonic(string keyChar)
     {
         if (keyChar.Length != 1)
@@ -253,6 +271,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
+    /// <summary>Updates the internal navigation level and notifies dependent computed properties.</summary>
     private void SetLevel(PopupLevel level)
     {
         if (_level == level)
@@ -265,6 +284,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         Notify(nameof(IsHistoryLevel));
     }
 
+    /// <summary>Sets <paramref name="field"/> and fires <see cref="PropertyChanged"/> if the value changed.</summary>
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? name = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))

@@ -23,8 +23,12 @@ internal sealed class ForegroundWindowTracker : IDisposable
     private readonly NativeMethods.WinEventProc _hookProc;
     private readonly int _ownPid = Environment.ProcessId;
 
+    /// <summary>The handle of the most recent non-shell, non-self foreground window.</summary>
     public IntPtr LastForegroundWindow { get; private set; }
 
+    /// <summary>
+    /// Installs the <c>WinEvent</c> hook that populates <see cref="LastForegroundWindow"/>.
+    /// </summary>
     public ForegroundWindowTracker()
     {
         _hookProc = OnWinEvent;

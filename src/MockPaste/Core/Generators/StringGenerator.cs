@@ -2,6 +2,11 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Core.Generators;
 
+/// <summary>
+/// Generates random strings in four formats: alphanumeric, letters-only, hexadecimal,
+/// and lorem-ipsum words. Length can be controlled via the <c>"length"</c> parameter
+/// in <see cref="FakeDataOptions.Parameters"/>.
+/// </summary>
 public sealed class StringGenerator() : FakeDataGeneratorBase([
     new("string-alphanumeric", "Alphanumeric", "Random letters and digits (16 chars)", opt => RandomString(opt, AlphanumericChars, defaultLength: 16)),
     new("string-alpha",        "Alpha Only",   "Random letters (16 chars)",            opt => RandomString(opt, AlphaChars, defaultLength: 16)),
@@ -22,6 +27,10 @@ public sealed class StringGenerator() : FakeDataGeneratorBase([
          "sed", "do", "eiusmod", "tempor", "incididunt", "ut", "labore", "et", "dolore",
          "magna", "aliqua", "enim", "ad", "minim", "veniam", "quis", "nostrud"];
 
+    /// <summary>
+    /// Builds a random string of the requested length by drawing characters from <paramref name="chars"/>.
+    /// The length can be overridden via the <c>"length"</c> key in <see cref="FakeDataOptions.Parameters"/>.
+    /// </summary>
     private static string RandomString(FakeDataOptions options, string chars, int defaultLength)
     {
         var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;
@@ -31,6 +40,7 @@ public sealed class StringGenerator() : FakeDataGeneratorBase([
         return new(Enumerable.Range(0, length).Select(_ => chars[rng.Next(chars.Length)]).ToArray());
     }
 
+    /// <summary>Picks <paramref name="wordCount"/> random words from the lorem-ipsum word list and joins them with spaces.</summary>
     private static string LoremIpsum(FakeDataOptions options, int wordCount)
     {
         var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;

@@ -5,6 +5,11 @@ using MockPaste.Infrastructure.Native;
 
 namespace MockPaste.Application;
 
+/// <summary>
+/// Coordinates the full paste pipeline: generate a fake value → save the clipboard
+/// → set new clipboard text → focus the target window → simulate Ctrl+V → restore
+/// the original clipboard. Marshals all clipboard operations to the UI (STA) thread.
+/// </summary>
 public sealed class PasteOrchestrator
 {
     private readonly GeneratorRegistry _generators;
@@ -14,6 +19,7 @@ public sealed class PasteOrchestrator
     private readonly HistoryService _history;
     private readonly IAppLogger _logger;
 
+    /// <summary>Creates the orchestrator and injects all required service dependencies.</summary>
     public PasteOrchestrator(
         GeneratorRegistry generators,
         ClipboardService clipboard,
@@ -30,6 +36,11 @@ public sealed class PasteOrchestrator
         _logger = logger;
     }
 
+    /// <summary>
+    /// Generates a value using the named <paramref name="categoryName"/> generator and
+    /// <paramref name="formatId"/> format, then runs the clipboard-paste pipeline.
+    /// The generated value is added to history on success.
+    /// </summary>
     public async Task ExecuteAsync(string categoryName, string formatId, IntPtr targetWindow, CancellationToken ct = default)
     {
         try
@@ -64,6 +75,10 @@ public sealed class PasteOrchestrator
         }
     }
 
+    /// <summary>
+    /// Pastes <paramref name="value"/> directly (e.g. from the history list) without
+    /// invoking a generator. Promotes the entry to the top of the history list on success.
+    /// </summary>
     public async Task ExecuteDirectAsync(string value, IntPtr targetWindow, CancellationToken ct = default)
     {
         try

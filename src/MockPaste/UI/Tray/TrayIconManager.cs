@@ -3,16 +3,30 @@ using MockPaste.Infrastructure;
 
 namespace MockPaste.UI.Tray;
 
+/// <summary>
+/// Creates and manages the H.NotifyIcon <c>TaskbarIcon</c> declared in application
+/// resources. Wires the tray context menu commands to application-level events and
+/// propagates the enabled/disabled toggle state.
+/// </summary>
 public sealed class TrayIconManager : IDisposable
 {
     private readonly TaskbarIcon _taskbarIcon;
     private readonly TrayViewModel _viewModel;
     private bool _isEnabled = true;
 
+    /// <summary>Raised when the user clicks "Settings" via the tray context menu.</summary>
     public event Action? OnSettingsClicked;
+
+    /// <summary>Raised when the user clicks "Exit" via the tray context menu.</summary>
     public event Action? OnExitClicked;
+
+    /// <summary>Raised when the user clicks the tray icon with the left mouse button.</summary>
     public event Action? OnTrayLeftClicked;
+
+    /// <summary><c>true</c> when the app is accepting hotkey presses; mirrors the toggle state.</summary>
     public bool IsEnabled => _isEnabled;
+
+    /// <summary>Raised when the user toggles the enabled state from the tray menu, carrying the new value.</summary>
     public event Action<bool>? EnabledChanged;
 
     public TrayIconManager()

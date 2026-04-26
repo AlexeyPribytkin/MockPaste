@@ -3,6 +3,10 @@ using Microsoft.Win32;
 
 namespace MockPaste.Infrastructure;
 
+/// <summary>
+/// Manages the Windows startup registry entry that controls whether the application
+/// launches automatically when the user logs in.
+/// </summary>
 internal static class StartupService
 {
     private const string AppName = "MockPaste";

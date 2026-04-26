@@ -5,6 +5,12 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Infrastructure;
 
+/// <summary>
+/// Applies WPF theme resource dictionaries (Dark / Light / System) at runtime by
+/// swapping the appropriate <c>Themes/*.xaml</c> merged dictionary in the application
+/// resources. Remembers the last applied theme so it can be reapplied after window
+/// recreation.
+/// </summary>
 public static class ThemeService
 {
     // Cached once to avoid repeated reflection calls.
@@ -16,6 +22,7 @@ public static class ThemeService
     // Tracks the currently applied dictionary so we avoid fragile string matching.
     private static ResourceDictionary? _currentDictionary;
 
+    /// <summary>Applies <paramref name="theme"/> to the running WPF application. System theme is resolved to Dark or Light based on the OS setting.</summary>
     public static void Apply(AppTheme theme)
     {
         _currentTheme = theme;
@@ -40,6 +47,11 @@ public static class ThemeService
         _ => "Light"
     };
 
+    /// <summary>
+    /// Replaces the currently active theme dictionary with the one matching
+    /// <paramref name="resolved"/> ("Dark" or "Light"). Inserts at the same index
+    /// to preserve resource merge order; no-op if the same URI is already active.
+    /// </summary>
     private static void SwapTheme(string resolved)
     {
         var app = System.Windows.Application.Current;

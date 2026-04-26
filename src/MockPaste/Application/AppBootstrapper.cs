@@ -31,11 +31,16 @@ internal sealed class AppBootstrapper : IDisposable
     private SettingsWindow? _settingsWindow;
     private ClipboardMonitor? _clipboardMonitor;
 
+    /// <summary>Creates the bootstrapper with a callback that shuts down the WPF application.</summary>
     public AppBootstrapper(Action shutdownApp)
     {
         _shutdownApp = shutdownApp;
     }
 
+    /// <summary>
+    /// Initializes logging, loads settings, creates all services and UI components,
+    /// and registers system event hooks. On failure, performs cleanup and exits the application.
+    /// </summary>
     public void Startup()
     {
         InitializeLogging();
@@ -92,12 +97,14 @@ internal sealed class AppBootstrapper : IDisposable
         }
     }
 
+    /// <summary>Logs the shutdown event and unregisters the system theme change handler.</summary>
     public void Shutdown()
     {
         AppLogger.Information("MockPaste shutting down");
         SystemEvents.UserPreferenceChanged -= OnSystemThemeChanged;
     }
 
+    /// <summary>Disposes all managed resources (hotkey window, tray icon, event hooks, clipboard monitor).</summary>
     public void Dispose()
     {
         _hotkeyManager?.Dispose();
@@ -131,6 +138,7 @@ internal sealed class AppBootstrapper : IDisposable
         _foregroundTracker = null;
     }
 
+    /// <summary>Configures the <see cref="AppLogger"/> singleton to write to the user's AppData logs directory.</summary>
     private static void InitializeLogging()
     {
         var logDir = Path.Combine(
@@ -139,6 +147,7 @@ internal sealed class AppBootstrapper : IDisposable
         AppLogger.Initialize(logDir);
     }
 
+    /// <summary>Creates and configures the system-tray icon and wires its commands to application actions.</summary>
     private void InitializeTray()
     {
         _trayIcon = new TrayIconManager();
@@ -148,6 +157,7 @@ internal sealed class AppBootstrapper : IDisposable
         _trayIcon.EnabledChanged += _ => ApplyHotkey(_settings!);
     }
 
+    /// <summary>Creates the <see cref="HotkeyManager"/>, registers the configured hotkey, and subscribes to press events.</summary>
     private void InitializeHotkey()
     {
         _hotkeyManager = new HotkeyManager();
@@ -160,6 +170,7 @@ internal sealed class AppBootstrapper : IDisposable
         }
     }
 
+    /// <summary>Creates the popup window and subscribes to its format and history selection events.</summary>
     private void InitializePopup(GeneratorRegistry generators)
     {
         _popup = new PopupWindow(generators, _history!);
@@ -167,6 +178,10 @@ internal sealed class AppBootstrapper : IDisposable
         _popup.HistoryItemSelected += OnHistoryItemSelected;
     }
 
+    /// <summary>
+    /// Handles the global hotkey (or tray icon click). Captures the foreground window
+    /// handle before the popup steals focus, then shows the popup at the cursor position.
+    /// </summary>
     private void OnHotkeyPressed()
     {
         if (_trayIcon is { IsEnabled: false })
@@ -183,6 +198,7 @@ internal sealed class AppBootstrapper : IDisposable
         System.Windows.Application.Current.Dispatcher.Invoke(() => _popup?.ShowAtCursor());
     }
 
+    /// <summary>Fires-and-forgets the paste pipeline for a generator format chosen in the popup.</summary>
     private void OnFormatSelected(string categoryName, string formatId)
     {
         // Snapshot the target window before any await so it is not overwritten by a subsequent hotkey press.
@@ -190,6 +206,7 @@ internal sealed class AppBootstrapper : IDisposable
         _ = _orchestrator?.ExecuteAsync(categoryName, formatId, targetWindow) ?? Task.CompletedTask;
     }
 
+    /// <summary>Fires-and-forgets the direct paste pipeline for a history entry chosen in the popup.</summary>
     private void OnHistoryItemSelected(string value)
     {
         // Snapshot the target window before any await so it is not overwritten by a subsequent hotkey press.
@@ -197,6 +214,10 @@ internal sealed class AppBootstrapper : IDisposable
         _ = _orchestrator?.ExecuteDirectAsync(value, targetWindow) ?? Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Opens the Settings window on the UI thread. If the window is already open, it is
+    /// activated instead of opening a second instance.
+    /// </summary>
     private void ShowSettings()
     {
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
@@ -221,6 +242,10 @@ internal sealed class AppBootstrapper : IDisposable
         });
     }
 
+    /// <summary>
+    /// Applies and persists updated settings: propagates changes to history size, hotkey,
+    /// theme, and startup registration.
+    /// </summary>
     private bool OnSettingsSaved(AppSettings updated)
     {
         _settings!.CopyFrom(updated);
@@ -253,6 +278,7 @@ internal sealed class AppBootstrapper : IDisposable
         }
     }
 
+    /// <summary>Re-applies the current theme when the Windows color scheme changes.</summary>
     private void OnSystemThemeChanged(object sender, UserPreferenceChangedEventArgs e)
     {
         if (e.Category == UserPreferenceCategory.General)
@@ -261,6 +287,10 @@ internal sealed class AppBootstrapper : IDisposable
         }
     }
 
+    /// <summary>
+    /// Reads the current clipboard text on startup and adds it to history if
+    /// <see cref="AppSettings.TrackClipboardHistory"/> is enabled.
+    /// </summary>
     private void SeedHistoryFromClipboard(ClipboardService clipboard)
     {
         if (!_settings!.TrackClipboardHistory)
@@ -276,6 +306,7 @@ internal sealed class AppBootstrapper : IDisposable
         }
     }
 
+    /// <summary>Creates and starts the clipboard change monitor that tracks new clipboard entries into history.</summary>
     private void InitializeClipboardMonitor(ClipboardService clipboard)
     {
         _clipboardMonitor = new ClipboardMonitor();

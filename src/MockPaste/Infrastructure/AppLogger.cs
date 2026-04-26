@@ -25,6 +25,10 @@ public sealed class AppLogger : IAppLogger
     public static void Fatal(string message, Exception? ex = null) => _instance.Write("FTL", message, ex);
     public static void CloseAndFlush() => _instance.Flush();
 
+    /// <summary>
+    /// Replaces the singleton logger with a new instance that writes to daily log files
+    /// in <paramref name="logDir"/>. The previous instance is flushed before replacement.
+    /// </summary>
     public static void Initialize(string logDir)
     {
         lock (_initLock)
@@ -50,6 +54,7 @@ public sealed class AppLogger : IAppLogger
     /// <summary>Creates a no-op logger (used before <see cref="Initialize"/> is called).</summary>
     private AppLogger() { }
 
+    /// <summary>Creates a logger that writes to daily rotating files in <paramref name="logDir"/>.</summary>
     private AppLogger(string logDir)
     {
         _logDir = logDir;
@@ -57,6 +62,7 @@ public sealed class AppLogger : IAppLogger
         OpenLogFile();
     }
 
+    /// <summary>Opens (or rotates to) the log file for the current calendar day.</summary>
     private void OpenLogFile()
     {
         _writer?.Dispose();
@@ -67,6 +73,7 @@ public sealed class AppLogger : IAppLogger
         CleanupOldLogs();
     }
 
+    /// <summary>Deletes all but the seven most recent daily log files. Errors are swallowed to keep logging non-fatal.</summary>
     private void CleanupOldLogs()
     {
         try
@@ -86,6 +93,7 @@ public sealed class AppLogger : IAppLogger
         }
     }
 
+    /// <summary>Writes a single log line. Rotates to a new file when the calendar day has changed.</summary>
     private void Write(string level, string message, Exception? ex)
     {
         lock (_lock)

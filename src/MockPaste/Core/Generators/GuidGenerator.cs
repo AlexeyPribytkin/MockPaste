@@ -1,5 +1,9 @@
 namespace MockPaste.Core.Generators;
 
+/// <summary>
+/// Generates random GUIDs in four common formats: standard hyphenated, no dashes,
+/// uppercase, and braced.
+/// </summary>
 public sealed class GuidGenerator() : FakeDataGeneratorBase([
     new("guid-standard",  "Standard",  "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", _ => Guid.NewGuid().ToString("D")),
     new("guid-nodashes",  "No Dashes", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",      _ => Guid.NewGuid().ToString("N")),

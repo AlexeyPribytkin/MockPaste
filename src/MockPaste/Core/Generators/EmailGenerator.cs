@@ -2,6 +2,10 @@ using MockPaste.Core.Models;
 
 namespace MockPaste.Core.Generators;
 
+/// <summary>
+/// Generates plausible but fictional email addresses in four common formats:
+/// standard (firstname.lastname@domain), numbered, simple initial, and plus-alias.
+/// </summary>
 public sealed class EmailGenerator() : FakeDataGeneratorBase([
     new("email-standard", "Standard",   "firstname.lastname@domain.com", opt => Generate(opt, "standard")),
     new("email-numbered", "Numbered",   "user1234@domain.com",           opt => Generate(opt, "numbered")),
@@ -25,6 +29,7 @@ public sealed class EmailGenerator() : FakeDataGeneratorBase([
         ["example.com", "test.org", "demo.net", "sample.io", "mock.dev",
          "fakecorp.com", "testmail.org", "devbox.net"];
 
+    /// <summary>Produces a single fake email address for the given <paramref name="variant"/> style.</summary>
     private static string Generate(FakeDataOptions options, string variant)
     {
         var rng = options.Seed.HasValue ? new Random(options.Seed.Value) : Random.Shared;
