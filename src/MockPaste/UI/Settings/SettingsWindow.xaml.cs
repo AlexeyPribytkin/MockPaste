@@ -130,6 +130,15 @@ public partial class SettingsWindow : Window
         }
     }
 
+    private void About_Click(object sender, RoutedEventArgs e)
+    {
+        var aboutWindow = new AboutWindow
+        {
+            Owner = this
+        };
+        aboutWindow.ShowDialog();
+    }
+
     private void DigitsOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
     {
         e.Handled = !e.Text.All(char.IsDigit);

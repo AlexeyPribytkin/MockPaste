@@ -17,31 +17,6 @@
     </WindowChrome.WindowChrome>
 
     <Window.Resources>
-        <!-- Title bar close button -->
-        <Style x:Key="TitleBarButtonStyle" TargetType="Button">
-            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Foreground" Value="{DynamicResource BrushTextMuted}"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Width" Value="44"/>
-            <Setter Property="Height" Value="30"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bd" Background="{TemplateBinding Background}" CornerRadius="0,7,0,0">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrushSecondaryButtonHover}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <!-- Segmented theme pill -->
         <Style x:Key="ThemeSegmentStyle" TargetType="RadioButton">
             <Setter Property="BorderThickness" Value="0"/>
@@ -112,7 +87,7 @@
 
                 <Grid Margin="24,4,16,16">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="0"/>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -235,7 +210,6 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
@@ -264,14 +238,6 @@
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Text="{StaticResource StringUnitMilliseconds}"
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    VerticalAlignment="Center"
-                                    Margin="6,0,0,0"
-                                    Foreground="{DynamicResource BrushTextMuted}"/>
                             </Grid>
 
                             <!-- ── GENERAL ── -->
@@ -306,7 +272,6 @@
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
@@ -337,14 +302,6 @@
                                         </Style>
                                     </TextBox.Style>
                                 </TextBox>
-
-                                <TextBlock
-                                    Grid.Column="2"
-                                    Text="{StaticResource StringUnitItems}"
-                                    FontSize="{StaticResource FontSizeBase}"
-                                    VerticalAlignment="Center"
-                                    Margin="6,0,0,0"
-                                    Foreground="{DynamicResource BrushTextMuted}"/>
                             </Grid>
 
                             <!-- ── APPEARANCE ── -->
@@ -420,29 +377,66 @@
                         Foreground="{DynamicResource BrushTextMuted}"
                         FontSize="{StaticResource FontSizeSmall}" Margin="0,12,0,0"/>
 
-                    <!-- Save / Cancel -->
-                    <StackPanel
+                    <!-- About / Save / Cancel -->
+                    <Grid
                         Grid.Row="3"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
                         Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
                         <Button
-                            x:Name="SaveButton"
-                            Content="{StaticResource StringButtonSave}"
-                            Padding="16,9"
-                            Background="{DynamicResource BrushAccent}"
-                            Style="{StaticResource AccentButtonStyle}"
-                            Command="{Binding SaveCommand}"
-                            Margin="0,0,8,0"/>
+                            Grid.Column="0"
+                            Content="{StaticResource StringButtonAbout}"
+                            Padding="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Foreground="{DynamicResource BrushTextMuted}"
+                            Cursor="Hand"
+                            Click="About_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Opacity" Value="0.3"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <ContentPresenter/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Opacity" Value="1"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
 
-                        <Button
-                            Content="{StaticResource StringButtonCancel}"
-                            Padding="16,9"
-                            Background="{DynamicResource BrushBorder}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Click="Cancel_Click"/>
-                    </StackPanel>
+                        <StackPanel
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Right">
+
+                            <Button
+                                x:Name="SaveButton"
+                                Content="{StaticResource StringButtonSave}"
+                                Padding="16,9"
+                                Background="{DynamicResource BrushAccent}"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Command="{Binding SaveCommand}"
+                                Margin="0,0,8,0"/>
+
+                            <Button
+                                Content="{StaticResource StringButtonCancel}"
+                                Padding="16,9"
+                                Background="{DynamicResource BrushBorder}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Click="Cancel_Click"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </DockPanel>
         </Border>
