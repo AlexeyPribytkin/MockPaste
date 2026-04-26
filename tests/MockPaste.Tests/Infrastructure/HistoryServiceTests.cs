@@ -125,6 +125,59 @@ public sealed class HistoryServiceTests
         Assert.Equal(2, svc.GetAll().Count);
     }
 
+    // ── Remove ───────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Remove_ExistingValue_ReturnsTrueAndEntryIsGone()
+    {
+        var svc = new HistoryService(10);
+        svc.Add(Entry("a"));
+
+        bool result = svc.Remove("a");
+
+        Assert.True(result);
+        Assert.Empty(svc.GetAll());
+    }
+
+    [Fact]
+    public void Remove_UnknownValue_ReturnsFalse()
+    {
+        var svc = new HistoryService(10);
+        svc.Add(Entry("a"));
+
+        bool result = svc.Remove("does-not-exist");
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public void Remove_UnknownValue_DoesNotAffectExistingEntries()
+    {
+        var svc = new HistoryService(10);
+        svc.Add(Entry("a"));
+        svc.Add(Entry("b"));
+
+        svc.Remove("does-not-exist");
+
+        Assert.Equal(2, svc.GetAll().Count);
+    }
+
+    [Fact]
+    public void Remove_MiddleEntry_PreservesOrderOfRemainingEntries()
+    {
+        var svc = new HistoryService(10);
+        svc.Add(Entry("a"));
+        svc.Add(Entry("b"));
+        svc.Add(Entry("c"));
+
+        svc.Remove("b");
+
+        var all = svc.GetAll();
+        Assert.Equal(2, all.Count);
+        Assert.Equal("c", all[0].Value);
+        Assert.Equal("a", all[1].Value);
+    }
+
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static HistoryEntry Entry(string value) =>

@@ -49,6 +49,21 @@ public sealed class HistoryService
         }
     }
 
+    public bool Remove(string value)
+    {
+        lock (_lock)
+        {
+            var existing = _entries.FirstOrDefault(e => e.Value == value);
+            if (existing is null)
+            {
+                return false;
+            }
+
+            _entries.Remove(existing);
+            return true;
+        }
+    }
+
     public IReadOnlyList<HistoryEntry> GetAll()
     {
         lock (_lock)

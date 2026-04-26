@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MockPaste.Core.Generators;
 using MockPaste.Infrastructure;
+using MockPaste.UI;
 
 namespace MockPaste.UI.Popup;
 
@@ -130,6 +131,38 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         IsBackButton = true;
         IsHistoryButtonVisible = false;
 
+        RefreshHistoryItems();
+
+        SelectedIndex = Items.Count > 0 ? 0 : -1;
+    }
+
+    /// <summary>Removes a history entry by value and refreshes the history list.</summary>
+    public void DeleteHistoryItem(string value)
+    {
+        // Capture before RefreshHistoryItems() replaces Items, which resets
+        // SelectedIndex to -1 via the TwoWay binding on the ListBox.
+        int indexBeforeDelete = _selectedIndex;
+        _history.Remove(value);
+        RefreshHistoryItems();
+        SelectedIndex = Items.Count > 0 ? Math.Min(indexBeforeDelete, Items.Count - 1) : -1;
+    }
+
+    /// <summary>Deletes the currently selected history item.</summary>
+    public void DeleteSelectedHistoryItem()
+    {
+        if (_selectedIndex < 0 || _selectedIndex >= Items.Count)
+        {
+            return;
+        }
+
+        if (Items[_selectedIndex] is HistoryItemViewModel item)
+        {
+            DeleteHistoryItem(item.Value);
+        }
+    }
+
+    private void RefreshHistoryItems()
+    {
         var entries = _history.GetAll();
         if (entries.Count == 0)
         {
@@ -143,11 +176,10 @@ public sealed class PopupViewModel : INotifyPropertyChanged
             {
                 Value = e.Value,
                 CategoryName = e.CategoryName,
-                FormatName = e.FormatName
+                FormatName = e.FormatName,
+                DeleteCommand = new RelayCommand(() => DeleteHistoryItem(e.Value))
             }).ToList();
         }
-
-        SelectedIndex = Items.Count > 0 ? 0 : -1;
     }
 
     // ── Selection ────────────────────────────────────────────────────────

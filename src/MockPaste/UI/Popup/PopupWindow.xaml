@@ -55,17 +55,66 @@
 
         <!-- History item template -->
         <DataTemplate x:Key="HistoryItemTemplate">
-            <StackPanel>
-                <TextBlock Text="{Binding DisplayValue}"
-                           Foreground="{DynamicResource BrushTextPrimary}"
-                           FontFamily="{StaticResource FontFamilyDefault}"
-                           FontSize="{StaticResource FontSizeBody}"/>
-                <TextBlock Text="{Binding SubLabel}"
-                           Foreground="{DynamicResource BrushTextSubtle}"
-                           FontFamily="{StaticResource FontFamilyDefault}"
-                           FontSize="{StaticResource FontSizeTiny}"
-                           Margin="0,2,0,0"/>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding DisplayValue}"
+                               Foreground="{DynamicResource BrushTextPrimary}"
+                               FontFamily="{StaticResource FontFamilyDefault}"
+                               FontSize="{StaticResource FontSizeBody}"/>
+                    <TextBlock Text="{Binding SubLabel}"
+                               Foreground="{DynamicResource BrushTextSubtle}"
+                               FontFamily="{StaticResource FontFamilyDefault}"
+                               FontSize="{StaticResource FontSizeTiny}"
+                               Margin="0,2,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Command="{Binding DeleteCommand}"
+                        Cursor="Hand"
+                        VerticalAlignment="Center"
+                        Margin="8,0,0,0"
+                        Padding="4,2"
+                        ToolTip="{StaticResource StringTooltipDeleteHistoryItem}"
+                        Tag="DeleteBtn"
+                        Focusable="False">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bd"
+                                    Background="Transparent"
+                                    CornerRadius="3"
+                                    Padding="{TemplateBinding Padding}">
+                                <!-- Bin icon as a Path so Foreground drives its color in any theme -->
+                                <Viewbox Width="11" Height="11" VerticalAlignment="Center">
+                                    <Path x:Name="icon"
+                                          Data="M3,1 L3,0 L7,0 L7,1 L10,1 L10,2 L0,2 L0,1 Z
+                                                M1,3 L9,3 L8.5,10 L1.5,10 Z
+                                                M4,4 L4,9 M6,4 L6,9"
+                                          Fill="{DynamicResource BrushTextMuted}"
+                                          Stroke="{DynamicResource BrushTextMuted}"
+                                          StrokeThickness="0.3"
+                                          Visibility="Hidden"/>
+                            </Viewbox>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsMouseOver}" Value="True">
+                                    <Setter TargetName="icon" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                    <Setter TargetName="icon" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="icon" Property="Fill" Value="{DynamicResource BrushError}"/>
+                                    <Setter TargetName="icon" Property="Stroke" Value="{DynamicResource BrushError}"/>
+                                    <Setter TargetName="bd" Property="Background" Value="{DynamicResource BrushSurface}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
         </DataTemplate>
 
         <!-- Template selector -->

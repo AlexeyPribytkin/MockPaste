@@ -28,6 +28,7 @@
     <sys:String x:Key="StringButtonCancel">Cancel</sys:String>
     <sys:String x:Key="StringButtonAbout">About</sys:String>
     <sys:String x:Key="StringTooltipClose">Close</sys:String>
+    <sys:String x:Key="StringTooltipDeleteHistoryItem">Delete</sys:String>
 
     <!-- About window -->
     <sys:String x:Key="StringAboutTitle">MockPaste — About</sys:String>

@@ -164,6 +164,14 @@ public partial class PopupWindow : Window
     {
         switch (e.Key)
         {
+            case Key.Delete:
+                if (_vm.IsHistoryLevel)
+                {
+                    _vm.DeleteSelectedHistoryItem();
+                    e.Handled = true;
+                }
+                break;
+
             case Key.Escape:
                 if (_vm.IsFormatLevel || _vm.IsHistoryLevel)
                 {
@@ -226,10 +234,35 @@ public partial class PopupWindow : Window
 
     private void MenuList_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
+        // Don't trigger selection when the delete button was clicked
+        if (e.OriginalSource is FrameworkElement src)
+        {
+            var btn = FindAncestorWithTag(src, "DeleteBtn");
+            if (btn is not null)
+            {
+                return;
+            }
+        }
+
         if (e.OriginalSource is FrameworkElement { DataContext: MenuItemViewModel or HistoryItemViewModel })
         {
             _vm.SelectCurrentItem();
         }
+    }
+
+    private static DependencyObject? FindAncestorWithTag(DependencyObject? element, object tag)
+    {
+        while (element is not null)
+        {
+            if (element is FrameworkElement fe && Equals(fe.Tag, tag))
+            {
+                return element;
+            }
+
+            element = VisualTreeHelper.GetParent(element);
+        }
+
+        return null;
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

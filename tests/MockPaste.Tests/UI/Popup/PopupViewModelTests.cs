@@ -433,4 +433,130 @@ public sealed class PopupViewModelTests
 
         Assert.Contains(nameof(PopupViewModel.Items), changed);
     }
+
+    // ── DeleteHistoryItem ─────────────────────────────────────────────────
+
+    [Fact]
+    public void DeleteHistoryItem_RemovesItemFromList()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("b", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+
+        vm.DeleteHistoryItem("a");
+
+        Assert.Single(vm.Items);
+        var remaining = Assert.IsType<HistoryItemViewModel>(vm.Items[0]);
+        Assert.Equal("b", remaining.Value);
+    }
+
+    [Fact]
+    public void DeleteHistoryItem_LastItem_ShowsEmptyHistoryState()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+
+        vm.DeleteHistoryItem("a");
+
+        Assert.True(vm.IsEmptyHistoryVisible);
+        Assert.Empty(vm.Items);
+    }
+
+    [Fact]
+    public void DeleteHistoryItem_LastItem_SetsSelectedIndexToMinusOne()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+
+        vm.DeleteHistoryItem("a");
+
+        Assert.Equal(-1, vm.SelectedIndex);
+    }
+
+    [Fact]
+    public void DeleteHistoryItem_NotLastItem_SelectedIndexClampsToNewCount()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("b", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("c", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+        vm.SelectedIndex = 2; // select last item
+
+        vm.DeleteHistoryItem("c");
+
+        Assert.Equal(1, vm.SelectedIndex); // clamped to new last index
+    }
+
+    [Fact]
+    public void DeleteHistoryItem_RaisesPropertyChangedForItems()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("b", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+        var changed = new List<string?>();
+        vm.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        vm.DeleteHistoryItem("a");
+
+        Assert.Contains(nameof(PopupViewModel.Items), changed);
+    }
+
+    // ── DeleteSelectedHistoryItem ─────────────────────────────────────────
+
+    [Fact]
+    public void DeleteSelectedHistoryItem_RemovesSelectedEntry()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("b", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+        vm.SelectedIndex = 0; // "b" is first (most recent)
+
+        vm.DeleteSelectedHistoryItem();
+
+        Assert.Single(vm.Items);
+        var remaining = Assert.IsType<HistoryItemViewModel>(vm.Items[0]);
+        Assert.Equal("a", remaining.Value);
+    }
+
+    [Fact]
+    public void DeleteSelectedHistoryItem_WhenNoSelection_DoesNotThrow()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+        vm.SelectedIndex = -1;
+
+        var ex = Record.Exception(() => vm.DeleteSelectedHistoryItem());
+
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void DeleteSelectedHistoryItem_PreservesSelectionOnRemainingItems()
+    {
+        var history = new HistoryService();
+        history.Add(new HistoryEntry("a", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("b", "Email", "Basic", DateTime.Now));
+        history.Add(new HistoryEntry("c", "Email", "Basic", DateTime.Now));
+        var vm = CreateVm(history: history);
+        vm.ShowHistory();
+        vm.SelectedIndex = 0; // delete first item
+
+        vm.DeleteSelectedHistoryItem();
+
+        Assert.Equal(0, vm.SelectedIndex);
+    }
 }
