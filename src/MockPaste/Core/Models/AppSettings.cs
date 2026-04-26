@@ -14,6 +14,7 @@ public sealed class AppSettings
 
     public const bool PreserveClipboardDefault = true;
     public const bool LaunchAtStartupDefault = false;
+    public const bool TrackClipboardHistoryDefault = false;
     public const AppTheme ThemeDefault = AppTheme.Dark;
 
     public int Version { get; set; } = 1;
@@ -22,6 +23,7 @@ public sealed class AppSettings
     public int PasteDelayMs { get; set; } = PasteDelayDefault;
     public int ClipboardRestoreDelayMs { get; set; } = ClipboardRestoreDelayDefault;
     public bool LaunchAtStartup { get; set; } = LaunchAtStartupDefault;
+    public bool TrackClipboardHistory { get; set; } = TrackClipboardHistoryDefault;
     public AppTheme Theme { get; set; } = ThemeDefault;
     public int HistorySize { get; set; } = HistorySizeDefault;
 
@@ -48,6 +50,7 @@ public sealed class AppSettings
         PasteDelayMs = source.PasteDelayMs;
         ClipboardRestoreDelayMs = source.ClipboardRestoreDelayMs;
         LaunchAtStartup = source.LaunchAtStartup;
+        TrackClipboardHistory = source.TrackClipboardHistory;
         Theme = source.Theme;
         HistorySize = source.HistorySize;
     }

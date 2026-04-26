@@ -81,6 +81,21 @@ public sealed class ClipboardService
         return success;
     }
 
+    public string? TryGetText()
+    {
+        EnforceStaThread();
+
+        try
+        {
+            return Clipboard.ContainsText() ? Clipboard.GetText() : null;
+        }
+        catch (Exception ex)
+        {
+            AppLogger.Warning("Failed to read clipboard text", ex);
+            return null;
+        }
+    }
+
     public bool TrySetTextInstance(string text)
     {
         EnforceStaThread();

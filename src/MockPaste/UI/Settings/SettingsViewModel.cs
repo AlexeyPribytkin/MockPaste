@@ -16,6 +16,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _snapshotPasteDelay = string.Empty;
     private bool _snapshotLaunchAtStartup;
     private string _snapshotHistorySize = string.Empty;
+    private bool _snapshotTrackClipboardHistory;
     private AppTheme _snapshotTheme;
 
     // backing fields
@@ -25,6 +26,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     private string _pasteDelayText = string.Empty;
     private bool _launchAtStartup;
     private string _historySizeText = string.Empty;
+    private bool _trackClipboardHistory;
     private bool _isThemeDark;
     private bool _isThemeLight;
     private bool _isThemeSystem;
@@ -91,6 +93,12 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         get => _launchAtStartup;
         set => SetDirtyField(ref _launchAtStartup, value);
+    }
+
+    public bool TrackClipboardHistory
+    {
+        get => _trackClipboardHistory;
+        set => SetDirtyField(ref _trackClipboardHistory, value);
     }
 
     public string HistorySizeText
@@ -183,6 +191,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         _preserveClipboard = _settings.PreserveClipboard;
         _pasteDelayText = _settings.PasteDelayMs.ToString();
         _launchAtStartup = _settings.LaunchAtStartup;
+        _trackClipboardHistory = _settings.TrackClipboardHistory;
         _historySizeText = _settings.HistorySize.ToString();
 
         (_isThemeDark, _isThemeLight, _isThemeSystem) = _settings.Theme switch
@@ -199,6 +208,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         _snapshotPreserveClipboard = _preserveClipboard;
         _snapshotPasteDelay = _pasteDelayText;
         _snapshotLaunchAtStartup = _launchAtStartup;
+        _snapshotTrackClipboardHistory = _trackClipboardHistory;
         _snapshotHistorySize = _historySizeText;
         _snapshotTheme = CurrentTheme;
     }
@@ -208,6 +218,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         || _preserveClipboard != _snapshotPreserveClipboard
         || _pasteDelayText != _snapshotPasteDelay
         || _launchAtStartup != _snapshotLaunchAtStartup
+        || _trackClipboardHistory != _snapshotTrackClipboardHistory
         || _historySizeText != _snapshotHistorySize
         || CurrentTheme != _snapshotTheme;
 
@@ -254,6 +265,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         _settings.Hotkey = _pendingHotkey;
         _settings.PreserveClipboard = _preserveClipboard;
         _settings.LaunchAtStartup = _launchAtStartup;
+        _settings.TrackClipboardHistory = _trackClipboardHistory;
         if (AppSettings.TryParsePasteDelay(_pasteDelayText, out var delay))
         {
             _settings.PasteDelayMs = delay;

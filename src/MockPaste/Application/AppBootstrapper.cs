@@ -29,6 +29,7 @@ internal sealed class AppBootstrapper : IDisposable
     private ForegroundWindowTracker? _foregroundTracker;
     private IntPtr _lastForegroundWindow;
     private SettingsWindow? _settingsWindow;
+    private ClipboardMonitor? _clipboardMonitor;
 
     public AppBootstrapper(Action shutdownApp)
     {
@@ -58,9 +59,11 @@ internal sealed class AppBootstrapper : IDisposable
                 _history,
                 AppLogger.Instance);
 
+            SeedHistoryFromClipboard(clipboard);
             InitializeTray();
             InitializeHotkey();
             InitializePopup(generators);
+            InitializeClipboardMonitor(clipboard);
             _foregroundTracker = new ForegroundWindowTracker();
 
             ThemeService.Apply(_settings.Theme);
@@ -100,6 +103,7 @@ internal sealed class AppBootstrapper : IDisposable
         _hotkeyManager?.Dispose();
         _trayIcon?.Dispose();
         _foregroundTracker?.Dispose();
+        _clipboardMonitor?.Dispose();
     }
 
     private void CleanupFailedStartup()
@@ -113,6 +117,9 @@ internal sealed class AppBootstrapper : IDisposable
             _popup.HidePopup();
             _popup = null;
         }
+
+        _clipboardMonitor?.Dispose();
+        _clipboardMonitor = null;
 
         _hotkeyManager?.Dispose();
         _hotkeyManager = null;
@@ -252,5 +259,27 @@ internal sealed class AppBootstrapper : IDisposable
         {
             ThemeService.Reapply();
         }
+    }
+
+    private void SeedHistoryFromClipboard(ClipboardService clipboard)
+    {
+        if (!_settings!.TrackClipboardHistory)
+        {
+            return;
+        }
+
+        var text = clipboard.TryGetText();
+        if (!string.IsNullOrWhiteSpace(text))
+        {
+            _history!.Add(new HistoryEntry(text, "Clipboard", "Clipboard", DateTime.Now));
+            AppLogger.Debug("Added clipboard text to history");
+        }
+    }
+
+    private void InitializeClipboardMonitor(ClipboardService clipboard)
+    {
+        _clipboardMonitor = new ClipboardMonitor();
+        _clipboardMonitor.ClipboardChanged += () => SeedHistoryFromClipboard(clipboard);
+        _clipboardMonitor.Initialize();
     }
 }

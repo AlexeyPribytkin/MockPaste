@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:components="clr-namespace:MockPaste.UI.Components"
         Title="{StaticResource StringSettingsTitle}"
-        Width="420" Height="576"
+        Width="420"
+        Height="584"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
         WindowStyle="None"
@@ -205,6 +206,14 @@
                                 FontSize="{StaticResource FontSizeBase}"
                                 Margin="0,0,0,12"
                                 IsChecked="{Binding PreserveClipboard, Mode=TwoWay}"/>
+
+                            <components:ToggleSwitch
+                                x:Name="TrackClipboardHistoryCheck"
+                                Header="{StaticResource StringCheckboxTrackClipboardHistory}"
+                                Foreground="{DynamicResource BrushTextPrimary}"
+                                FontSize="{StaticResource FontSizeBase}"
+                                Margin="0,0,0,12"
+                                IsChecked="{Binding TrackClipboardHistory, Mode=TwoWay}"/>
 
                             <Grid>
                                 <Grid.ColumnDefinitions>
