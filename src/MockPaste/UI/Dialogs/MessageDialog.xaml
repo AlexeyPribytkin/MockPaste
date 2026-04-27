@@ -56,10 +56,10 @@
                 </Grid>
 
                 <!-- Body -->
-                <StackPanel Margin="20,8,20,20">
+                <StackPanel Margin="24,4,16,16">
 
                     <!-- Icon + message row -->
-                    <Grid Margin="0,4,0,20">
+                    <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -101,11 +101,10 @@
                     </Grid>
 
                     <!-- Buttons row -->
-                    <Grid x:Name="ButtonRow">
+                    <Grid x:Name="ButtonRow" Margin="0,16,0,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="8"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
@@ -114,7 +113,7 @@
                             x:Name="YesButton"
                             Grid.Column="1"
                             MinWidth="80"
-                            Padding="14,8"
+                            Padding="16,8"
                             Click="Yes_Click">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
@@ -131,9 +130,10 @@
                         <!-- No / Cancel button (secondary) -->
                         <Button
                             x:Name="NoButton"
-                            Grid.Column="3"
+                            Grid.Column="2"
                             MinWidth="80"
-                            Padding="14,8"
+                            Margin="8,0,0,0"
+                            Padding="16,8"
                             Click="No_Click">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
