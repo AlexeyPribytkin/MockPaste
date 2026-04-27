@@ -30,6 +30,9 @@
     <SolidColorBrush x:Key="BrushTextMuted"           Color="#FF5A5870"/>
     <SolidColorBrush x:Key="BrushTextSubtle"          Color="#FF5F5D73"/>
 
+    <!-- System focus visual stroke (dotted keyboard focus rectangle) -->
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="#FF000000"/>
+
     <!-- Toggle switch -->
     <SolidColorBrush x:Key="BrushToggleTrackOff"      Color="#FFD5D5D8"/>
     <SolidColorBrush x:Key="BrushToggleTrackBorder"   Color="#A0000000"/>
