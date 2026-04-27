@@ -483,4 +483,16 @@ public sealed class SettingsViewModelTests
 
         Assert.Contains(nameof(SettingsViewModel.HistorySizeDisplay), raised);
     }
+
+    [Fact]
+    public void WhenThemeLightSelected_OtherThemeFlags_AreFalse()
+    {
+        var vm = CreateVm();
+
+        vm.IsThemeLight = true;
+
+        Assert.True(vm.IsThemeLight);
+        Assert.False(vm.IsThemeDark);
+        Assert.False(vm.IsThemeSystem);
+    }
 }

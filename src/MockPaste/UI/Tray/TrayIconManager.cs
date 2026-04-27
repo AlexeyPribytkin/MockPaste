@@ -44,14 +44,30 @@ public sealed class TrayIconManager : IDisposable
             EnabledChanged?.Invoke(enabled);
         };
 
-        (_taskbarIcon.ContextMenu ?? throw new InvalidOperationException("TrayIcon ContextMenu is not set."))
-            .DataContext = _viewModel;
+        ApplyContextMenuDataContext(_taskbarIcon.ContextMenu ?? throw new InvalidOperationException("TrayIcon ContextMenu is not set."));
         _taskbarIcon.TrayLeftMouseDown += (_, _) => OnTrayLeftClicked?.Invoke();
         _taskbarIcon.ForceCreate(enablesEfficiencyMode: false);
+    }
+
+    /// <summary>Recreates and reapplies the tray context menu so it picks up current theme resources.</summary>
+    public void RefreshTheme()
+    {
+        if (System.Windows.Application.Current.Resources["TrayContextMenu"] is not System.Windows.Controls.ContextMenu menu)
+        {
+            throw new InvalidOperationException("TrayContextMenu resource is not set.");
+        }
+
+        ApplyContextMenuDataContext(menu);
+        _taskbarIcon.ContextMenu = menu;
     }
 
     public void Dispose()
     {
         _taskbarIcon.Dispose();
+    }
+
+    private void ApplyContextMenuDataContext(System.Windows.Controls.ContextMenu contextMenu)
+    {
+        contextMenu.DataContext = _viewModel;
     }
 }

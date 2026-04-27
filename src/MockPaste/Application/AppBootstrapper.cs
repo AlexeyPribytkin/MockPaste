@@ -256,6 +256,7 @@ internal sealed class AppBootstrapper : IDisposable
         ApplyHotkey(_settings);
 
         ThemeService.Apply(_settings.Theme);
+        _trayIcon?.RefreshTheme();
         StartupService.Apply(_settings.LaunchAtStartup);
         AppLogger.Information("Settings updated");
         return saved;
@@ -283,6 +284,7 @@ internal sealed class AppBootstrapper : IDisposable
         if (e.Category == UserPreferenceCategory.General)
         {
             ThemeService.Reapply();
+            _trayIcon?.RefreshTheme();
         }
     }
 

@@ -184,21 +184,39 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     public bool IsThemeDark
     {
         get => _isThemeDark;
-        set => SetDirtyField(ref _isThemeDark, value);
+        set
+        {
+            if (value)
+            {
+                SetThemeSelection(AppTheme.Dark);
+            }
+        }
     }
 
     /// <summary>When <c>true</c>, the Light theme radio button is selected.</summary>
     public bool IsThemeLight
     {
         get => _isThemeLight;
-        set => SetDirtyField(ref _isThemeLight, value);
+        set
+        {
+            if (value)
+            {
+                SetThemeSelection(AppTheme.Light);
+            }
+        }
     }
 
     /// <summary>When <c>true</c>, the System (follow OS) theme radio button is selected.</summary>
     public bool IsThemeSystem
     {
         get => _isThemeSystem;
-        set => SetDirtyField(ref _isThemeSystem, value);
+        set
+        {
+            if (value)
+            {
+                SetThemeSelection(AppTheme.System);
+            }
+        }
     }
 
     /// <summary>Feedback message shown in the settings UI, e.g. "Saved" or "Hotkey reset".</summary>
@@ -291,6 +309,27 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
             AppTheme.System => (false, false, true),
             _ => (true, false, false)
         };
+    }
+
+    /// <summary>Sets one active theme flag and clears the others so radio-button state remains consistent.</summary>
+    private void SetThemeSelection(AppTheme theme)
+    {
+        var (isDark, isLight, isSystem) = theme switch
+        {
+            AppTheme.Light => (false, true, false),
+            AppTheme.Dark => (true, false, false),
+            _ => (false, false, true)
+        };
+
+        var changed = false;
+        changed |= SetField(ref _isThemeDark, isDark, nameof(IsThemeDark));
+        changed |= SetField(ref _isThemeLight, isLight, nameof(IsThemeLight));
+        changed |= SetField(ref _isThemeSystem, isSystem, nameof(IsThemeSystem));
+
+        if (changed)
+        {
+            NotifyDirty();
+        }
     }
 
     /// <summary>

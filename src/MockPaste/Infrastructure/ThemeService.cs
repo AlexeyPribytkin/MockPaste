@@ -61,6 +61,9 @@ public static class ThemeService
         }
 
         var newUri = new Uri($"/{AssemblyName};component/Themes/{resolved}.xaml", UriKind.Relative);
+        var merged = app.Resources.MergedDictionaries;
+
+        _currentDictionary ??= FindExistingThemeDictionary(merged);
 
         // Short-circuit if the same theme dictionary is already applied.
         if (_currentDictionary?.Source == newUri)
@@ -69,7 +72,6 @@ public static class ThemeService
         }
 
         var newDict = new ResourceDictionary { Source = newUri };
-        var merged = app.Resources.MergedDictionaries;
 
         if (_currentDictionary is not null && merged.Contains(_currentDictionary))
         {
@@ -80,11 +82,31 @@ public static class ThemeService
         }
         else
         {
-            // Theme dictionary is inserted first so it has the highest resource priority.
-            merged.Insert(0, newDict);
+            // Theme dictionary is inserted last so it has the highest resource priority.
+            merged.Add(newDict);
         }
 
         _currentDictionary = newDict;
+    }
+
+    private static ResourceDictionary? FindExistingThemeDictionary(IList<ResourceDictionary> dictionaries)
+    {
+        for (int i = 0; i < dictionaries.Count; i++)
+        {
+            var source = dictionaries[i].Source?.OriginalString;
+            if (source is null)
+            {
+                continue;
+            }
+
+            if (source.EndsWith("Themes/Dark.xaml", StringComparison.OrdinalIgnoreCase)
+                || source.EndsWith("Themes/Light.xaml", StringComparison.OrdinalIgnoreCase))
+            {
+                return dictionaries[i];
+            }
+        }
+
+        return null;
     }
 
     private static string GetSystemTheme()

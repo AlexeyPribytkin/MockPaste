@@ -16,14 +16,19 @@
             <local:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
             <local:StringToVisibilityConverter x:Key="StringToVisibility"/>
 
-            <ContextMenu x:Key="TrayContextMenu">
+            <ContextMenu x:Key="TrayContextMenu"
+                         x:Shared="False"
+                         Style="{StaticResource TrayContextMenuStyle}">
                 <MenuItem Header="Enabled"
+                          Style="{StaticResource TrayMenuItemStyle}"
                           IsCheckable="True"
                           IsChecked="{Binding IsEnabled, Mode=OneWay}"
                           Command="{Binding ToggleCommand}"/>
                 <MenuItem Header="Settings"
+                          Style="{StaticResource TrayMenuItemStyle}"
                           Command="{Binding SettingsCommand}"/>
                 <MenuItem Header="Exit"
+                          Style="{StaticResource TrayMenuItemStyle}"
                           Command="{Binding ExitCommand}"/>
             </ContextMenu>
 

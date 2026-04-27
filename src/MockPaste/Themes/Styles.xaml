@@ -28,7 +28,7 @@
     </Style>
 
     <!-- Tray context menu -->
-    <Style TargetType="ContextMenu">
+    <Style x:Key="TrayContextMenuStyle" TargetType="ContextMenu">
         <Setter Property="Background" Value="{DynamicResource BrushSurface}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BrushBorder}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -65,7 +65,7 @@
     </Style>
 
     <!-- Tray menu item -->
-    <Style TargetType="MenuItem">
+    <Style x:Key="TrayMenuItemStyle" TargetType="MenuItem">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}"/>
         <Setter Property="FontFamily" Value="{StaticResource FontFamilyDefault}"/>
@@ -100,7 +100,8 @@
                             <ContentPresenter Grid.Column="3"
                                               ContentSource="Header"
                                               Margin="8,0"
-                                              VerticalAlignment="Center"/>
+                                              VerticalAlignment="Center"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"/>
                         </Grid>
                     </Border>
                     <ControlTemplate.Triggers>
