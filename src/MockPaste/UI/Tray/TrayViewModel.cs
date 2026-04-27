@@ -11,6 +11,7 @@ namespace MockPaste.UI.Tray;
 internal sealed class TrayViewModel : INotifyPropertyChanged
 {
     private bool _isEnabled = true;
+    private readonly Func<string, string> _resourceResolver;
 
     /// <summary>Raised when the user clicks "Settings" in the tray context menu.</summary>
     public event Action? SettingsRequested;
@@ -35,7 +36,9 @@ internal sealed class TrayViewModel : INotifyPropertyChanged
     }
 
     /// <summary>Tooltip text shown when hovering the tray icon, indicating the enabled/disabled state.</summary>
-    public string ToolTipText => IsEnabled ? "MockPaste" : "MockPaste (Disabled)";
+    public string ToolTipText => IsEnabled
+        ? Res("StringTrayTooltipEnabled")
+        : Res("StringTrayTooltipDisabled");
 
     /// <summary>Toggles the application between enabled and disabled states.</summary>
     public ICommand ToggleCommand { get; }
@@ -48,6 +51,7 @@ internal sealed class TrayViewModel : INotifyPropertyChanged
 
     public TrayViewModel()
     {
+        _resourceResolver = key => System.Windows.Application.Current?.Resources[key] as string ?? key;
         ToggleCommand = new RelayCommand(OnToggle);
         SettingsCommand = new RelayCommand(() => SettingsRequested?.Invoke());
         ExitCommand = new RelayCommand(() => ExitRequested?.Invoke());
@@ -60,6 +64,8 @@ internal sealed class TrayViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private string Res(string key) => _resourceResolver(key);
 
     private void OnPropertyChanged([CallerMemberName] string? name = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

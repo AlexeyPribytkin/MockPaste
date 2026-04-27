@@ -48,7 +48,7 @@
 
                     <Button
                         Grid.Column="2"
-                        Content="✕"
+                        Content="{DynamicResource StringCloseGlyph}"
                         Style="{StaticResource TitleBarButtonStyle}"
                         ToolTip="{StaticResource StringTooltipClose}"
                         Click="Close_Click"/>

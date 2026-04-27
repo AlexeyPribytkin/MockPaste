@@ -109,8 +109,10 @@ public partial class SettingsWindow : Window
         {
             return true;
         }
+
         var msg = System.Windows.Application.Current.Resources["StringDiscardChangesMessage"] as string ?? "";
-        return MessageDialog.Confirm(msg, "MockPaste", this);
+        var title = System.Windows.Application.Current.Resources["StringAppName"] as string ?? "";
+        return MessageDialog.Confirm(msg, title, this);
     }
 
     private void TitleBarClose_Click(object sender, RoutedEventArgs e)

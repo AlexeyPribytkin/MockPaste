@@ -9,6 +9,7 @@
     <sys:String x:Key="StringButtonHistory">History</sys:String>
     <sys:String x:Key="StringEmptyHistory">No recent items</sys:String>
     <sys:String x:Key="StringSubMenuArrow">›</sys:String>
+    <sys:String x:Key="StringPopupBackFormat">← {0}</sys:String>
 
     <!-- Settings window -->
     <sys:String x:Key="StringSettingsTitle">MockPaste — Settings</sys:String>
@@ -30,6 +31,7 @@
     <sys:String x:Key="StringButtonAbout">About</sys:String>
     <sys:String x:Key="StringTooltipClose">Close</sys:String>
     <sys:String x:Key="StringTooltipDeleteHistoryItem">Delete</sys:String>
+    <sys:String x:Key="StringCloseGlyph">✕</sys:String>
 
     <!-- About window -->
     <sys:String x:Key="StringAboutTitle">MockPaste — About</sys:String>
@@ -68,5 +70,18 @@
     <sys:String x:Key="StringDialogOK">OK</sys:String>
     <sys:String x:Key="StringDialogYes">Yes</sys:String>
     <sys:String x:Key="StringDialogNo">No</sys:String>
+
+    <!-- Tray -->
+    <sys:String x:Key="StringTrayMenuEnabled">Enabled</sys:String>
+    <sys:String x:Key="StringTrayMenuSettings">Settings</sys:String>
+    <sys:String x:Key="StringTrayMenuExit">Exit</sys:String>
+    <sys:String x:Key="StringTrayTooltipEnabled">MockPaste</sys:String>
+    <sys:String x:Key="StringTrayTooltipDisabled">MockPaste (Disabled)</sys:String>
+
+    <!-- Application messages -->
+    <sys:String x:Key="StringMessageAlreadyRunning">MockPaste is already running.</sys:String>
+    <sys:String x:Key="StringMessageFailedToStartFormat">Failed to start MockPaste:{0}{1}</sys:String>
+    <sys:String x:Key="StringTitleError">MockPaste Error</sys:String>
+    <sys:String x:Key="StringMessageHotkeyRegisterFailedFormat">Could not register hotkey: {0}{1}It may be in use by another application.</sys:String>
 
 </ResourceDictionary>

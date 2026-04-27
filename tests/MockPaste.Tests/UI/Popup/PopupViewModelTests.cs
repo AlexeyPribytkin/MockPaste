@@ -58,7 +58,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowCategories();
 
-        Assert.Equal("MockPaste", vm.HeaderText);
+        Assert.Equal("StringAppName", vm.HeaderText);
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowFormats(gen);
 
-        Assert.Equal("← Email", vm.HeaderText);
+        Assert.Equal("StringPopupBackFormat", vm.HeaderText);
     }
 
     [Fact]
@@ -197,7 +197,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowHistory();
 
-        Assert.Equal("← History", vm.HeaderText);
+        Assert.Equal("StringPopupBackFormat", vm.HeaderText);
     }
 
     [Fact]

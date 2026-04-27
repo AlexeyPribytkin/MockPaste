@@ -92,7 +92,10 @@ internal sealed class AppBootstrapper : IDisposable
             }
 
             AppLogger.Fatal("Failed to start MockPaste", ex);
-            MessageDialog.Show($"Failed to start MockPaste:\n{ex.Message}", "MockPaste Error", DialogKind.Error);
+            var newLine = Environment.NewLine;
+            var startupMessageFormat = Resolve("StringMessageFailedToStartFormat");
+            var startupMessage = string.Format(startupMessageFormat, newLine, ex.Message);
+            MessageDialog.Show(startupMessage, Resolve("StringTitleError"), DialogKind.Error);
             _shutdownApp();
         }
     }
@@ -270,13 +273,19 @@ internal sealed class AppBootstrapper : IDisposable
         {
             if (!_hotkeyManager!.Register(current.Hotkey))
             {
+                var newLine = Environment.NewLine;
+                var hotkeyMessageFormat = Resolve("StringMessageHotkeyRegisterFailedFormat");
+                var hotkeyMessage = string.Format(hotkeyMessageFormat, current.Hotkey.ToDisplayString(), newLine);
                 MessageDialog.Show(
-                    $"Could not register hotkey: {current.Hotkey.ToDisplayString()}\nIt may be in use by another application.",
-                    "MockPaste",
+                    hotkeyMessage,
+                    Resolve("StringAppName"),
                     DialogKind.Warning);
             }
         }
     }
+
+    private static string Resolve(string key) =>
+        System.Windows.Application.Current.Resources[key] as string ?? key;
 
     /// <summary>Re-applies the current theme when the Windows color scheme changes.</summary>
     private void OnSystemThemeChanged(object sender, UserPreferenceChangedEventArgs e)

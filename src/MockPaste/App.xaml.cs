@@ -24,7 +24,9 @@ public partial class App : System.Windows.Application
 
         if (!createdNew)
         {
-            MessageDialog.Show("MockPaste is already running.", "MockPaste", DialogKind.Information);
+            var message = Current.Resources["StringMessageAlreadyRunning"] as string ?? string.Empty;
+            var title = Current.Resources["StringAppName"] as string;
+            MessageDialog.Show(message, title, DialogKind.Information);
             _instanceMutex?.Dispose();
             Shutdown(0);
             return;

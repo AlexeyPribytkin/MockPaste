@@ -19,21 +19,21 @@
             <ContextMenu x:Key="TrayContextMenu"
                          x:Shared="False"
                          Style="{StaticResource TrayContextMenuStyle}">
-                <MenuItem Header="Enabled"
+                <MenuItem Header="{DynamicResource StringTrayMenuEnabled}"
                           Style="{StaticResource TrayMenuItemStyle}"
                           IsCheckable="True"
                           IsChecked="{Binding IsEnabled, Mode=OneWay}"
                           Command="{Binding ToggleCommand}"/>
-                <MenuItem Header="Settings"
+                <MenuItem Header="{DynamicResource StringTrayMenuSettings}"
                           Style="{StaticResource TrayMenuItemStyle}"
                           Command="{Binding SettingsCommand}"/>
-                <MenuItem Header="Exit"
+                <MenuItem Header="{DynamicResource StringTrayMenuExit}"
                           Style="{StaticResource TrayMenuItemStyle}"
                           Command="{Binding ExitCommand}"/>
             </ContextMenu>
 
             <tb:TaskbarIcon x:Key="TrayIcon"
-                            ToolTipText="MockPaste"
+                            ToolTipText="{DynamicResource StringTrayTooltipEnabled}"
                             IconSource="/Assets/app.ico"
                             ContextMenu="{StaticResource TrayContextMenu}"
                             MenuActivation="RightClick"/>

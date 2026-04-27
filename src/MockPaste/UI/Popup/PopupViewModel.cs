@@ -15,9 +15,10 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     private readonly GeneratorRegistry _generators;
     private readonly HistoryService _history;
+    private readonly Func<string, string> _resourceResolver;
 
     private PopupLevel _level;
-    private string _headerText = "MockPaste";
+    private string _headerText = string.Empty;
     private bool _isBackButton;
     private bool _isHistoryButtonVisible = true;
     private bool _isEmptyHistoryVisible;
@@ -39,6 +40,8 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     {
         _generators = generators;
         _history = history;
+        _resourceResolver = key => System.Windows.Application.Current?.Resources[key] as string ?? key;
+        _headerText = Res("StringAppName");
     }
 
     // ── Navigation state ─────────────────────────────────────────────────
@@ -99,7 +102,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     public void ShowCategories()
     {
         SetLevel(PopupLevel.Categories);
-        HeaderText = "MockPaste";
+        HeaderText = Res("StringAppName");
         IsBackButton = false;
         IsHistoryButtonVisible = true;
         IsEmptyHistoryVisible = false;
@@ -119,7 +122,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     public void ShowFormats(IFakeDataGenerator generator)
     {
         SetLevel(PopupLevel.Formats);
-        HeaderText = $"← {generator.CategoryName}";
+        HeaderText = string.Format(Res("StringPopupBackFormat"), generator.CategoryName);
         IsBackButton = true;
         IsHistoryButtonVisible = false;
         IsEmptyHistoryVisible = false;
@@ -140,7 +143,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     public void ShowHistory()
     {
         SetLevel(PopupLevel.History);
-        HeaderText = "← History";
+        HeaderText = string.Format(Res("StringPopupBackFormat"), Res("StringButtonHistory"));
         IsBackButton = true;
         IsHistoryButtonVisible = false;
 
@@ -306,4 +309,6 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
+
+    private string Res(string key) => _resourceResolver(key);
 }
