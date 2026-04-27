@@ -33,7 +33,8 @@
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="41"/>
+            <ColumnDefinition Width="24"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
         <!-- Label -->
@@ -42,8 +43,27 @@
                           VerticalAlignment="Center"
                           Margin="0,0,12,0"/>
 
+        <!-- State label -->
+        <TextBlock Grid.Column="1"
+                   VerticalAlignment="Center"
+                   Foreground="{DynamicResource BrushTextMuted}"
+                   FontSize="{StaticResource FontSizeSmall}"
+                   FontWeight="SemiBold">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Text" Value="{StaticResource StringToggleOff}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource AncestorType={x:Type self:ToggleSwitch}}}" Value="True">
+                            <Setter Property="Text" Value="{StaticResource StringToggleOn}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource BrushTextPrimary}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
         <!-- Switch track + thumb -->
-        <Grid Grid.Column="1" Width="40" Height="20" VerticalAlignment="Center">
+        <Grid Grid.Column="2" Width="40" Height="20" VerticalAlignment="Center">
             <!-- Off-state track (always behind) -->
             <Border x:Name="OffTrack"
                     CornerRadius="10"
@@ -89,5 +109,6 @@
                 </Ellipse>
             </Grid>
         </Grid>
+
     </Grid>
 </UserControl>

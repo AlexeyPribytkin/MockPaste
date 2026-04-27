@@ -49,6 +49,10 @@
     <sys:String x:Key="StringThemeLight">Light</sys:String>
     <sys:String x:Key="StringThemeSystem">System</sys:String>
 
+    <!-- Toggle switch -->
+    <sys:String x:Key="StringToggleOn">On</sys:String>
+    <sys:String x:Key="StringToggleOff">Off</sys:String>
+
     <!-- Status messages (set from code) -->
     <sys:String x:Key="StringStatusCapturePrompt">Press a key combination...</sys:String>
     <sys:String x:Key="StringStatusHotkeySet">Hotkey set to: {0}</sys:String>
