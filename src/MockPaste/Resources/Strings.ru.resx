@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StringAppName" xml:space="preserve">
+    <value>MockPaste</value>
+  </data>
+  <data name="StringButtonHistory" xml:space="preserve">
+    <value>История</value>
+  </data>
+  <data name="StringEmptyHistory" xml:space="preserve">
+    <value>Нет недавних элементов</value>
+  </data>
+  <data name="StringSubMenuArrow" xml:space="preserve">
+    <value>›</value>
+  </data>
+  <data name="StringPopupBackFormat" xml:space="preserve">
+    <value>← {0}</value>
+  </data>
+  <data name="StringSettingsTitle" xml:space="preserve">
+    <value>MockPaste — Настройки</value>
+  </data>
+  <data name="StringSettingsHeader" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="StringLabelHotkey" xml:space="preserve">
+    <value>Глобальная горячая клавиша</value>
+  </data>
+  <data name="StringHotkeyDefault" xml:space="preserve">
+    <value>Ctrl + Alt + Space</value>
+  </data>
+  <data name="StringButtonChange" xml:space="preserve">
+    <value>Изменить</value>
+  </data>
+  <data name="StringButtonReset" xml:space="preserve">
+    <value>Сброс</value>
+  </data>
+  <data name="StringCheckboxPreserveClipboard" xml:space="preserve">
+    <value>Сохранять содержимое буфера обмена</value>
+  </data>
+  <data name="StringCheckboxTrackClipboardHistory" xml:space="preserve">
+    <value>Отслеживать историю буфера обмена</value>
+  </data>
+  <data name="StringLabelPasteDelay" xml:space="preserve">
+    <value>Задержка вставки:</value>
+  </data>
+  <data name="StringUnitMilliseconds" xml:space="preserve">
+    <value>мс</value>
+  </data>
+  <data name="StringCheckboxLaunchAtStartup" xml:space="preserve">
+    <value>Запускать при старте системы</value>
+  </data>
+  <data name="StringLabelHistorySize" xml:space="preserve">
+    <value>Размер истории:</value>
+  </data>
+  <data name="StringUnitItem" xml:space="preserve">
+    <value>шт.</value>
+  </data>
+  <data name="StringUnitItems" xml:space="preserve">
+    <value>шт.</value>
+  </data>
+  <data name="StringButtonSave" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="StringButtonCancel" xml:space="preserve">
+    <value>Отмена</value>
+  </data>
+  <data name="StringButtonAbout" xml:space="preserve">
+    <value>О программе</value>
+  </data>
+  <data name="StringTooltipClose" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="StringTooltipDeleteHistoryItem" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="StringCloseGlyph" xml:space="preserve">
+    <value>✕</value>
+  </data>
+  <data name="StringAboutTitle" xml:space="preserve">
+    <value>MockPaste — О программе</value>
+  </data>
+  <data name="StringAboutDevelopedBy" xml:space="preserve">
+    <value>Разработано Alexey Pribytkin</value>
+  </data>
+  <data name="StringAboutVersion" xml:space="preserve">
+    <value>Версия {0}</value>
+  </data>
+  <data name="StringButtonClose" xml:space="preserve">
+    <value>Закрыть</value>
+  </data>
+  <data name="StringSectionHotkey" xml:space="preserve">
+    <value>ГОРЯЧАЯ КЛАВИША</value>
+  </data>
+  <data name="StringSectionBehavior" xml:space="preserve">
+    <value>ПОВЕДЕНИЕ</value>
+  </data>
+  <data name="StringSectionGeneral" xml:space="preserve">
+    <value>ОБЩИЕ</value>
+  </data>
+  <data name="StringSectionAppearance" xml:space="preserve">
+    <value>ВНЕШНИЙ ВИД</value>
+  </data>
+  <data name="StringLabelTheme" xml:space="preserve">
+    <value>Тема:</value>
+  </data>
+  <data name="StringThemeDark" xml:space="preserve">
+    <value>Тёмная</value>
+  </data>
+  <data name="StringThemeLight" xml:space="preserve">
+    <value>Светлая</value>
+  </data>
+  <data name="StringThemeSystem" xml:space="preserve">
+    <value>Системная</value>
+  </data>
+  <data name="StringToggleOn" xml:space="preserve">
+    <value>Вкл</value>
+  </data>
+  <data name="StringToggleOff" xml:space="preserve">
+    <value>Выкл</value>
+  </data>
+  <data name="StringStatusCapturePrompt" xml:space="preserve">
+    <value>Нажмите сочетание клавиш...</value>
+  </data>
+  <data name="StringStatusHotkeySet" xml:space="preserve">
+    <value>Горячая клавиша установлена: {0}</value>
+  </data>
+  <data name="StringStatusHotkeyReset" xml:space="preserve">
+    <value>Горячая клавиша сброшена по умолчанию.</value>
+  </data>
+  <data name="StringStatusHotkeyModifierRequired" xml:space="preserve">
+    <value>Требуется хотя бы одна клавиша-модификатор (Ctrl, Alt, Shift, Win).</value>
+  </data>
+  <data name="StringStatusSaved" xml:space="preserve">
+    <value>Настройки сохранены.</value>
+  </data>
+  <data name="StringStatusSaveFailed" xml:space="preserve">
+    <value>Не удалось сохранить настройки.</value>
+  </data>
+  <data name="StringDiscardChangesMessage" xml:space="preserve">
+    <value>Отменить несохранённые изменения?</value>
+  </data>
+  <data name="StringDialogOK" xml:space="preserve">
+    <value>ОК</value>
+  </data>
+  <data name="StringDialogYes" xml:space="preserve">
+    <value>Да</value>
+  </data>
+  <data name="StringDialogNo" xml:space="preserve">
+    <value>Нет</value>
+  </data>
+  <data name="StringTrayMenuEnabled" xml:space="preserve">
+    <value>Включено</value>
+  </data>
+  <data name="StringTrayMenuSettings" xml:space="preserve">
+    <value>Настройки</value>
+  </data>
+  <data name="StringTrayMenuExit" xml:space="preserve">
+    <value>Выход</value>
+  </data>
+  <data name="StringTrayTooltipEnabled" xml:space="preserve">
+    <value>MockPaste</value>
+  </data>
+  <data name="StringTrayTooltipDisabled" xml:space="preserve">
+    <value>MockPaste (Отключено)</value>
+  </data>
+  <data name="StringMessageAlreadyRunning" xml:space="preserve">
+    <value>MockPaste уже запущен.</value>
+  </data>
+  <data name="StringMessageFailedToStartFormat" xml:space="preserve">
+    <value>Не удалось запустить MockPaste:{0}{1}</value>
+  </data>
+  <data name="StringTitleError" xml:space="preserve">
+    <value>Ошибка MockPaste</value>
+  </data>
+  <data name="StringMessageHotkeyRegisterFailedFormat" xml:space="preserve">
+    <value>Не удалось зарегистрировать горячую клавишу: {0}{1}Возможно, она используется другим приложением.</value>
+  </data>
+</root>

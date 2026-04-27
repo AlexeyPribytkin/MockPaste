@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:MockPaste.UI.Popup"
         xmlns:converters="clr-namespace:MockPaste.UI.Converters"
+        xmlns:loc="clr-namespace:MockPaste.Localization"
         WindowStyle="None"
         AllowsTransparency="True"
         ShowInTaskbar="False"
@@ -43,7 +44,7 @@
                                Visibility="{Binding Description, Converter={StaticResource StringToVisibility}}"/>
                 </StackPanel>
                 <TextBlock Grid.Column="2"
-                           Text="{StaticResource StringSubMenuArrow}"
+                           Text="{loc:Loc StringSubMenuArrow}"
                            Foreground="{DynamicResource BrushTextMuted}"
                            FontSize="{StaticResource FontSizeSubMenuArrow}"
                            VerticalAlignment="Center"
@@ -77,7 +78,7 @@
                         VerticalAlignment="Center"
                         Margin="8,0,0,0"
                         Padding="4,2"
-                        ToolTip="{StaticResource StringTooltipDeleteHistoryItem}"
+                        ToolTip="{loc:Loc StringTooltipDeleteHistoryItem}"
                         Tag="DeleteBtn"
                         Focusable="False">
                     <Button.Template>
@@ -191,7 +192,7 @@
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
                         </Button.Template>
-                        <TextBlock Text="{StaticResource StringButtonHistory}" Margin="0,-1,0,0"/>
+                        <TextBlock Text="{loc:Loc StringButtonHistory}" Margin="0,-1,0,0"/>
                     </Button>
                 </Grid>
 
@@ -201,7 +202,7 @@
                 <!-- Empty history state -->
                 <TextBlock x:Name="EmptyHistoryText"
                        Grid.Row="2"
-                       Text="{StaticResource StringEmptyHistory}"
+                       Text="{loc:Loc StringEmptyHistory}"
                        Foreground="{DynamicResource BrushTextSubtle}"
                        FontFamily="{StaticResource FontFamilyDefault}"
                        FontSize="{StaticResource FontSizeBody}"

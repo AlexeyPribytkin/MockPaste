@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using MockPaste.Core.Models;
+using MockPaste.Resources;
 using MockPaste.UI.Dialogs;
 
 namespace MockPaste.UI.Settings;
@@ -96,7 +97,7 @@ public partial class SettingsWindow : Window
 
         if (!config.IsValid())
         {
-            _vm.SetStatus(System.Windows.Application.Current.Resources["StringStatusHotkeyModifierRequired"] as string ?? "");
+            _vm.SetStatus(Strings.StringStatusHotkeyModifierRequired);
             return;
         }
 
@@ -110,8 +111,8 @@ public partial class SettingsWindow : Window
             return true;
         }
 
-        var msg = System.Windows.Application.Current.Resources["StringDiscardChangesMessage"] as string ?? "";
-        var title = System.Windows.Application.Current.Resources["StringAppName"] as string ?? "";
+        var msg = Strings.StringDiscardChangesMessage;
+        var title = Strings.StringAppName;
         return MessageDialog.Confirm(msg, title, this);
     }
 

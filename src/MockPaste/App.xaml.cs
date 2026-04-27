@@ -1,6 +1,8 @@
 using System.Windows;
 using MockPaste.Application;
 using MockPaste.Infrastructure;
+using MockPaste.Localization;
+using MockPaste.Resources;
 using MockPaste.UI.Dialogs;
 
 namespace MockPaste;
@@ -12,6 +14,8 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        _ = LocalizationManager.Instance;
+
         bool createdNew;
         try
         {
@@ -24,8 +28,8 @@ public partial class App : System.Windows.Application
 
         if (!createdNew)
         {
-            var message = Current.Resources["StringMessageAlreadyRunning"] as string ?? string.Empty;
-            var title = Current.Resources["StringAppName"] as string;
+            var message = Strings.StringMessageAlreadyRunning;
+            var title = Strings.StringAppName;
             MessageDialog.Show(message, title, DialogKind.Information);
             _instanceMutex?.Dispose();
             Shutdown(0);

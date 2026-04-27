@@ -1,12 +1,11 @@
 using System.Windows;
+using MockPaste.Resources;
 
 namespace MockPaste.UI.Dialogs;
 
 /// <summary>Themed replacement for <see cref="MessageBox"/> that matches the MockPaste visual style.</summary>
 public partial class MessageDialog : Window
 {
-    private const string AppNameResourceKey = "StringAppName";
-
     public bool Result { get; private set; }
 
     private MessageDialog(string message, string title, DialogKind kind)
@@ -32,13 +31,10 @@ public partial class MessageDialog : Window
     }
 
     private static MessageDialog Create(string message, string? title, DialogKind kind, Window? owner)
-        => new(message, title ?? Resolve(AppNameResourceKey), kind)
+        => new(message, title ?? Strings.StringAppName, kind)
         {
             Owner = owner ?? System.Windows.Application.Current?.MainWindow
         };
-
-    private static string Resolve(string key) =>
-        System.Windows.Application.Current?.Resources[key] as string ?? key;
 
     private void Yes_Click(object sender, RoutedEventArgs e)
     {

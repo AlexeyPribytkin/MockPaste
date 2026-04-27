@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:components="clr-namespace:MockPaste.UI.Components"
         xmlns:comp="clr-namespace:MockPaste.UI.Components"
-        Title="{StaticResource StringSettingsTitle}"
+        xmlns:loc="clr-namespace:MockPaste.Localization"
+        Title="{loc:Loc StringSettingsTitle}"
         Width="420"
         Height="588"
         WindowStartupLocation="CenterScreen"
@@ -74,16 +75,16 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock
                         Grid.Column="0"
-                        Text="{StaticResource StringSettingsTitle}"
+                        Text="{loc:Loc StringSettingsTitle}"
                         Foreground="{DynamicResource BrushTextMuted}"
                         FontSize="{StaticResource FontSizeBase}"
                         FontFamily="{StaticResource FontFamilyDefault}"
                         Margin="12,6,4,4"/>
                     <Button
                         Grid.Column="2"
-                        Content="{DynamicResource StringCloseGlyph}"
+                        Content="{loc:Loc StringCloseGlyph}"
                         Style="{StaticResource TitleBarButtonStyle}"
-                        ToolTip="{StaticResource StringTooltipClose}"
+                        ToolTip="{loc:Loc StringTooltipClose}"
                         Click="TitleBarClose_Click"/>
                 </Grid>
 
@@ -98,7 +99,7 @@
                     <!-- Title -->
                     <TextBlock
                         Grid.Row="0"
-                        Text="{StaticResource StringSettingsHeader}"
+                        Text="{loc:Loc StringSettingsHeader}"
                         FontWeight="SemiBold"/>
 
                     <!-- Scrollable content -->
@@ -116,7 +117,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock
-                                    Text="{StaticResource StringSectionHotkey}"
+                                    Text="{loc:Loc StringSectionHotkey}"
                                     Foreground="{DynamicResource BrushTextMuted}"
                                     FontSize="{StaticResource FontSizeSmall}"
                                     FontWeight="SemiBold"/>
@@ -128,7 +129,7 @@
                             </Grid>
 
                             <TextBlock
-                                Text="{StaticResource StringLabelHotkey}"
+                                Text="{loc:Loc StringLabelHotkey}"
                                 Foreground="{DynamicResource BrushTextMuted}"
                                 FontSize="{StaticResource FontSizeBody}"
                                 Margin="0,0,0,4"/>
@@ -159,10 +160,10 @@
                                     Padding="12,8">
                                     <Button.Style>
                                         <Style TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
-                                            <Setter Property="Content" Value="{StaticResource StringButtonChange}"/>
+                                            <Setter Property="Content" Value="{loc:Loc StringButtonChange}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsCapturing}" Value="True">
-                                                    <Setter Property="Content" Value="{StaticResource StringButtonCancel}"/>
+                                                    <Setter Property="Content" Value="{loc:Loc StringButtonCancel}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -171,7 +172,7 @@
 
                                 <Button
                                     Grid.Column="2"
-                                    Content="{StaticResource StringButtonReset}"
+                                    Content="{loc:Loc StringButtonReset}"
                                     Command="{Binding ResetHotkeyCommand}"
                                     Margin="8,0,0,0"
                                     Padding="12,8"
@@ -186,7 +187,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
-                                    Text="{StaticResource StringSectionBehavior}"
+                                    Text="{loc:Loc StringSectionBehavior}"
                                     Foreground="{DynamicResource BrushTextMuted}"
                                     FontSize="{StaticResource FontSizeSmall}"
                                     FontWeight="SemiBold"/>
@@ -200,7 +201,7 @@
 
                             <components:ToggleSwitch
                                 x:Name="PreserveClipboardCheck"
-                                Header="{StaticResource StringCheckboxPreserveClipboard}"
+                                Header="{loc:Loc StringCheckboxPreserveClipboard}"
                                 Foreground="{DynamicResource BrushTextPrimary}"
                                 FontSize="{StaticResource FontSizeBase}"
                                 Margin="0,0,0,12"
@@ -208,7 +209,7 @@
 
                             <components:ToggleSwitch
                                 x:Name="TrackClipboardHistoryCheck"
-                                Header="{StaticResource StringCheckboxTrackClipboardHistory}"
+                                Header="{loc:Loc StringCheckboxTrackClipboardHistory}"
                                 Foreground="{DynamicResource BrushTextPrimary}"
                                 FontSize="{StaticResource FontSizeBase}"
                                 Margin="0,0,0,12"
@@ -221,7 +222,7 @@
                                 SmallChange="10"
                                 LargeChange="50"
                                 Value="{Binding PasteDelay, Mode=TwoWay}"
-                                Header="{StaticResource StringLabelPasteDelay}"
+                                Header="{loc:Loc StringLabelPasteDelay}"
                                 ValueDisplay="{Binding PasteDelayDisplay}"
                                 Margin="0,0,0,0"/>
 
@@ -233,7 +234,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
-                                    Text="{StaticResource StringSectionGeneral}"
+                                    Text="{loc:Loc StringSectionGeneral}"
                                     Foreground="{DynamicResource BrushTextMuted}"
                                     FontSize="{StaticResource FontSizeSmall}"
                                     FontWeight="SemiBold"/>
@@ -247,7 +248,7 @@
 
                             <components:ToggleSwitch
                                 x:Name="LaunchStartupCheck"
-                                Header="{StaticResource StringCheckboxLaunchAtStartup}"
+                                Header="{loc:Loc StringCheckboxLaunchAtStartup}"
                                 Foreground="{DynamicResource BrushTextPrimary}"
                                 FontSize="{StaticResource FontSizeBase}"
                                 Margin="0,0,0,12"
@@ -260,7 +261,7 @@
                                 SmallChange="1"
                                 LargeChange="10"
                                 Value="{Binding HistorySize, Mode=TwoWay}"
-                                Header="{StaticResource StringLabelHistorySize}"
+                                Header="{loc:Loc StringLabelHistorySize}"
                                 ValueDisplay="{Binding HistorySizeDisplay}"
                                 Margin="0,0,0,0"/>
 
@@ -272,7 +273,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock
-                                    Text="{StaticResource StringSectionAppearance}"
+                                    Text="{loc:Loc StringSectionAppearance}"
                                     Foreground="{DynamicResource BrushTextMuted}"
                                     FontSize="{StaticResource FontSizeSmall}"
                                     FontWeight="SemiBold"/>
@@ -286,7 +287,7 @@
                             </Grid>
 
                             <TextBlock
-                                Text="{StaticResource StringLabelTheme}"
+                                Text="{loc:Loc StringLabelTheme}"
                                 Foreground="{DynamicResource BrushTextMuted}"
                                 FontSize="{StaticResource FontSizeBody}"
                                 Margin="0,0,0,8"/>
@@ -306,7 +307,7 @@
                                         GroupName="ThemeGroup"
                                         Tag="Dark"
                                         IsChecked="{Binding IsThemeDark, Mode=TwoWay}"
-                                        Content="{StaticResource StringThemeDark}"
+                                        Content="{loc:Loc StringThemeDark}"
                                         Margin="2,0"/>
                                     <RadioButton
                                         x:Name="ThemeLight"
@@ -314,7 +315,7 @@
                                         GroupName="ThemeGroup"
                                         Tag="Light"
                                         IsChecked="{Binding IsThemeLight, Mode=TwoWay}"
-                                        Content="{StaticResource StringThemeLight}"
+                                        Content="{loc:Loc StringThemeLight}"
                                         Margin="2,0"/>
                                     <RadioButton
                                         x:Name="ThemeSystem"
@@ -322,7 +323,7 @@
                                         GroupName="ThemeGroup"
                                         Tag="System"
                                         IsChecked="{Binding IsThemeSystem, Mode=TwoWay}"
-                                        Content="{StaticResource StringThemeSystem}"
+                                        Content="{loc:Loc StringThemeSystem}"
                                         Margin="2,0"/>
                                 </UniformGrid>
                             </Border>
@@ -348,7 +349,7 @@
 
                         <Button
                             Grid.Column="0"
-                            Content="{StaticResource StringButtonAbout}"
+                            Content="{loc:Loc StringButtonAbout}"
                             Padding="0"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
@@ -362,14 +363,14 @@
 
                             <Button
                                 x:Name="SaveButton"
-                                Content="{StaticResource StringButtonSave}"
+                                Content="{loc:Loc StringButtonSave}"
                                 Padding="16,8"
                                 Style="{StaticResource AccentButtonStyle}"
                                 Command="{Binding SaveCommand}"
                                 Margin="0,0,8,0"/>
 
                             <Button
-                                Content="{StaticResource StringButtonCancel}"
+                                Content="{loc:Loc StringButtonCancel}"
                                 Padding="16,8"
                                 Style="{StaticResource SecondaryButtonStyle}"
                                 Click="Cancel_Click"/>

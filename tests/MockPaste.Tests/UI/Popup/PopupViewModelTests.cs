@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using MockPaste.Core.Generators;
 using MockPaste.Core.Models;
 using MockPaste.Infrastructure;
+using MockPaste.Resources;
 using MockPaste.UI.Popup;
 
 namespace MockPaste.Tests.UI.Popup;
@@ -58,7 +59,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowCategories();
 
-        Assert.Equal("StringAppName", vm.HeaderText);
+        Assert.Equal(Strings.StringAppName, vm.HeaderText);
     }
 
     [Fact]
@@ -144,7 +145,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowFormats(gen);
 
-        Assert.Equal("StringPopupBackFormat", vm.HeaderText);
+        Assert.Equal(string.Format(Strings.StringPopupBackFormat, "Email"), vm.HeaderText);
     }
 
     [Fact]
@@ -197,7 +198,7 @@ public sealed class PopupViewModelTests
 
         vm.ShowHistory();
 
-        Assert.Equal("StringPopupBackFormat", vm.HeaderText);
+        Assert.Equal(string.Format(Strings.StringPopupBackFormat, Strings.StringButtonHistory), vm.HeaderText);
     }
 
     [Fact]

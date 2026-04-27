@@ -5,6 +5,7 @@ using MockPaste.Core.Generators;
 using MockPaste.Core.Models;
 using MockPaste.Infrastructure;
 using MockPaste.Infrastructure.Native;
+using MockPaste.Resources;
 using MockPaste.UI.Popup;
 using MockPaste.UI.Dialogs;
 using MockPaste.UI.Settings;
@@ -93,9 +94,8 @@ internal sealed class AppBootstrapper : IDisposable
 
             AppLogger.Fatal("Failed to start MockPaste", ex);
             var newLine = Environment.NewLine;
-            var startupMessageFormat = Resolve("StringMessageFailedToStartFormat");
-            var startupMessage = string.Format(startupMessageFormat, newLine, ex.Message);
-            MessageDialog.Show(startupMessage, Resolve("StringTitleError"), DialogKind.Error);
+            var startupMessage = string.Format(Strings.StringMessageFailedToStartFormat, newLine, ex.Message);
+            MessageDialog.Show(startupMessage, Strings.StringTitleError, DialogKind.Error);
             _shutdownApp();
         }
     }
@@ -274,18 +274,14 @@ internal sealed class AppBootstrapper : IDisposable
             if (!_hotkeyManager!.Register(current.Hotkey))
             {
                 var newLine = Environment.NewLine;
-                var hotkeyMessageFormat = Resolve("StringMessageHotkeyRegisterFailedFormat");
-                var hotkeyMessage = string.Format(hotkeyMessageFormat, current.Hotkey.ToDisplayString(), newLine);
+                var hotkeyMessage = string.Format(Strings.StringMessageHotkeyRegisterFailedFormat, current.Hotkey.ToDisplayString(), newLine);
                 MessageDialog.Show(
                     hotkeyMessage,
-                    Resolve("StringAppName"),
+                    Strings.StringAppName,
                     DialogKind.Warning);
             }
         }
     }
-
-    private static string Resolve(string key) =>
-        System.Windows.Application.Current.Resources[key] as string ?? key;
 
     /// <summary>Re-applies the current theme when the Windows color scheme changes.</summary>
     private void OnSystemThemeChanged(object sender, UserPreferenceChangedEventArgs e)

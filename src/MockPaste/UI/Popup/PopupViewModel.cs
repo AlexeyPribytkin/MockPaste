@@ -2,6 +2,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using MockPaste.Core.Generators;
 using MockPaste.Infrastructure;
+using MockPaste.Localization;
+using MockPaste.Resources;
 using MockPaste.UI;
 
 namespace MockPaste.UI.Popup;
@@ -15,7 +17,6 @@ public sealed class PopupViewModel : INotifyPropertyChanged
 
     private readonly GeneratorRegistry _generators;
     private readonly HistoryService _history;
-    private readonly Func<string, string> _resourceResolver;
 
     private PopupLevel _level;
     private string _headerText = string.Empty;
@@ -40,8 +41,8 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     {
         _generators = generators;
         _history = history;
-        _resourceResolver = key => System.Windows.Application.Current?.Resources[key] as string ?? key;
-        _headerText = Res("StringAppName");
+        _headerText = Strings.StringAppName;
+        LocalizationManager.Instance.CultureChanged += OnCultureChanged;
     }
 
     // ── Navigation state ─────────────────────────────────────────────────
@@ -102,7 +103,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     public void ShowCategories()
     {
         SetLevel(PopupLevel.Categories);
-        HeaderText = Res("StringAppName");
+        HeaderText = Strings.StringAppName;
         IsBackButton = false;
         IsHistoryButtonVisible = true;
         IsEmptyHistoryVisible = false;
@@ -122,7 +123,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     public void ShowFormats(IFakeDataGenerator generator)
     {
         SetLevel(PopupLevel.Formats);
-        HeaderText = string.Format(Res("StringPopupBackFormat"), generator.CategoryName);
+        HeaderText = string.Format(Strings.StringPopupBackFormat, generator.CategoryName);
         IsBackButton = true;
         IsHistoryButtonVisible = false;
         IsEmptyHistoryVisible = false;
@@ -143,7 +144,7 @@ public sealed class PopupViewModel : INotifyPropertyChanged
     public void ShowHistory()
     {
         SetLevel(PopupLevel.History);
-        HeaderText = string.Format(Res("StringPopupBackFormat"), Res("StringButtonHistory"));
+        HeaderText = string.Format(Strings.StringPopupBackFormat, Strings.StringButtonHistory);
         IsBackButton = true;
         IsHistoryButtonVisible = false;
 
@@ -310,5 +311,20 @@ public sealed class PopupViewModel : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
-    private string Res(string key) => _resourceResolver(key);
+    private void OnCultureChanged(object? sender, EventArgs e)
+    {
+        if (_level == PopupLevel.Formats && Items.Count > 0 && Items[SelectedIndex >= 0 ? SelectedIndex : 0] is MenuItemViewModel formatItem)
+        {
+            HeaderText = string.Format(Strings.StringPopupBackFormat, formatItem.CategoryName);
+            return;
+        }
+
+        if (_level == PopupLevel.History)
+        {
+            HeaderText = string.Format(Strings.StringPopupBackFormat, Strings.StringButtonHistory);
+            return;
+        }
+
+        HeaderText = Strings.StringAppName;
+    }
 }

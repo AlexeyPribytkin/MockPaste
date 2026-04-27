@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="StringAppName" xml:space="preserve"><value>MockPaste</value></data>
+
+  <data name="StringButtonHistory" xml:space="preserve"><value>History</value></data>
+  <data name="StringEmptyHistory" xml:space="preserve"><value>No recent items</value></data>
+  <data name="StringSubMenuArrow" xml:space="preserve"><value>›</value></data>
+  <data name="StringPopupBackFormat" xml:space="preserve"><value>← {0}</value></data>
+
+  <data name="StringSettingsTitle" xml:space="preserve"><value>MockPaste — Settings</value></data>
+  <data name="StringSettingsHeader" xml:space="preserve"><value>Settings</value></data>
+  <data name="StringLabelHotkey" xml:space="preserve"><value>Global Hotkey</value></data>
+  <data name="StringHotkeyDefault" xml:space="preserve"><value>Ctrl + Alt + Space</value></data>
+  <data name="StringButtonChange" xml:space="preserve"><value>Change</value></data>
+  <data name="StringButtonReset" xml:space="preserve"><value>Reset</value></data>
+  <data name="StringCheckboxPreserveClipboard" xml:space="preserve"><value>Preserve clipboard content</value></data>
+  <data name="StringCheckboxTrackClipboardHistory" xml:space="preserve"><value>Track clipboard history</value></data>
+  <data name="StringLabelPasteDelay" xml:space="preserve"><value>Paste delay:</value></data>
+  <data name="StringUnitMilliseconds" xml:space="preserve"><value>ms</value></data>
+  <data name="StringCheckboxLaunchAtStartup" xml:space="preserve"><value>Launch at system startup</value></data>
+  <data name="StringLabelHistorySize" xml:space="preserve"><value>History size:</value></data>
+  <data name="StringUnitItem" xml:space="preserve"><value>item</value></data>
+  <data name="StringUnitItems" xml:space="preserve"><value>items</value></data>
+  <data name="StringButtonSave" xml:space="preserve"><value>Save</value></data>
+  <data name="StringButtonCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="StringButtonAbout" xml:space="preserve"><value>About</value></data>
+  <data name="StringTooltipClose" xml:space="preserve"><value>Close</value></data>
+  <data name="StringTooltipDeleteHistoryItem" xml:space="preserve"><value>Delete</value></data>
+  <data name="StringCloseGlyph" xml:space="preserve"><value>✕</value></data>
+
+  <data name="StringAboutTitle" xml:space="preserve"><value>MockPaste — About</value></data>
+  <data name="StringAboutDevelopedBy" xml:space="preserve"><value>Developed by Alexey Pribytkin</value></data>
+  <data name="StringAboutVersion" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="StringButtonClose" xml:space="preserve"><value>Close</value></data>
+
+  <data name="StringSectionHotkey" xml:space="preserve"><value>HOTKEY</value></data>
+  <data name="StringSectionBehavior" xml:space="preserve"><value>BEHAVIOR</value></data>
+  <data name="StringSectionGeneral" xml:space="preserve"><value>GENERAL</value></data>
+  <data name="StringSectionAppearance" xml:space="preserve"><value>APPEARANCE</value></data>
+
+  <data name="StringLabelTheme" xml:space="preserve"><value>Theme:</value></data>
+  <data name="StringThemeDark" xml:space="preserve"><value>Dark</value></data>
+  <data name="StringThemeLight" xml:space="preserve"><value>Light</value></data>
+  <data name="StringThemeSystem" xml:space="preserve"><value>System</value></data>
+
+  <data name="StringToggleOn" xml:space="preserve"><value>On</value></data>
+  <data name="StringToggleOff" xml:space="preserve"><value>Off</value></data>
+
+  <data name="StringStatusCapturePrompt" xml:space="preserve"><value>Press a key combination...</value></data>
+  <data name="StringStatusHotkeySet" xml:space="preserve"><value>Hotkey set to: {0}</value></data>
+  <data name="StringStatusHotkeyReset" xml:space="preserve"><value>Hotkey reset to default.</value></data>
+  <data name="StringStatusHotkeyModifierRequired" xml:space="preserve"><value>At least one modifier key (Ctrl, Alt, Shift, Win) is required.</value></data>
+  <data name="StringStatusSaved" xml:space="preserve"><value>Settings saved.</value></data>
+  <data name="StringStatusSaveFailed" xml:space="preserve"><value>Failed to save settings.</value></data>
+
+  <data name="StringDiscardChangesMessage" xml:space="preserve"><value>Discard unsaved changes?</value></data>
+
+  <data name="StringDialogOK" xml:space="preserve"><value>OK</value></data>
+  <data name="StringDialogYes" xml:space="preserve"><value>Yes</value></data>
+  <data name="StringDialogNo" xml:space="preserve"><value>No</value></data>
+
+  <data name="StringTrayMenuEnabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="StringTrayMenuSettings" xml:space="preserve"><value>Settings</value></data>
+  <data name="StringTrayMenuExit" xml:space="preserve"><value>Exit</value></data>
+  <data name="StringTrayTooltipEnabled" xml:space="preserve"><value>MockPaste</value></data>
+  <data name="StringTrayTooltipDisabled" xml:space="preserve"><value>MockPaste (Disabled)</value></data>
+
+  <data name="StringMessageAlreadyRunning" xml:space="preserve"><value>MockPaste is already running.</value></data>
+  <data name="StringMessageFailedToStartFormat" xml:space="preserve"><value>Failed to start MockPaste:{0}{1}</value></data>
+  <data name="StringTitleError" xml:space="preserve"><value>MockPaste Error</value></data>
+  <data name="StringMessageHotkeyRegisterFailedFormat" xml:space="preserve"><value>Could not register hotkey: {0}{1}It may be in use by another application.</value></data>
+</root>

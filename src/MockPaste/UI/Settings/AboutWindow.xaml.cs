@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Windows;
+using MockPaste.Resources;
 
 namespace MockPaste.UI.Settings;
 
@@ -13,7 +14,7 @@ public partial class AboutWindow : Window
 
     private static string GetVersionText()
     {
-        var versionFormat = System.Windows.Application.Current.Resources["StringAboutVersion"] as string ?? "Version {0}";
+        var versionFormat = Strings.StringAboutVersion;
         var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0.0";
         return string.Format(versionFormat, version);
     }

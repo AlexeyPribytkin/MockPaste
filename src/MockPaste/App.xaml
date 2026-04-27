@@ -3,12 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
              xmlns:local="clr-namespace:MockPaste.UI.Converters"
+             xmlns:loc="clr-namespace:MockPaste.Localization"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/Dark.xaml"/>
-                <ResourceDictionary Source="Themes/Strings.xaml"/>
                 <ResourceDictionary Source="Themes/Typography.xaml"/>
                 <ResourceDictionary Source="Themes/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
@@ -19,21 +19,21 @@
             <ContextMenu x:Key="TrayContextMenu"
                          x:Shared="False"
                          Style="{StaticResource TrayContextMenuStyle}">
-                <MenuItem Header="{DynamicResource StringTrayMenuEnabled}"
+                <MenuItem Header="{loc:Loc StringTrayMenuEnabled}"
                           Style="{StaticResource TrayMenuItemStyle}"
                           IsCheckable="True"
                           IsChecked="{Binding IsEnabled, Mode=OneWay}"
                           Command="{Binding ToggleCommand}"/>
-                <MenuItem Header="{DynamicResource StringTrayMenuSettings}"
+                <MenuItem Header="{loc:Loc StringTrayMenuSettings}"
                           Style="{StaticResource TrayMenuItemStyle}"
                           Command="{Binding SettingsCommand}"/>
-                <MenuItem Header="{DynamicResource StringTrayMenuExit}"
+                <MenuItem Header="{loc:Loc StringTrayMenuExit}"
                           Style="{StaticResource TrayMenuItemStyle}"
                           Command="{Binding ExitCommand}"/>
             </ContextMenu>
 
             <tb:TaskbarIcon x:Key="TrayIcon"
-                            ToolTipText="{DynamicResource StringTrayTooltipEnabled}"
+                            ToolTipText="{loc:Loc StringTrayTooltipEnabled}"
                             IconSource="/Assets/app.ico"
                             ContextMenu="{StaticResource TrayContextMenu}"
                             MenuActivation="RightClick"/>

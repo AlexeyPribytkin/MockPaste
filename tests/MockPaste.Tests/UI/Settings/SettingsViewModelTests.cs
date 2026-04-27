@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows.Input;
 using MockPaste.Core.Models;
+using MockPaste.Resources;
 using MockPaste.UI.Settings;
 
 namespace MockPaste.Tests.UI.Settings;
@@ -11,9 +12,7 @@ public sealed class SettingsViewModelTests
 
     private static SettingsViewModel CreateVm(AppSettings? settings = null)
     {
-        var vm = new SettingsViewModel(settings ?? DefaultSettings());
-        vm.ResourceResolver = key => key;
-        return vm;
+        return new SettingsViewModel(settings ?? DefaultSettings());
     }
 
     // ── Initial state ─────────────────────────────────────────────────────
@@ -424,7 +423,7 @@ public sealed class SettingsViewModelTests
         vm.PasteDelay = 80;
 
         Assert.Contains("80", vm.PasteDelayDisplay);
-        Assert.Contains("StringUnitMilliseconds", vm.PasteDelayDisplay);
+        Assert.Contains(Strings.StringUnitMilliseconds, vm.PasteDelayDisplay);
     }
 
     [Fact]
@@ -447,8 +446,8 @@ public sealed class SettingsViewModelTests
         var vm = CreateVm();
         vm.HistorySize = 1;
 
-        Assert.Contains("StringUnitItem", vm.HistorySizeDisplay);
-        Assert.DoesNotContain("StringUnitItems", vm.HistorySizeDisplay);
+        Assert.Contains(Strings.StringUnitItem, vm.HistorySizeDisplay);
+        Assert.DoesNotContain(Strings.StringUnitItems, vm.HistorySizeDisplay);
     }
 
     [Theory]
@@ -460,7 +459,7 @@ public sealed class SettingsViewModelTests
         var vm = CreateVm();
         vm.HistorySize = size;
 
-        Assert.Contains("StringUnitItems", vm.HistorySizeDisplay);
+        Assert.Contains(Strings.StringUnitItems, vm.HistorySizeDisplay);
     }
 
     [Fact]

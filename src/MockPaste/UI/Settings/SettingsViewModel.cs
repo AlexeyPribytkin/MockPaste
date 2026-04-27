@@ -2,6 +2,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using MockPaste.Core.Models;
+using MockPaste.Localization;
+using MockPaste.Resources;
 
 namespace MockPaste.UI.Settings;
 
@@ -53,7 +55,7 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     /// Can be replaced in tests to avoid a live WPF application.
     /// </summary>
     public Func<string, string> ResourceResolver { get; set; } =
-        key => System.Windows.Application.Current?.Resources[key] as string ?? key;
+        key => LocalizationManager.Instance.GetString(key);
 
     /// <summary>
     /// Initializes the ViewModel from the supplied <paramref name="settings"/>, wires up
@@ -65,6 +67,8 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     {
         _settings = settings;
         _pendingHotkey = settings.Hotkey.Clone();
+
+        LocalizationManager.Instance.CultureChanged += OnCultureChanged;
 
         SaveCommand = new RelayCommand(Save, () => IsDirty && IsPasteDelayValid && IsHistorySizeValid);
         ChangeHotkeyCommand = new RelayCommand(ToggleCapture);
@@ -431,7 +435,32 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
     }
 
     /// <summary>Shorthand for resolving a resource string key via <see cref="ResourceResolver"/>.</summary>
-    private string Res(string key) => ResourceResolver(key);
+    private string Res(string key)
+    {
+        return key switch
+        {
+            nameof(Strings.StringUnitMilliseconds) => Strings.StringUnitMilliseconds,
+            nameof(Strings.StringUnitItem) => Strings.StringUnitItem,
+            nameof(Strings.StringUnitItems) => Strings.StringUnitItems,
+            nameof(Strings.StringStatusHotkeySet) => Strings.StringStatusHotkeySet,
+            nameof(Strings.StringStatusCapturePrompt) => Strings.StringStatusCapturePrompt,
+            nameof(Strings.StringStatusHotkeyReset) => Strings.StringStatusHotkeyReset,
+            nameof(Strings.StringStatusSaved) => Strings.StringStatusSaved,
+            nameof(Strings.StringStatusSaveFailed) => Strings.StringStatusSaveFailed,
+            _ => ResourceResolver(key)
+        };
+    }
+
+    private void OnCultureChanged(object? sender, EventArgs e)
+    {
+        Notify(nameof(PasteDelayDisplay));
+        Notify(nameof(HistorySizeDisplay));
+
+        if (_isCapturing)
+        {
+            HotkeyDisplayText = Res("StringStatusCapturePrompt");
+        }
+    }
 
     /// <summary>
     /// Sets <paramref name="field"/> to <paramref name="value"/> and, if the value changed,
