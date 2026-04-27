@@ -1,0 +1,46 @@
+<UserControl x:Class="MockPaste.UI.Components.LabeledSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:self="clr-namespace:MockPaste.UI.Components"
+             SnapsToDevicePixels="True"
+             Focusable="False">
+
+    <StackPanel>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                Grid.Column="0"
+                Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+                FontSize="{StaticResource FontSizeBase}"
+                VerticalAlignment="Center"/>
+
+            <TextBlock
+                Grid.Column="1"
+                Text="{Binding ValueDisplay, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+                FontSize="{StaticResource FontSizeBase}"
+                Foreground="{DynamicResource BrushTextMuted}"
+                VerticalAlignment="Center"
+                MinWidth="52"
+                TextAlignment="Right"/>
+        </Grid>
+
+        <Slider
+            x:Name="InnerSlider"
+            Minimum="{Binding Minimum, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+            Maximum="{Binding Maximum, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+            Value="{Binding Value, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}, Mode=TwoWay}"
+            TickFrequency="{Binding TickFrequency, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+            SmallChange="{Binding SmallChange, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+            LargeChange="{Binding LargeChange, RelativeSource={RelativeSource AncestorType={x:Type self:LabeledSlider}}}"
+            IsSnapToTickEnabled="False"
+            IsMoveToPointEnabled="True"
+            Focusable="True"
+            Margin="0,4,0,0"
+            KeyDown="InnerSlider_KeyDown"
+            PreviewMouseMove="InnerSlider_PreviewMouseMove"/>
+    </StackPanel>
+</UserControl>
