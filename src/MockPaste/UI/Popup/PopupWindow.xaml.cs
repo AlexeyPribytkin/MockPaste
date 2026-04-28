@@ -173,14 +173,7 @@ public partial class PopupWindow : Window
                 break;
 
             case Key.Escape:
-                if (_vm.IsFormatLevel || _vm.IsHistoryLevel)
-                {
-                    _vm.ShowCategories();
-                }
-                else
-                {
-                    HidePopup();
-                }
+                HidePopup();
                 e.Handled = true;
                 break;
 
