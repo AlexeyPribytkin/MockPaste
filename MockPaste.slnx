@@ -1,4 +1,9 @@
 <Solution>
+  <Folder Name="/installer/">
+    <File Path="installer/Config.wxi" />
+    <File Path="installer/Product.wxs" />
+    <File Path="installer/Setup.wixproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/MockPaste/MockPaste.csproj" />
   </Folder>

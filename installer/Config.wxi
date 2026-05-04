@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Include xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <?define AppName="MockPaste" ?>
+    <?define Manufacturer="Aliaksei Prybytkin" ?>
+    <?define Version="1.0.0" ?>
+    <?define UpgradeCode="9BE068E6-ECC1-4862-B016-3A1C1BD63BA0" ?>
+</Include>

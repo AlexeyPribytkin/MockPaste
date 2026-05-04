@@ -1,0 +1,102 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <?include Config.wxi?>
+
+  <Package Name="$(var.AppName)"
+           Manufacturer="$(var.Manufacturer)"
+           Version="$(var.Version)"
+           UpgradeCode="$(var.UpgradeCode)">
+
+    <MediaTemplate />
+
+    <!-- ===================== -->
+    <!-- Install directory -->
+    <!-- ===================== -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="$(var.AppName)" />
+    </StandardDirectory>
+
+    <!-- ===================== -->
+    <!-- AppData directory tree -->
+    <!-- ===================== -->
+    <StandardDirectory Id="AppDataFolder">
+      <Directory Id="APPDATADIR" Name="$(var.AppName)">
+        <Directory Id="LOGSDIR" Name="logs" />
+      </Directory>
+    </StandardDirectory>
+
+    <!-- ===================== -->
+    <!-- Startup registry -->
+    <!-- ===================== -->
+    <Component Id="StartupRegistry" Guid="*">
+      <RegistryValue Root="HKCU"
+                     Key="Software\Microsoft\Windows\CurrentVersion\Run"
+                     Name="$(var.AppName)"
+                     Type="string"
+                     Value="[INSTALLFOLDER]$(var.AppName).exe"
+                     KeyPath="yes" />
+    </Component>
+
+    <!-- ===================== -->
+    <!-- AppData cleanup -->
+    <!-- ===================== -->
+    <Component Id="CleanupAppData" Guid="*">
+
+      <!-- Remove specific files -->
+      <RemoveFile Id="RemoveSettings"
+                  Name="settings.json"
+                  Directory="APPDATADIR"
+                  On="uninstall" />
+
+      <RemoveFile Id="RemoveSettingsBak"
+                  Name="settings.json.bak"
+                  Directory="APPDATADIR"
+                  On="uninstall" />
+
+      <RemoveFile Id="RemoveSettingsTmp"
+                  Name="settings.json.tmp"
+                  Directory="APPDATADIR"
+                  On="uninstall" />
+
+      <!-- Remove all files inside logs -->
+      <RemoveFile Id="RemoveLogsFiles"
+                  Name="*"
+                  Directory="LOGSDIR"
+                  On="uninstall" />
+
+      <!-- Remove logs directory itself -->
+      <RemoveFolder Id="RemoveLogsFolder"
+                    Directory="LOGSDIR"
+                    On="uninstall" />
+
+      <!-- Remove app root if empty -->
+      <RemoveFolder Id="RemoveAppDataFolder"
+                    Directory="APPDATADIR"
+                    On="uninstall" />
+
+      <!-- KeyPath (required by MSI) -->
+      <RegistryValue Root="HKCU"
+                     Key="Software\$(var.Manufacturer)\$(var.AppName)"
+                     Name="Installed"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <!-- ===================== -->
+    <!-- Features -->
+    <!-- ===================== -->
+    <Feature Id="MainFeature" Title="$(var.AppName)" Level="1">
+
+      <!-- Published files -->
+      <ComponentGroupRef Id="PublishedFiles" />
+
+      <!-- Registry + cleanup -->
+      <ComponentRef Id="StartupRegistry" />
+      <ComponentRef Id="CleanupAppData" />
+
+    </Feature>
+
+  </Package>
+
+</Wix>
