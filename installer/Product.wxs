@@ -1,102 +1,157 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+	 xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
 
-  <?include Config.wxi?>
+	<?include Config.wxi?>
 
-  <Package Name="$(var.AppName)"
-           Manufacturer="$(var.Manufacturer)"
-           Version="$(var.Version)"
-           UpgradeCode="$(var.UpgradeCode)">
+	<Package Name="$(var.AppName)"
+			 Manufacturer="$(var.Manufacturer)"
+			 Version="$(var.Version)"
+			 UpgradeCode="$(var.UpgradeCode)">
 
-    <MediaTemplate />
+		<Icon Id="AppIcon" SourceFile="..\src\MockPaste\Assets\app.ico" />
+		<Property Id="ARPPRODUCTICON" Value="AppIcon" />
 
-    <!-- ===================== -->
-    <!-- Install directory -->
-    <!-- ===================== -->
-    <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="$(var.AppName)" />
-    </StandardDirectory>
+		<!-- Single msi file -->
+		<MediaTemplate EmbedCab="yes" />
 
-    <!-- ===================== -->
-    <!-- AppData directory tree -->
-    <!-- ===================== -->
-    <StandardDirectory Id="AppDataFolder">
-      <Directory Id="APPDATADIR" Name="$(var.AppName)">
-        <Directory Id="LOGSDIR" Name="logs" />
-      </Directory>
-    </StandardDirectory>
+		<!-- UI behavior -->
+		<Property Id="LicenseAccepted" Value="1" />
 
-    <!-- ===================== -->
-    <!-- Startup registry -->
-    <!-- ===================== -->
-    <Component Id="StartupRegistry" Guid="*">
-      <RegistryValue Root="HKCU"
-                     Key="Software\Microsoft\Windows\CurrentVersion\Run"
-                     Name="$(var.AppName)"
-                     Type="string"
-                     Value="[INSTALLFOLDER]$(var.AppName).exe"
-                     KeyPath="yes" />
-    </Component>
+		<!-- Check .NET 10 Desktop Runtime -->
+		<netfx:DotNetCompatibilityCheck
+			Id="CheckDotNet10"
+			Property="DOTNET10_OK"
+			RuntimeType="desktop"
+			Version="10.0.0"
+			Platform="x64"
+			RollForward="latestMinor" />
 
-    <!-- ===================== -->
-    <!-- AppData cleanup -->
-    <!-- ===================== -->
-    <Component Id="CleanupAppData" Guid="*">
+		<!-- Condition is reversed. False - displays the message and aborts the installation -->
+		<Launch Condition="DOTNET10_OK = 0"
+				Message="This application requires .NET 10 Desktop Runtime.
+				Download it here:
+				https://dotnet.microsoft.com/download/dotnet/10.0" />
 
-      <!-- Remove specific files -->
-      <RemoveFile Id="RemoveSettings"
-                  Name="settings.json"
-                  Directory="APPDATADIR"
-                  On="uninstall" />
+		<!-- Directories -->
+		<StandardDirectory Id="ProgramFiles64Folder">
+			<Directory Id="INSTALLFOLDER" Name="$(var.AppName)" />
+		</StandardDirectory>
 
-      <RemoveFile Id="RemoveSettingsBak"
-                  Name="settings.json.bak"
-                  Directory="APPDATADIR"
-                  On="uninstall" />
+		<StandardDirectory Id="AppDataFolder">
+			<Directory Id="APPDATADIR" Name="$(var.AppName)">
+				<Directory Id="LOGSDIR" Name="logs" />
+			</Directory>
+		</StandardDirectory>
 
-      <RemoveFile Id="RemoveSettingsTmp"
-                  Name="settings.json.tmp"
-                  Directory="APPDATADIR"
-                  On="uninstall" />
+		<StandardDirectory Id="ProgramMenuFolder">
+			<Directory Id="ProgramMenuDir" Name="$(var.AppName)" />
+		</StandardDirectory>
 
-      <!-- Remove all files inside logs -->
-      <RemoveFile Id="RemoveLogsFiles"
-                  Name="*"
-                  Directory="LOGSDIR"
-                  On="uninstall" />
+		<!-- Files -->
+		<Component Id="AppExe" Guid="*" Directory="INSTALLFOLDER">
+			<File Id="$(var.AppName)ExeFile"
+				  Source="$(var.PublishDir)\$(var.AppName).exe"
+				  KeyPath="yes" />
+		</Component>
 
-      <!-- Remove logs directory itself -->
-      <RemoveFolder Id="RemoveLogsFolder"
-                    Directory="LOGSDIR"
-                    On="uninstall" />
+		<!-- Desktop shortcut (optional) -->
+		<Component Id="DesktopShortcut" Guid="*" Directory="DesktopFolder">
+			<Shortcut Id="DesktopShortcut"
+					  Name="$(var.AppName)"
+					  Target="[INSTALLFOLDER]$(var.AppName).exe"
+					  WorkingDirectory="INSTALLFOLDER" />
+			<RegistryValue Root="HKCU"
+						   Key="Software\$(var.Manufacturer)\$(var.AppName)"
+						   Name="DesktopShortcut"
+						   Type="integer"
+						   Value="1"
+						   KeyPath="yes" />
+		</Component>
 
-      <!-- Remove app root if empty -->
-      <RemoveFolder Id="RemoveAppDataFolder"
-                    Directory="APPDATADIR"
-                    On="uninstall" />
+		<!-- Start Menu Shortcut (optional) -->
+		<Component Id="StartMenuShortcut" Guid="*" Directory="ProgramMenuDir">
+			<Shortcut Id="StartMenuShortcut"
+					  Name="$(var.AppName)"
+					  Target="[INSTALLFOLDER]$(var.AppName).exe"
+					  WorkingDirectory="INSTALLFOLDER" />
+			<RegistryValue Root="HKCU"
+						   Key="Software\$(var.Manufacturer)\$(var.AppName)"
+						   Name="StartMenuShortcut"
+						   Type="integer"
+						   Value="1"
+						   KeyPath="yes" />
+		</Component>
 
-      <!-- KeyPath (required by MSI) -->
-      <RegistryValue Root="HKCU"
-                     Key="Software\$(var.Manufacturer)\$(var.AppName)"
-                     Name="Installed"
-                     Type="integer"
-                     Value="1"
-                     KeyPath="yes" />
-    </Component>
+		<!-- Always remove Start Menu directory -->
+		<Component Id="ProgramMenuDirCleanup" Guid="*" Directory="ProgramMenuDir">
+			<RemoveFolder Id="RemoveProgramMenuDir" On="uninstall" />
+			<RegistryValue Root="HKCU"
+						   Key="Software\$(var.Manufacturer)\$(var.AppName)"
+						   Name="ProgramMenuDir"
+						   Type="integer"
+						   Value="1"
+						   KeyPath="yes" />
+		</Component>
 
-    <!-- ===================== -->
-    <!-- Features -->
-    <!-- ===================== -->
-    <Feature Id="MainFeature" Title="$(var.AppName)" Level="1">
+		<!-- AppData cleanup -->
+		<Component Id="CleanupAppData" Guid="*">
 
-      <!-- Published files -->
-      <ComponentGroupRef Id="PublishedFiles" />
+			<RemoveFile Id="RemoveSettings"
+						Name="settings.json*"
+						Directory="APPDATADIR"
+						On="uninstall" />
 
-      <!-- Registry + cleanup -->
-      <ComponentRef Id="StartupRegistry" />
-      <ComponentRef Id="CleanupAppData" />
+			<RemoveFile Id="RemoveLogsFiles"
+						Name="*"
+						Directory="LOGSDIR"
+						On="uninstall" />
 
-    </Feature>
+			<RemoveFolder Id="RemoveLogsFolder"
+						  Directory="LOGSDIR"
+						  On="uninstall" />
 
-  </Package>
+			<RemoveFolder Id="RemoveAppDataFolder"
+						  Directory="APPDATADIR"
+						  On="uninstall" />
+
+			<RegistryValue Root="HKCU"
+						   Key="Software\$(var.Manufacturer)\$(var.AppName)"
+						   Name="Installed"
+						   Type="integer"
+						   Value="1"
+						   KeyPath="yes" />
+
+		</Component>
+
+		<!-- Core app always selected -->
+		<Feature Id="MainFeature"
+				 Title="$(var.AppName)"
+				 Level="1"
+				 AllowAbsent="no">
+			<ComponentRef Id="AppExe" />
+			<ComponentRef Id="ProgramMenuDirCleanup" />
+			<ComponentRef Id="CleanupAppData" />
+		</Feature>
+
+		<!-- Optional: Desktop shortcut -->
+		<Feature Id="DesktopShortcutFeature"
+				 Title="Desktop shortcut"
+				 Level="1">
+			<ComponentRef Id="DesktopShortcut" />
+		</Feature>
+
+		<!-- Optional: Start Menu shortcut -->
+		<Feature Id="StartMenuShortcutFeature"
+				 Title="Start menu shortcut"
+				 Level="1">
+			<ComponentRef Id="StartMenuShortcut" />
+		</Feature>
+
+		<!-- UI -->
+		<ui:WixUI Id="WixUI_FeatureTree"
+				  InstallDirectory="INSTALLFOLDER" />
+
+	</Package>
 
 </Wix>

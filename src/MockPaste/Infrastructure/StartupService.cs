@@ -11,6 +11,7 @@ internal static class StartupService
 {
     private const string AppName = "MockPaste";
     private const string RunRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    private const string StartupApprovedRunRegistryKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
 
     /// <summary>
     /// Adds or removes the app from the Windows startup registry key to match <paramref name="enable"/>.
@@ -47,6 +48,7 @@ internal static class StartupService
                 }
 
                 key.SetValue(AppName, value);
+                ClearStartupApprovedValue();
                 AppLogger.Debug("Startup enabled");
             }
             else
@@ -74,12 +76,40 @@ internal static class StartupService
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunRegistryKey, writable: false);
-            return key?.GetValue(AppName) is not null;
+            var hasRunValue = key?.GetValue(AppName) is not null;
+            if (!hasRunValue)
+            {
+                return false;
+            }
+
+            return IsStartupApprovedEnabled();
         }
         catch (Exception ex)
         {
             AppLogger.Warning("Failed to read startup registry setting", ex);
             return false;
         }
+    }
+
+    private static bool IsStartupApprovedEnabled()
+    {
+        using var startupApprovedKey = Registry.CurrentUser.OpenSubKey(StartupApprovedRunRegistryKey, writable: false);
+        if (startupApprovedKey?.GetValue(AppName) is not byte[] value || value.Length == 0)
+        {
+            return true;
+        }
+
+        return value[0] != 0x03;
+    }
+
+    private static void ClearStartupApprovedValue()
+    {
+        using var startupApprovedKey = Registry.CurrentUser.OpenSubKey(StartupApprovedRunRegistryKey, writable: true);
+        if (startupApprovedKey is null)
+        {
+            return;
+        }
+
+        startupApprovedKey.DeleteValue(AppName, throwOnMissingValue: false);
     }
 }

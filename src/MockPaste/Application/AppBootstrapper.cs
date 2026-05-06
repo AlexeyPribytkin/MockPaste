@@ -52,6 +52,14 @@ internal sealed class AppBootstrapper : IDisposable
         {
             _settingsService = new SettingsService();
             _settings = _settingsService.Load();
+
+            var startupEnabled = StartupService.IsEnabled();
+            if (_settings.LaunchAtStartup != startupEnabled)
+            {
+                _settings.LaunchAtStartup = startupEnabled;
+                _settingsService.Save(_settings);
+            }
+
             _history = new HistoryService(_settings.HistorySize);
 
             var generators = GeneratorRegistry.CreateDefault(AppLogger.Instance);
@@ -225,24 +233,40 @@ internal sealed class AppBootstrapper : IDisposable
     {
         System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
-            if (_settingsWindow != null)
+            if (_settingsWindow == null)
             {
-                _settingsWindow.Activate();
-                return;
+                _settingsWindow = new SettingsWindow(
+                    _settings!,
+                    OnSettingsSaved,
+                    () => _hotkeyManager?.Unregister(),
+                    () =>
+                    {
+                        if (_trayIcon is { IsEnabled: true })
+                        {
+                            _hotkeyManager?.Register(_settings!.Hotkey);
+                        }
+                    });
+                _settingsWindow.Closed += (_, _) => _settingsWindow = null;
             }
 
-            _settingsWindow = new SettingsWindow(
-                _settings!,
-                OnSettingsSaved,
-                () => _hotkeyManager?.Unregister(),
-                () =>
-                {
-                    if (_trayIcon is { IsEnabled: true })
-                        _hotkeyManager?.Register(_settings!.Hotkey);
-                });
-            _settingsWindow.Closed += (_, _) => _settingsWindow = null;
-            _settingsWindow.ShowDialog();
+            BringWindowToFront(_settingsWindow);
         });
+    }
+
+    private static void BringWindowToFront(Window window)
+    {
+        if (window.WindowState == WindowState.Minimized)
+        {
+            window.WindowState = WindowState.Normal;
+        }
+
+        window.Show();
+        window.Activate();
+        // WPF/Windows focus rules can ignore Activate() for tray-driven interactions.
+        // A temporary Topmost toggle reliably promotes the window once without keeping it always-on-top.
+        window.Topmost = true;
+        window.Topmost = false;
+        window.Focus();
     }
 
     /// <summary>

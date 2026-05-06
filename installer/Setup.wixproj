@@ -1,44 +1,41 @@
 <Project Sdk="WixToolset.Sdk/7.0.0">
 
-  <PropertyGroup>
-    <!-- WiX -->
-    <OutputName>$(AppName)</OutputName>
-    <InstallerPlatform>x64</InstallerPlatform>
+	<PropertyGroup>
+		<!-- WiX -->
+		<AppName>MockPaste</AppName>
+		<OutputName>$(AppName)</OutputName>
+		<AcceptEula>wix7</AcceptEula>
+		<InstallerPlatform>x64</InstallerPlatform>
+		<SuppressPdbOutput>true</SuppressPdbOutput>
 
-    <!-- .NET publish -->
-    <TargetFramework>net10.0-windows</TargetFramework>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<!-- .NET publish -->
+		<AppTargetFramework>net10.0-windows</AppTargetFramework>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
-    <PublishDir>
-      $(MSBuildThisFileDirectory)..\$(AppName)\bin\$(Configuration)\$(TargetFramework)\$(RuntimeIdentifier)\publish\
-    </PublishDir>
-  </PropertyGroup>
+		<PublishDir>$(MSBuildThisFileDirectory)..\publish\</PublishDir>
+		<DefineConstants>$(DefineConstants);PublishDir=$(PublishDir)</DefineConstants>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<Content Include="Config.wxi" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Config.wxi" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
+		<PackageReference Include="WixToolset.Netfx.wixext" Version="7.0.0" />
+	</ItemGroup>
 
-  <Target Name="PublishApp" BeforeTargets="Build">
-    <Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\$(AppName)&quot;
-      -c $(Configuration)
-      --framework $(TargetFramework)
-      --runtime $(RuntimeIdentifier)
-      --self-contained
-      /p:PublishReadyToRun=false
-      /p:PublishSingleFile=false
-      -o &quot;$(PublishDir)&quot;" />
-  </Target>
-
-  <ItemGroup>
-    <HarvestDirectory Include="$(PublishDir)">
-      <ComponentGroupName>PublishedFiles</ComponentGroupName>
-      <DirectoryRefId>INSTALLFOLDER</DirectoryRefId>
-    </HarvestDirectory>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="WixToolset.Util.wixext" Version="7.0.0" />
-    <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
-  </ItemGroup>
+	<Target Name="PublishApp" BeforeTargets="CoreCompile">
+		<Exec Command="dotnet publish &quot;$(MSBuildThisFileDirectory)..\src\$(AppName)\$(AppName).csproj&quot; ^
+		  -c $(Configuration) ^
+		  --framework $(AppTargetFramework) ^
+		  --runtime $(RuntimeIdentifier) ^
+		  --no-self-contained ^
+		  /p:PublishSingleFile=true ^
+		  /p:PublishReadyToRun=false ^
+		  /p:DebugType=None ^
+		  /p:DebugSymbols=false ^
+		  -o &quot;$(PublishDir)&quot;" />
+	</Target>
 
 </Project>
