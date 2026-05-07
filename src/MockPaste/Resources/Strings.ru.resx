@@ -195,11 +195,17 @@
   <data name="StringAboutTitle" xml:space="preserve">
     <value>MockPaste — О программе</value>
   </data>
-  <data name="StringAboutDevelopedBy" xml:space="preserve">
-    <value>Разработано Alexey Pribytkin</value>
-  </data>
   <data name="StringAboutVersion" xml:space="preserve">
     <value>Версия {0}</value>
+  </data>
+  <data name="StringAboutCopyright" xml:space="preserve">
+    <value>© 2026 Aliaksei Prybytkin</value>
+  </data>
+  <data name="StringAboutLicense" xml:space="preserve">
+    <value>Лицензия MIT</value>
+  </data>
+  <data name="StringButtonGitHub" xml:space="preserve">
+    <value>GitHub</value>
   </data>
   <data name="StringButtonClose" xml:space="preserve">
     <value>Закрыть</value>

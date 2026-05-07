@@ -42,8 +42,10 @@
   <data name="StringCloseGlyph" xml:space="preserve"><value>✕</value></data>
 
   <data name="StringAboutTitle" xml:space="preserve"><value>MockPaste — About</value></data>
-  <data name="StringAboutDevelopedBy" xml:space="preserve"><value>Developed by Alexey Pribytkin</value></data>
   <data name="StringAboutVersion" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="StringAboutCopyright" xml:space="preserve"><value>© 2026 Aliaksei Prybytkin</value></data>
+  <data name="StringAboutLicense" xml:space="preserve"><value>Licensed under MIT License</value></data>
+  <data name="StringButtonGitHub" xml:space="preserve"><value>GitHub</value></data>
   <data name="StringButtonClose" xml:space="preserve"><value>Close</value></data>
 
   <data name="StringSectionHotkey" xml:space="preserve"><value>HOTKEY</value></data>

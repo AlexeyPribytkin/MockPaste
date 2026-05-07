@@ -350,10 +350,11 @@
                         <Button
                             Grid.Column="0"
                             Content="{loc:Loc StringButtonAbout}"
-                            Padding="0"
+                            MinWidth="80"
+                            Padding="16,8"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Style="{StaticResource GhostButtonStyle}"
+                            Style="{StaticResource SecondaryButtonStyle}"
                             Click="About_Click"/>
 
                         <StackPanel

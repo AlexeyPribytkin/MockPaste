@@ -18,4 +18,10 @@
 		<PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Include="..\..\LICENSE" />
+		<EmbeddedResource Include="..\..\THIRD_PARTY_NOTICES.md" />
+	</ItemGroup>
+
+
 </Project>

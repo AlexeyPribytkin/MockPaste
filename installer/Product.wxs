@@ -128,7 +128,8 @@
 		<Feature Id="MainFeature"
 				 Title="$(var.AppName)"
 				 Level="1"
-				 AllowAbsent="no">
+				 AllowAbsent="no"
+				 ConfigurableDirectory="INSTALLFOLDER">
 			<ComponentRef Id="AppExe" />
 			<ComponentRef Id="ProgramMenuDirCleanup" />
 			<ComponentRef Id="CleanupAppData" />
@@ -149,8 +150,7 @@
 		</Feature>
 
 		<!-- UI -->
-		<ui:WixUI Id="WixUI_FeatureTree"
-				  InstallDirectory="INSTALLFOLDER" />
+		<ui:WixUI Id="WixUI_FeatureTree" />
 
 	</Package>
 
