@@ -22,7 +22,9 @@ jobs:
           dotnet-version: 10.x
 
       - name: Restore
-        run: dotnet restore MockPaste.slnx
+        run: |
+          dotnet restore MockPaste.slnx
+          dotnet restore installer/Setup.wixproj
 
       - name: Build solution
         run: dotnet build MockPaste.slnx -c Release --no-restore
