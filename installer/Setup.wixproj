@@ -11,9 +11,12 @@
 		<!-- .NET publish -->
 		<AppTargetFramework>net10.0-windows</AppTargetFramework>
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<InstallerVersion Condition="'$(InstallerVersion)' == ''">1.0.0</InstallerVersion>
+		<Version Condition="'$(Version)' == ''">$(InstallerVersion)</Version>
 
 		<PublishDir>$(MSBuildThisFileDirectory)..\publish\</PublishDir>
-		<DefineConstants>$(DefineConstants);PublishDir=$(PublishDir)</DefineConstants>
+		<OutputPath>$(PublishDir)</OutputPath>
+		<DefineConstants>$(DefineConstants);PublishDir=$(PublishDir);InstallerVersion=$(InstallerVersion)</DefineConstants>
 	</PropertyGroup>
 	
 	<ItemGroup>
@@ -33,6 +36,7 @@
 		  --no-self-contained ^
 		  /p:PublishSingleFile=true ^
 		  /p:PublishReadyToRun=false ^
+		  /p:Version=$(Version) ^
 		  /p:DebugType=None ^
 		  /p:DebugSymbols=false ^
 		  -o &quot;$(PublishDir)&quot;" />

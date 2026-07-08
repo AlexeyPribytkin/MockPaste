@@ -1,8 +1,12 @@
 <Solution>
   <Folder Name="/installer/">
+    <File Path="installer/Banner493x58.png" />
     <File Path="installer/Config.wxi" />
+    <File Path="installer/Dialog493x312.png" />
+    <File Path="installer/ExitDlg.wxs" />
     <File Path="installer/Product.wxs" />
     <File Path="installer/Setup.wixproj" />
+    <File Path="installer/WixUI_FeatureTreeNoLicense.wxs" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/MockPaste/MockPaste.csproj" />

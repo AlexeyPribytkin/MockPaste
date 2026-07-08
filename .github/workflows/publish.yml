@@ -1,0 +1,66 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.x
+
+      - name: Restore
+        run: dotnet restore MockPaste.slnx
+
+      - name: Build solution
+        run: dotnet build MockPaste.slnx -c Release --no-restore
+
+      - name: Run tests
+        run: dotnet test MockPaste.slnx -c Release --no-build --verbosity normal
+
+      - name: Resolve release version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          if ($version.StartsWith("v"))
+          {
+            $version = $version.Substring(1)
+          }
+
+          # Keep one source of truth for release assets and MSI metadata.
+          "RELEASE_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Publish single-file executable
+        run: dotnet publish src/MockPaste/MockPaste.csproj -c Release -f net10.0-windows -r win-x64 --no-self-contained /p:PublishSingleFile=true /p:PublishReadyToRun=false /p:DebugType=None /p:DebugSymbols=false /p:Version=${{ env.RELEASE_VERSION }} -o publish
+
+      - name: Build installer
+        run: dotnet build installer/Setup.wixproj -c Release --no-restore /p:Version=${{ env.RELEASE_VERSION }} /p:InstallerVersion=${{ env.RELEASE_VERSION }}
+
+      - name: Prepare release asset names
+        shell: pwsh
+        run: |
+          $version = "${{ env.RELEASE_VERSION }}"
+          $portableAssetName = "MockPaste-Portable-x64-$version.zip"
+          $installerAssetName = "MockPaste-x64-$version.msi"
+
+          Compress-Archive -Path "publish/MockPaste.exe" -DestinationPath "publish/$portableAssetName" -Force
+          Copy-Item -Path "publish/MockPaste.msi" -Destination "publish/$installerAssetName" -Force
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            publish/MockPaste-Portable-x64-*.zip
+            publish/MockPaste-x64-*.msi

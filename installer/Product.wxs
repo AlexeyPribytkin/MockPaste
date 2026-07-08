@@ -1,12 +1,11 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
 	 xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx">
 
 	<?include Config.wxi?>
 
 	<Package Name="$(var.AppName)"
 			 Manufacturer="$(var.Manufacturer)"
-			 Version="$(var.Version)"
+			 Version="$(var.InstallerVersion)"
 			 UpgradeCode="$(var.UpgradeCode)">
 
 		<Icon Id="AppIcon" SourceFile="..\src\MockPaste\Assets\app.ico" />
@@ -15,8 +14,8 @@
 		<!-- Single msi file -->
 		<MediaTemplate EmbedCab="yes" />
 
-		<!-- UI behavior -->
-		<Property Id="LicenseAccepted" Value="1" />
+		<!--<WixVariable Id="WixUIBannerBmp" Value="Banner493x58.png" />-->
+		<!--<WixVariable Id="WixUIDialogBmp" Value="Dialog493x312.png" />-->
 
 		<!-- Check .NET 10 Desktop Runtime -->
 		<netfx:DotNetCompatibilityCheck
@@ -149,9 +148,29 @@
 			<ComponentRef Id="StartMenuShortcut" />
 		</Feature>
 
+		<!-- Launch app after install: shows a checkbox on the final ExitDialog -->
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch $(var.AppName) now" />
+		<!-- Checkbox is checked by default -->
+		<Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+
+		<!-- Launches the installed exe from the UI thread; asyncNoWait means we don't block the installer -->
+		<CustomAction Id="LaunchApp"
+					  FileRef="$(var.AppName)ExeFile"
+					  ExeCommand=""
+					  Execute="immediate"
+					  Impersonate="yes"
+					  Return="asyncNoWait" />
+
 		<!-- UI -->
-		<ui:WixUI Id="WixUI_FeatureTree" />
+		<UIRef Id="WixUI_FeatureTreeNoLicense" />
 
+		<!-- Tells the installer to substitute ExitDialog with your layout -->
+		<InstallUISequence>
+			<Show Dialog="ExitDlg" OnExit="success" />
+		</InstallUISequence>
+
+		<AdminUISequence>
+			<Show Dialog="ExitDlg" OnExit="success" />
+		</AdminUISequence>
 	</Package>
-
 </Wix>
