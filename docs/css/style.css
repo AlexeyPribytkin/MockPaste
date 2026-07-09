@@ -47,10 +47,17 @@ a {
 .footer-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
     flex-wrap: wrap;
     padding: 1rem 0;
+}
+
+.header-row {
+    justify-content: flex-start;
+}
+
+.footer-row {
+    justify-content: space-between;
 }
 
 .brand {
@@ -69,6 +76,7 @@ a {
 .nav {
     display: inline-flex;
     gap: 1rem;
+    margin-left: 0.75rem;
 }
 
     .nav a {
@@ -91,7 +99,7 @@ h2 {
 }
 
 h1 {
-    max-width: 18ch;
+    max-width: 22ch;
 }
 
 .hero-grid {
@@ -102,17 +110,18 @@ h1 {
 }
 
 .hero-content p {
-    max-width: 60ch;
+    max-width: 56ch;
 }
 
 .hero-highlights {
-    padding: 1.5rem;
-    border: 1px solid var(--border);
+    padding: 1.3rem;
+    border: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
     border-radius: 8px;
-    background-color: var(--surface);
+    background-color: color-mix(in srgb, var(--surface) 82%, var(--bg));
 }
 
     .hero-highlights h2 {
+        font-size: 1.3rem;
         margin-bottom: 1rem;
     }
 
