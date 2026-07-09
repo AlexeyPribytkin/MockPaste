@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="MockPaste is a lightweight Windows tray app for instant fake-data pasting from a global hotkey.">
     <title>MockPaste - Instant fake-data pasting</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="icon.ico">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -24,20 +25,38 @@
     </header>
 
     <main>
-        <section class="section">
-            <div class="container">
-                <p class="muted">Windows desktop app</p>
-                <h1>Instant fake-data pasting from a global hotkey</h1>
-                <p>
-                    MockPaste helps developers and testers fill forms faster by generating realistic placeholder values
-                    and pasting them directly into any focused text field.
-                </p>
-                <div class="actions" id="links">
-                    <a class="button button-primary" href="https://github.com/AlexeyPribytkin/mockpaste" target="_blank" rel="noopener noreferrer">View source code</a>
-                    <a class="button button-secondary" href="https://github.com/AlexeyPribytkin/mockpaste/releases" target="_blank" rel="noopener noreferrer">Download release</a>
+        <section class="section hero">
+            <div class="container hero-grid">
+                <div class="hero-content">
+                    <p class="muted">Windows desktop app</p>
+
+                    <h1>Generate and paste realistic test data from a global hotkey.</h1>
+
+                    <p>
+                        MockPaste helps developers and testers fill forms faster by generating realistic placeholder values
+                        and pasting them directly into any focused text field.
+                    </p>
+
+                    <div class="actions" id="links">
+                        <a class="button button-primary"
+                           href="https://github.com/AlexeyPribytkin/mockpaste"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            View source code
+                        </a>
+
+                        <a class="button button-secondary"
+                           href="https://github.com/AlexeyPribytkin/mockpaste/releases"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Download release
+                        </a>
+                    </div>
                 </div>
-                <div class="highlights">
+
+                <aside class="hero-highlights">
                     <h2>Highlights</h2>
+
                     <ul class="highlights-list">
                         <li>Customizable global hotkey</li>
                         <li>Instant paste to active field</li>
@@ -45,7 +64,7 @@
                         <li>Optional clipboard history and clipboard restore</li>
                         <li>Light, dark, and system theme support</li>
                     </ul>
-                </div>
+                </aside>
             </div>
         </section>
 
@@ -67,19 +86,19 @@
                 <h2>Screenshots</h2>
                 <div class="gallery">
                     <figure class="shot">
-                        <img src="screenshots/popup.png" alt="MockPaste popup with data categories">
+                        <img src="screenshots/popup.png" alt="MockPaste popup with data categories" loading="lazy">
                         <figcaption>Main popup with categories</figcaption>
                     </figure>
                     <figure class="shot">
-                        <img src="screenshots/submenu.png" alt="MockPaste category submenu with available formats">
+                        <img src="screenshots/submenu.png" alt="MockPaste category submenu with available formats" loading="lazy">
                         <figcaption>Category submenu</figcaption>
                     </figure>
                     <figure class="shot">
-                        <img src="screenshots/history.png" alt="MockPaste popup showing clipboard history entries">
+                        <img src="screenshots/history.png" alt="MockPaste popup showing clipboard history entries" loading="lazy">
                         <figcaption>Clipboard history</figcaption>
                     </figure>
                     <figure class="shot">
-                        <img src="screenshots/settings.png" alt="MockPaste settings window">
+                        <img src="screenshots/settings.png" alt="MockPaste settings window" loading="lazy">
                         <figcaption>Settings window</figcaption>
                     </figure>
                 </div>

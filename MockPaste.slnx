@@ -1,4 +1,18 @@
 <Solution>
+  <Folder Name="/docs/">
+    <File Path="docs/CNAME" />
+    <File Path="docs/favicon.ico" />
+    <File Path="docs/index.html" />
+  </Folder>
+  <Folder Name="/docs/screenshots/">
+    <File Path="docs/screenshots/history.png" />
+    <File Path="docs/screenshots/popup.png" />
+    <File Path="docs/screenshots/settings.png" />
+    <File Path="docs/screenshots/submenu.png" />
+  </Folder>
+  <Folder Name="/docs/css/">
+    <File Path="docs/css/style.css" />
+  </Folder>
   <Folder Name="/installer/">
     <File Path="installer/Banner493x58.png" />
     <File Path="installer/Config.wxi" />
