@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="MockPaste is a lightweight Windows tray app for instant fake-data pasting from a global hotkey.">
+    <title>MockPaste - Instant fake-data pasting</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header" id="top">
+        <div class="container header-row">
+            <a class="brand" href="#top" aria-label="MockPaste home">
+                <img src="favicon.ico" alt="MockPaste logo">
+                <strong>MockPaste</strong>
+            </a>
+            <nav class="nav" aria-label="Primary navigation">
+                <a href="#about">About</a>
+                <a href="#screenshots">Screenshots</a>
+                <a href="#links">Links</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="section">
+            <div class="container">
+                <p class="muted">Windows desktop app</p>
+                <h1>Instant fake-data pasting from a global hotkey</h1>
+                <p>
+                    MockPaste helps developers and testers fill forms faster by generating realistic placeholder values
+                    and pasting them directly into any focused text field.
+                </p>
+                <div class="actions" id="links">
+                    <a class="button button-primary" href="https://github.com/AlexeyPribytkin/mockpaste" target="_blank" rel="noopener noreferrer">View source code</a>
+                    <a class="button button-secondary" href="https://github.com/AlexeyPribytkin/mockpaste/releases" target="_blank" rel="noopener noreferrer">Download release</a>
+                </div>
+                <div class="highlights">
+                    <h2>Highlights</h2>
+                    <ul class="highlights-list">
+                        <li>Customizable global hotkey</li>
+                        <li>Instant paste to active field</li>
+                        <li>Built-in generators for GUID, number, email, phone, and string data</li>
+                        <li>Optional clipboard history and clipboard restore</li>
+                        <li>Light, dark, and system theme support</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section">
+            <div class="container">
+                <h2>About MockPaste</h2>
+                <p>
+                    MockPaste is a lightweight tray application for Windows 10+ built with .NET 10.
+                    It stays out of the way until you need it, then lets you generate and paste test data in a few keystrokes.
+                </p>
+                <p>
+                    It is useful for QA, development, demos, and repetitive form-filling tasks where realistic placeholder values save time.
+                </p>
+            </div>
+        </section>
+
+        <section id="screenshots" class="section">
+            <div class="container">
+                <h2>Screenshots</h2>
+                <div class="gallery">
+                    <figure class="shot">
+                        <img src="screenshots/popup.png" alt="MockPaste popup with data categories">
+                        <figcaption>Main popup with categories</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <img src="screenshots/submenu.png" alt="MockPaste category submenu with available formats">
+                        <figcaption>Category submenu</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <img src="screenshots/history.png" alt="MockPaste popup showing clipboard history entries">
+                        <figcaption>Clipboard history</figcaption>
+                    </figure>
+                    <figure class="shot">
+                        <img src="screenshots/settings.png" alt="MockPaste settings window">
+                        <figcaption>Settings window</figcaption>
+                    </figure>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-row">
+            <p>&copy; 2026 MockPaste · Author: Aliaksei Prybytkin</p>
+            <p>
+                <a href="https://github.com/AlexeyPribytkin/mockpaste" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <span aria-hidden="true">·</span>
+                <a href="https://github.com/AlexeyPribytkin/mockpaste/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
