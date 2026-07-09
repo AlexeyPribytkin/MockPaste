@@ -2,7 +2,6 @@
   <Folder Name="/docs/">
     <File Path="docs/CNAME" />
     <File Path="docs/icon.ico" />
-    <File Path="docs/icon.svg" />
     <File Path="docs/index.html" />
   </Folder>
   <Folder Name="/docs/screenshots/">
